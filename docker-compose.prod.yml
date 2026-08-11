@@ -1,0 +1,39 @@
+services:
+  app:
+    container_name: ecom-panel-app-prod
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: ecom-panel-app:prod
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+
+  db:
+    container_name: ecom-panel-db-prod
+    image: mysql:8.0
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - dbdata_prod:/var/lib/mysql
+
+  adminer:
+    container_name: ecom-panel-adminer-prod
+    image: adminer:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  dbdata_prod:
+    driver: local

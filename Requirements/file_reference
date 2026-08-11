@@ -1,0 +1,7 @@
+@rules: /var/www/html/ecom-panel/instruction.md
+@file: /var/www/html/ecom-panel/Requirements/srs_apis.md
+@file: /var/www/html/ecom-panel/Requirements/admin_panel.md
+@file: /var/www/html/ecom-panel/Requirements/development_modules.md
+
+@file: /var/www/html/ecom-panel/specifications/feature.foundation.spec.md
+@file: /var/www/html/ecom-panel/plans/plan.foundation.md

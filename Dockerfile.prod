@@ -1,0 +1,61 @@
+# Stage 1: Build frontend assets using Node.js
+FROM node:20-alpine AS node_builder
+WORKDIR /app
+COPY package*.json vite.config.js ./
+RUN npm ci || npm install
+COPY resources/ ./resources/
+COPY public/ ./public/
+RUN npm run build
+
+# Stage 2: Production PHP + Apache application
+FROM php:8.2-apache
+
+WORKDIR /var/www/html
+
+# Enable Apache mod_rewrite for Laravel routing
+RUN a2enmod rewrite
+
+# Update Apache DocumentRoot to point to Laravel's public directory
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    zip \
+    unzip \
+    git \
+    curl \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    libicu-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Configure and install PHP extensions including opcache
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl opcache
+
+# Use default production php.ini settings
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy application source code
+COPY . /var/www/html
+
+# Copy compiled frontend assets from node builder stage
+COPY --from=node_builder /app/public/build /var/www/html/public/build
+
+# Install production composer dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+# Set directory permissions for Laravel storage and cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+EXPOSE 80
