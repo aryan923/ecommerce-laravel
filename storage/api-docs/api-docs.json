@@ -1575,6 +1575,1203 @@
                 ]
             }
         },
+        "/api/v1/admin/coupons": {
+            "get": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "List coupons",
+                "description": "Retrieve paginated list of coupons with optional search, type, and status filtering.",
+                "operationId": "93f1565d8dfeb32026799c663e48e4f6",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "percentage",
+                                "fixed_amount",
+                                "free_shipping"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "inactive",
+                                "archived"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupons listed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Create a new coupon",
+                "description": "Create a promo coupon with rules, date validity, limits, and product/category/brand/customer restrictions.",
+                "operationId": "00082f84cd15d42f617c57ec817b98b8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code",
+                                    "name",
+                                    "type",
+                                    "value"
+                                ],
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "example": "WELCOME20"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Welcome 20% Discount"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "percentage",
+                                            "fixed_amount",
+                                            "free_shipping"
+                                        ],
+                                        "example": "percentage"
+                                    },
+                                    "value": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 20
+                                    },
+                                    "max_discount": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 500
+                                    },
+                                    "min_order_value": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Coupon created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/coupons/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Get single coupon details",
+                "operationId": "598e818b0a93b470222a948bab3dcc77",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon details retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Coupon not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Update coupon",
+                "operationId": "b5001bc6d1afc86d45c09dc4d681cb25",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Archive / delete coupon",
+                "operationId": "9c19139dabf6e860c38d19c3879b3087",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon archived successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/coupons/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Toggle coupon status",
+                "operationId": "485b7b049d65ec40fedcd96bda653d53",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "inactive",
+                                            "archived"
+                                        ],
+                                        "example": "inactive"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Coupon status updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/coupons/{id}/reports": {
+            "get": {
+                "tags": [
+                    "Admin - Coupons"
+                ],
+                "summary": "Get coupon performance and usage report",
+                "operationId": "f1c017d7a67f90d2476c06128173afcd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon usage report generated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "List Inventory Records (Admin)",
+                "description": "Retrieve paginated list of variant inventory levels with SKU search and stock status filters.",
+                "operationId": "adminListInventory",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "in_stock",
+                                "low_stock",
+                                "out_of_stock"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Inventory records retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/dashboard": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Get Inventory Dashboard Summary (Admin)",
+                "description": "Retrieve key inventory metrics including total SKUs, total units, low stock count, and valuation.",
+                "operationId": "adminGetInventoryDashboard",
+                "responses": {
+                    "200": {
+                        "description": "Inventory dashboard metrics retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/alerts": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Get Low & Out of Stock Alerts (Admin)",
+                "description": "Fetch paginated list of items with stock at or below low stock threshold.",
+                "operationId": "adminGetInventoryAlerts",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Inventory alerts retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/history": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Get Inventory Transaction Audit Trail (Admin)",
+                "description": "Retrieve paginated history of all stock movements and adjustments.",
+                "operationId": "adminGetInventoryHistory",
+                "parameters": [
+                    {
+                        "name": "sku",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "product_variant_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "transaction_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Inventory audit history retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/{variant_id}": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Get Variant Inventory Detail (Admin)",
+                "description": "Fetch single inventory record details by variant ID.",
+                "operationId": "adminGetInventoryDetail",
+                "parameters": [
+                    {
+                        "name": "variant_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Inventory detail retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Inventory not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/adjust": {
+            "post": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Manual Stock Adjustment (Admin)",
+                "description": "Add, deduct, override, or mark damaged stock for a product variant with pessimistic row locking.",
+                "operationId": "adminAdjustInventory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_variant_id",
+                                    "adjustment_type",
+                                    "quantity",
+                                    "remarks"
+                                ],
+                                "properties": {
+                                    "product_variant_id": {
+                                        "type": "integer"
+                                    },
+                                    "adjustment_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "add",
+                                            "deduct",
+                                            "set",
+                                            "damage"
+                                        ]
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "low_stock_threshold": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inventory stock adjusted successfully"
+                    },
+                    "422": {
+                        "description": "Validation or insufficient stock error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/reserve": {
+            "post": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Atomic Stock Reservation (Admin / Internal)",
+                "description": "Reserve available stock for checkout/order placement.",
+                "operationId": "adminReserveInventory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_variant_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_variant_id": {
+                                        "type": "integer"
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "reference_type": {
+                                        "type": "string"
+                                    },
+                                    "reference_id": {
+                                        "type": "integer"
+                                    },
+                                    "remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Stock reserved successfully"
+                    },
+                    "422": {
+                        "description": "Insufficient stock available"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/release": {
+            "post": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Atomic Stock Release (Admin / Internal)",
+                "description": "Release reserved stock back to available pool upon order cancellation or timeout.",
+                "operationId": "adminReleaseInventory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_variant_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_variant_id": {
+                                        "type": "integer"
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "reference_type": {
+                                        "type": "string"
+                                    },
+                                    "reference_id": {
+                                        "type": "integer"
+                                    },
+                                    "remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Stock released successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/commit": {
+            "post": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Atomic Stock Commit / Shipment (Admin / Internal)",
+                "description": "Commit reserved stock upon order fulfillment/shipment.",
+                "operationId": "adminCommitInventory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_variant_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_variant_id": {
+                                        "type": "integer"
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "reference_type": {
+                                        "type": "string"
+                                    },
+                                    "reference_id": {
+                                        "type": "integer"
+                                    },
+                                    "remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Stock committed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/media/upload": {
+            "post": {
+                "tags": [
+                    "Admin Media Management"
+                ],
+                "summary": "Upload Media Files (Admin)",
+                "description": "Upload single or multiple image/document files to storage and persist media records.",
+                "operationId": "adminUploadMedia",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "file": {
+                                        "description": "Single file to upload",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "files": {
+                                        "description": "Array of files for batch upload",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "model_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "product",
+                                            "category",
+                                            "brand",
+                                            "banner",
+                                            "cms_page"
+                                        ]
+                                    },
+                                    "model_id": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "main",
+                                            "gallery",
+                                            "thumbnail",
+                                            "banner",
+                                            "document"
+                                        ]
+                                    },
+                                    "alt": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Media uploaded successfully"
+                    },
+                    "422": {
+                        "description": "Validation failure"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/media": {
+            "get": {
+                "tags": [
+                    "Admin Media Management"
+                ],
+                "summary": "List Media Assets (Admin)",
+                "description": "Retrieve paginated list of media records with search and filter parameters.",
+                "operationId": "adminListMedia",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "main",
+                                "gallery",
+                                "thumbnail",
+                                "banner",
+                                "document"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "mime_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "model_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "product",
+                                "category",
+                                "brand",
+                                "banner",
+                                "cms_page"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "model_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "unattached_only",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Media records retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/media/{id}": {
+            "get": {
+                "tags": [
+                    "Admin Media Management"
+                ],
+                "summary": "Get Media Detail (Admin)",
+                "description": "Fetch details of a single media asset by ID.",
+                "operationId": "adminGetMediaDetail",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Media detail retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Media not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin Media Management"
+                ],
+                "summary": "Update Media Metadata (Admin)",
+                "description": "Update alt text, asset type, or sort order for a media item.",
+                "operationId": "adminUpdateMedia",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "alt": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "main",
+                                            "gallery",
+                                            "thumbnail",
+                                            "banner",
+                                            "document"
+                                        ]
+                                    },
+                                    "sort_order": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Media metadata updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin Media Management"
+                ],
+                "summary": "Delete Media Asset (Admin)",
+                "description": "Delete media record and remove physical file from storage disk.",
+                "operationId": "adminDeleteMedia",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "force",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Media deleted successfully"
+                    },
+                    "422": {
+                        "description": "Safety check failed (media is attached)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/media/attach": {
+            "post": {
+                "tags": [
+                    "Admin Media Management"
+                ],
+                "summary": "Attach Media to Entity (Admin)",
+                "description": "Attach an existing media asset to a Product, Category, Brand, or Banner.",
+                "operationId": "adminAttachMedia",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "media_id",
+                                    "model_type",
+                                    "model_id"
+                                ],
+                                "properties": {
+                                    "media_id": {
+                                        "type": "integer"
+                                    },
+                                    "model_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "product",
+                                            "category",
+                                            "brand",
+                                            "banner",
+                                            "cms_page"
+                                        ]
+                                    },
+                                    "model_id": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "main",
+                                            "gallery",
+                                            "thumbnail",
+                                            "banner",
+                                            "document"
+                                        ]
+                                    },
+                                    "alt": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Media attached successfully"
+                    },
+                    "422": {
+                        "description": "Validation failure"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/media/detach": {
+            "post": {
+                "tags": [
+                    "Admin Media Management"
+                ],
+                "summary": "Detach Media from Entity (Admin)",
+                "description": "Detach a media asset from its associated entity.",
+                "operationId": "adminDetachMedia",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "media_id"
+                                ],
+                                "properties": {
+                                    "media_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Media detached successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/media/sort": {
+            "post": {
+                "tags": [
+                    "Admin Media Management"
+                ],
+                "summary": "Bulk Sort Media Items (Admin)",
+                "description": "Update sort_order index for multiple gallery media items.",
+                "operationId": "adminSortMedia",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "items"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "sort_order": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Media items reordered successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/media/unused": {
+            "delete": {
+                "tags": [
+                    "Admin Media Management"
+                ],
+                "summary": "Purge Unattached Media (Admin)",
+                "description": "Purge orphaned unattached media records and remove files from storage.",
+                "operationId": "adminPurgeUnusedMedia",
+                "parameters": [
+                    {
+                        "name": "older_than_days",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Unused media purged successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/permissions": {
             "get": {
                 "tags": [
@@ -2146,6 +3343,955 @@
                     },
                     "422": {
                         "description": "Cannot delete system role or assigned role"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipments": {
+            "get": {
+                "tags": [
+                    "Admin - Shipment Management"
+                ],
+                "summary": "List shipments",
+                "operationId": "9dc5fc6d48199d4dafe2cc41ef2a29fe",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipments listed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Shipment Management"
+                ],
+                "summary": "Create shipment & generate AWB",
+                "operationId": "60c2a18e391aee25e81f8e4925404fd1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "courier_name"
+                                ],
+                                "properties": {
+                                    "courier_name": {
+                                        "type": "string",
+                                        "example": "Delhivery"
+                                    },
+                                    "awb_number": {
+                                        "type": "string",
+                                        "example": "DL123456789"
+                                    },
+                                    "tracking_number": {
+                                        "type": "string",
+                                        "example": "TRK987654"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Shipment created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipments/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Shipment Management"
+                ],
+                "summary": "Get single shipment details",
+                "operationId": "c92e4902008e3290f7858a9bcaf622f0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipment details retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipments/{id}/tracking": {
+            "post": {
+                "tags": [
+                    "Admin - Shipment Management"
+                ],
+                "summary": "Add tracking log event to shipment",
+                "operationId": "75cd897031dc79ad0f1cb5de9956b85d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "in_transit"
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "example": "Mumbai Hub"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Dispatched from sorting facility"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tracking log added successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipping-methods": {
+            "get": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "List shipping methods",
+                "operationId": "a07053244e85ae7f12ab67f3790ea147",
+                "responses": {
+                    "200": {
+                        "description": "Shipping methods retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Create shipping method",
+                "operationId": "6d54e5c93cf7fd9b1afc5a0a98747172",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Standard Delivery"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "standard",
+                                            "express",
+                                            "same_day",
+                                            "pickup"
+                                        ],
+                                        "example": "standard"
+                                    },
+                                    "estimated_days": {
+                                        "type": "string",
+                                        "example": "3-5 business days"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Shipping method created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipping-methods/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Get single shipping method",
+                "operationId": "0cab45e671426d1f348aeb9e54defc25",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipping method details retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Update shipping method",
+                "operationId": "115408aa3b404268322fc71d7d44000c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipping method updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Delete shipping method",
+                "operationId": "c61a4f5cdb23a767640dc978f9f94ed9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipping method deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipping-rates": {
+            "get": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "List shipping rates",
+                "operationId": "18eed9059c82242a6f84f9597ee74d74",
+                "responses": {
+                    "200": {
+                        "description": "Shipping rates retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Create shipping rate",
+                "operationId": "93fa97fc20ba5b70cd005006e1dd12a7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "zone_id",
+                                    "method_id",
+                                    "rate_type",
+                                    "rate_value"
+                                ],
+                                "properties": {
+                                    "zone_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "method_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "rate_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "flat_rate",
+                                            "weight_based",
+                                            "order_value_based",
+                                            "free_shipping"
+                                        ],
+                                        "example": "flat_rate"
+                                    },
+                                    "rate_value": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50
+                                    },
+                                    "free_threshold": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 999
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Shipping rate created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipping-rates/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Get single shipping rate",
+                "operationId": "aabd2d4138640977b324b2297d77177d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipping rate details retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Update shipping rate",
+                "operationId": "4992ef65d6b55d91b77ae35fc2e7eb9f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipping rate updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Delete shipping rate",
+                "operationId": "1880d47a27e71dc4560bd1d45e59919f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipping rate deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipping-zones": {
+            "get": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "List shipping zones",
+                "operationId": "381d1cdebb339a6b3e174c6510baa529",
+                "responses": {
+                    "200": {
+                        "description": "Shipping zones retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Create shipping zone",
+                "operationId": "55c887d375d52831732c9a02466df481",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Local MH Zone"
+                                    },
+                                    "states": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "MH"
+                                        ]
+                                    },
+                                    "postal_codes": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "400001",
+                                            "400002"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Shipping zone created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipping-zones/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Get single shipping zone",
+                "operationId": "881f66bbb60a932f6a4fdfa451bc3efe",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipping zone details retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Update shipping zone",
+                "operationId": "2787f31661fdfceec21b42f557c73652",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipping zone updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Shipping Engine"
+                ],
+                "summary": "Delete shipping zone",
+                "operationId": "6db0417d0b70643de0f85a4e3f1190c7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipping zone deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/tax-classes": {
+            "get": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "List tax classes",
+                "operationId": "897786520f735b3fb48ab43010bd3709",
+                "responses": {
+                    "200": {
+                        "description": "Tax classes retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "Create tax class",
+                "operationId": "2076ee57d6d77f6bb39fe3613db47dcd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Standard GST 18%"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Standard rate for electronics"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tax class created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/tax-classes/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "Get single tax class",
+                "operationId": "82813eafbe046fc93ac3032ce1e66ad5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tax class details retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "Update tax class",
+                "operationId": "63a6a0c71f94288cb0721884853f1252",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tax class updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "Delete tax class",
+                "operationId": "3cd0645daa5ed5374c649a648b5f2614",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tax class deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/tax-rates": {
+            "get": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "List tax rates",
+                "operationId": "cc0de3ec6d6fea7ffde8761545b5ae0a",
+                "responses": {
+                    "200": {
+                        "description": "Tax rates retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "Create tax rate",
+                "operationId": "c68982d3c33478592ef98f546f1185ea",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tax_class_id",
+                                    "name",
+                                    "type",
+                                    "rate"
+                                ],
+                                "properties": {
+                                    "tax_class_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "CGST 9%"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "cgst",
+                                            "sgst",
+                                            "igst",
+                                            "flat",
+                                            "standard"
+                                        ],
+                                        "example": "cgst"
+                                    },
+                                    "rate": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 9
+                                    },
+                                    "state_code": {
+                                        "type": "string",
+                                        "example": "MH"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tax rate created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/tax-rates/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "Get single tax rate",
+                "operationId": "6ef59733927d87f6f994eaa8344b139d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tax rate details retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "Update tax rate",
+                "operationId": "4093afa98e3c55215f6e6b78da2b0e76",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tax rate updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Tax Engine"
+                ],
+                "summary": "Delete tax rate",
+                "operationId": "f7c2531d3a9914048286ad0ff55e562e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tax rate deleted successfully"
                     }
                 },
                 "security": [
@@ -2853,6 +4999,1276 @@
                 }
             }
         },
+        "/api/v1/customer/addresses": {
+            "get": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "List Saved Addresses",
+                "description": "Retrieve all saved delivery and billing addresses for the logged-in customer.",
+                "operationId": "customerListAddresses",
+                "responses": {
+                    "200": {
+                        "description": "Saved addresses retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Create Saved Address",
+                "description": "Add a new address to customer address book.",
+                "operationId": "customerCreateAddress",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "mobile",
+                                    "line_1",
+                                    "city",
+                                    "state",
+                                    "country",
+                                    "postal_code"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "line_1": {
+                                        "type": "string"
+                                    },
+                                    "line_2": {
+                                        "type": "string"
+                                    },
+                                    "landmark": {
+                                        "type": "string"
+                                    },
+                                    "city": {
+                                        "type": "string"
+                                    },
+                                    "state": {
+                                        "type": "string"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "default": "India"
+                                    },
+                                    "postal_code": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "home",
+                                            "office",
+                                            "other"
+                                        ]
+                                    },
+                                    "is_default_shipping": {
+                                        "type": "boolean"
+                                    },
+                                    "is_default_billing": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Address created successfully"
+                    },
+                    "422": {
+                        "description": "Validation failure"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/customer/addresses/{id}": {
+            "get": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Get Address Detail",
+                "description": "Fetch details of a single saved address by ID.",
+                "operationId": "customerGetAddressDetail",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Address detail retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Address not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Update Saved Address",
+                "description": "Update details of an existing saved address.",
+                "operationId": "customerUpdateAddress",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "line_1": {
+                                        "type": "string"
+                                    },
+                                    "line_2": {
+                                        "type": "string"
+                                    },
+                                    "landmark": {
+                                        "type": "string"
+                                    },
+                                    "city": {
+                                        "type": "string"
+                                    },
+                                    "state": {
+                                        "type": "string"
+                                    },
+                                    "country": {
+                                        "type": "string"
+                                    },
+                                    "postal_code": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "home",
+                                            "office",
+                                            "other"
+                                        ]
+                                    },
+                                    "is_default_shipping": {
+                                        "type": "boolean"
+                                    },
+                                    "is_default_billing": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Address updated successfully"
+                    },
+                    "404": {
+                        "description": "Address not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Delete Saved Address",
+                "description": "Remove a saved address from customer address book.",
+                "operationId": "customerDeleteAddress",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Address deleted successfully"
+                    },
+                    "404": {
+                        "description": "Address not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/customer/addresses/{id}/default-shipping": {
+            "patch": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Mark Address as Default Shipping",
+                "description": "Designate target address as default shipping address.",
+                "operationId": "customerSetDefaultShippingAddress",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Default shipping address updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/customer/addresses/{id}/default-billing": {
+            "patch": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Mark Address as Default Billing",
+                "description": "Designate target address as default billing address.",
+                "operationId": "customerSetDefaultBillingAddress",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Default billing address updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart": {
+            "get": {
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "summary": "View Shopping Cart",
+                "description": "Retrieve active shopping cart item breakdown and calculated totals for guest or customer.",
+                "operationId": "customerGetCart",
+                "parameters": [
+                    {
+                        "name": "X-Session-ID",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shopping cart retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "summary": "Clear Shopping Cart",
+                "description": "Remove all items from shopping cart.",
+                "operationId": "customerClearCart",
+                "parameters": [
+                    {
+                        "name": "X-Session-ID",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shopping cart cleared successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart/items": {
+            "post": {
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "summary": "Add Product/Variant to Cart",
+                "description": "Add a simple product or product variant to shopping cart.",
+                "operationId": "customerAddToCart",
+                "parameters": [
+                    {
+                        "name": "X-Session-ID",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer"
+                                    },
+                                    "product_variant_id": {
+                                        "type": "integer"
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "default": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Item added to cart successfully"
+                    },
+                    "422": {
+                        "description": "Stock limit or validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart/items/{id}": {
+            "put": {
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "summary": "Update Cart Item Quantity",
+                "description": "Modify quantity of an item in shopping cart.",
+                "operationId": "customerUpdateCartItem",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "X-Session-ID",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "quantity": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cart item updated successfully"
+                    },
+                    "422": {
+                        "description": "Stock limit error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "summary": "Remove Item from Cart",
+                "description": "Remove a single item from shopping cart.",
+                "operationId": "customerRemoveCartItem",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "X-Session-ID",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item removed from cart successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart/apply-coupon": {
+            "post": {
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "summary": "Apply Coupon Code",
+                "description": "Apply promotional coupon code to shopping cart.",
+                "operationId": "customerApplyCoupon",
+                "parameters": [
+                    {
+                        "name": "X-Session-ID",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "coupon_code"
+                                ],
+                                "properties": {
+                                    "coupon_code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Coupon applied successfully"
+                    },
+                    "422": {
+                        "description": "Invalid coupon code"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart/remove-coupon": {
+            "delete": {
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "summary": "Remove Coupon Code",
+                "description": "Remove applied coupon code from shopping cart.",
+                "operationId": "customerRemoveCoupon",
+                "parameters": [
+                    {
+                        "name": "X-Session-ID",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon removed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart/merge": {
+            "post": {
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "summary": "Merge Guest Cart into Customer Cart",
+                "description": "Merge guest session cart into logged-in customer cart.",
+                "operationId": "customerMergeCart",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "session_id"
+                                ],
+                                "properties": {
+                                    "session_id": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Guest cart merged successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart/validate": {
+            "post": {
+                "tags": [
+                    "Shopping Cart"
+                ],
+                "summary": "Validate Cart Pre-Checkout",
+                "description": "Verify product active status, stock availability, and coupon validity pre-checkout.",
+                "operationId": "customerValidateCart",
+                "parameters": [
+                    {
+                        "name": "X-Session-ID",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cart validated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/checkout/process": {
+            "post": {
+                "tags": [
+                    "Checkout & Orders"
+                ],
+                "summary": "Process checkout and place purchase order",
+                "description": "Transactional order creation endpoint supporting guest and customer carts, idempotency protection, atomic stock reservation, historical item snapshotting, and payment initialization.",
+                "operationId": "01ac18496df214e17017effbf1cf74ba",
+                "parameters": [
+                    {
+                        "name": "X-Session-ID",
+                        "in": "header",
+                        "description": "Guest Session ID",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Idempotency-Key",
+                        "in": "header",
+                        "description": "Duplicate prevention key",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "cod",
+                                            "razorpay",
+                                            "stripe",
+                                            "bank_transfer"
+                                        ],
+                                        "example": "cod"
+                                    },
+                                    "shipping_address_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "shipping_address": {
+                                        "properties": {
+                                            "address_line1": {
+                                                "type": "string",
+                                                "example": "123 Main St"
+                                            },
+                                            "city": {
+                                                "type": "string",
+                                                "example": "Mumbai"
+                                            },
+                                            "state_code": {
+                                                "type": "string",
+                                                "example": "MH"
+                                            },
+                                            "postal_code": {
+                                                "type": "string",
+                                                "example": "400001"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order placed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order placed successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "order_number": {
+                                                    "type": "string",
+                                                    "example": "ORD-20260812-1001"
+                                                },
+                                                "grand_total": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1180
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "pending_payment"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or out of stock"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/orders/{order_number}": {
+            "get": {
+                "tags": [
+                    "Checkout & Orders"
+                ],
+                "summary": "Fetch customer order details",
+                "operationId": "fb644e9aa00d5dcdcd7e83c5f729912f",
+                "parameters": [
+                    {
+                        "name": "order_number",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order details retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/coupons/validate": {
+            "post": {
+                "tags": [
+                    "Coupons"
+                ],
+                "summary": "Validate promo coupon code",
+                "description": "Validates a promo coupon code against active rules, date ranges, usage limits, minimum order subtotal, and calculates the resulting discount.",
+                "operationId": "854f6bf06d847c89aebcf36fc58204c8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code"
+                                ],
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "example": "WELCOME10"
+                                    },
+                                    "subtotal": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1500
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "product_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "total": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1500
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Coupon is valid and discount calculated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Coupon code is valid."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "is_valid": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "eligible_subtotal": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1500
+                                                },
+                                                "discount_amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 150
+                                                },
+                                                "free_shipping": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid or expired coupon code"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/profile": {
+            "get": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Get Customer Profile",
+                "description": "Retrieve profile details of the logged-in customer.",
+                "operationId": "customerGetProfile",
+                "responses": {
+                    "200": {
+                        "description": "Customer profile retrieved successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Update Customer Profile",
+                "description": "Update personal profile information of logged-in customer.",
+                "operationId": "customerUpdateProfile",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string"
+                                    },
+                                    "last_name": {
+                                        "type": "string"
+                                    },
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "profile_image": {
+                                        "type": "string"
+                                    },
+                                    "date_of_birth": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female",
+                                            "other"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation failure"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/customer/change-password": {
+            "post": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Change Customer Password",
+                "description": "Update account password for logged-in customer after verifying current password.",
+                "operationId": "customerChangePassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "minimum": 8
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully"
+                    },
+                    "422": {
+                        "description": "Incorrect current password or validation failure"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/wishlist": {
+            "get": {
+                "tags": [
+                    "Customer Wishlist"
+                ],
+                "summary": "List Customer Wishlist Items",
+                "description": "Retrieve paginated list of items in the logged-in customer's wishlist.",
+                "operationId": "customerListWishlist",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Wishlist items retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Customer Wishlist"
+                ],
+                "summary": "Add Product/Variant to Wishlist",
+                "description": "Add a simple product or specific variant to customer's wishlist.",
+                "operationId": "customerAddToWishlist",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer"
+                                    },
+                                    "product_variant_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Item added to wishlist successfully"
+                    },
+                    "422": {
+                        "description": "Validation or product status error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Customer Wishlist"
+                ],
+                "summary": "Clear Entire Wishlist",
+                "description": "Remove all items from logged-in customer's wishlist.",
+                "operationId": "customerClearWishlist",
+                "responses": {
+                    "200": {
+                        "description": "Wishlist cleared successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/wishlist/check/{product_id}": {
+            "get": {
+                "tags": [
+                    "Customer Wishlist"
+                ],
+                "summary": "Check Wishlist Status",
+                "description": "Check if a product or variant is currently in the customer's wishlist.",
+                "operationId": "customerCheckWishlistStatus",
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "variant_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Wishlist status checked successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/wishlist/{id}/move-to-cart": {
+            "post": {
+                "tags": [
+                    "Customer Wishlist"
+                ],
+                "summary": "Move Wishlist Item to Shopping Cart",
+                "description": "Transfer saved wishlist item directly into customer's shopping cart.",
+                "operationId": "customerMoveWishlistToCart",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "quantity": {
+                                        "type": "integer",
+                                        "default": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Item moved to shopping cart successfully"
+                    },
+                    "404": {
+                        "description": "Wishlist item not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/wishlist/{id}": {
+            "delete": {
+                "tags": [
+                    "Customer Wishlist"
+                ],
+                "summary": "Remove Item from Wishlist",
+                "description": "Remove a single item from customer's wishlist.",
+                "operationId": "customerRemoveFromWishlist",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item removed from wishlist successfully"
+                    },
+                    "404": {
+                        "description": "Wishlist item not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/health": {
             "get": {
                 "tags": [
@@ -3133,6 +6549,235 @@
                     }
                 }
             }
+        },
+        "/api/v1/shipping/calculate": {
+            "post": {
+                "tags": [
+                    "Shipping Engine"
+                ],
+                "summary": "Calculate shipping options and costs",
+                "description": "Evaluates destination state/postal code against shipping zones and returns available shipping methods and fees.",
+                "operationId": "a8d01c7f31701e4a280a25b6a623aeda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "state_code"
+                                ],
+                                "properties": {
+                                    "state_code": {
+                                        "type": "string",
+                                        "example": "MH"
+                                    },
+                                    "postal_code": {
+                                        "type": "string",
+                                        "example": "400001"
+                                    },
+                                    "subtotal": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1200
+                                    },
+                                    "total_weight": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1.5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Shipping options calculated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Shipping options calculated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "is_deliverable": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "available_methods": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "method_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "method_name": {
+                                                                "type": "string",
+                                                                "example": "Standard Delivery"
+                                                            },
+                                                            "fee": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 50
+                                                            },
+                                                            "is_free": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/shipments/track/{tracking_number}": {
+            "get": {
+                "tags": [
+                    "Shipping Engine"
+                ],
+                "summary": "Track shipment progress",
+                "description": "Retrieve public tracking details and timeline log for a shipment.",
+                "operationId": "b5f047dc9d4b56687d8ae4cade7449a2",
+                "parameters": [
+                    {
+                        "name": "tracking_number",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shipment tracking details retrieved successfully"
+                    },
+                    "422": {
+                        "description": "Shipment tracking number not found"
+                    }
+                }
+            }
+        },
+        "/api/v1/tax/calculate": {
+            "post": {
+                "tags": [
+                    "Tax Engine"
+                ],
+                "summary": "Calculate Tax / GST for line items",
+                "description": "Calculates intra-state (CGST+SGST) vs inter-state (IGST) taxes and handles inclusive/exclusive price math.",
+                "operationId": "59020f0967475a0c734e9fbe88ae70db",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "shipping_state_code",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "shipping_state_code": {
+                                        "type": "string",
+                                        "example": "MH"
+                                    },
+                                    "origin_state_code": {
+                                        "type": "string",
+                                        "example": "MH"
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "product_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1000
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tax breakdown calculated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tax calculated successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "cgst_amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 90
+                                                },
+                                                "sgst_amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 90
+                                                },
+                                                "igst_amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 0
+                                                },
+                                                "total_tax": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 180
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -3167,12 +6812,36 @@
             "description": "Admin Category Management"
         },
         {
+            "name": "Admin - Coupons",
+            "description": "Admin - Coupons"
+        },
+        {
+            "name": "Admin Inventory Management",
+            "description": "Admin Inventory Management"
+        },
+        {
+            "name": "Admin Media Management",
+            "description": "Admin Media Management"
+        },
+        {
             "name": "Role & Permission Management",
             "description": "Role & Permission Management"
         },
         {
             "name": "Admin Product Management",
             "description": "Admin Product Management"
+        },
+        {
+            "name": "Admin - Shipment Management",
+            "description": "Admin - Shipment Management"
+        },
+        {
+            "name": "Admin - Shipping Engine",
+            "description": "Admin - Shipping Engine"
+        },
+        {
+            "name": "Admin - Tax Engine",
+            "description": "Admin - Tax Engine"
         },
         {
             "name": "Admin Product Variants",
@@ -3183,12 +6852,40 @@
             "description": "Authentication"
         },
         {
+            "name": "Customer Profile & Addresses",
+            "description": "Customer Profile & Addresses"
+        },
+        {
+            "name": "Shopping Cart",
+            "description": "Shopping Cart"
+        },
+        {
+            "name": "Checkout & Orders",
+            "description": "Checkout & Orders"
+        },
+        {
+            "name": "Coupons",
+            "description": "Coupons"
+        },
+        {
+            "name": "Customer Wishlist",
+            "description": "Customer Wishlist"
+        },
+        {
             "name": "System",
             "description": "System"
         },
         {
             "name": "Storefront Catalog",
             "description": "Storefront Catalog"
+        },
+        {
+            "name": "Shipping Engine",
+            "description": "Shipping Engine"
+        },
+        {
+            "name": "Tax Engine",
+            "description": "Tax Engine"
         }
     ]
 }

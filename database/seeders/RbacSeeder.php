@@ -33,6 +33,7 @@ class RbacSeeder extends Seeder
             'notifications' => ['view', 'update'],
             'staff' => ['view', 'create', 'update', 'delete'],
             'roles' => ['view', 'create', 'update', 'delete'],
+            'media' => ['view', 'create', 'update', 'delete'],
             'audit_logs' => ['view'],
             'settings' => ['view', 'update'],
         ];

@@ -3,5 +3,8 @@
 @file: /var/www/html/ecom-panel/Requirements/admin_panel.md
 @file: /var/www/html/ecom-panel/Requirements/development_modules.md
 
-@file: /var/www/html/ecom-panel/specifications/feature.foundation.spec.md
-@file: /var/www/html/ecom-panel/plans/plan.foundation.md
+@rules: D:\Projects\ecommerce_laravel\instruction.md
+@file: D:\Projects\ecommerce_laravel\Requirements\srs_apis.md
+@file: D:\Projects\ecommerce_laravel\Requirements\admin_panel.md
+@file: D:\Projects\ecommerce_laravel\Requirements\development_modules.md
+

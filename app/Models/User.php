@@ -71,4 +71,60 @@ class User extends Authenticatable
     {
         return trim("{$this->first_name} {$this->last_name}") ?: ($this->name ?? '');
     }
+
+    /**
+     * Relationship to customer addresses.
+     */
+    public function addresses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Address::class, 'user_id');
+    }
+
+    /**
+     * Relationship to default shipping address.
+     */
+    public function defaultShippingAddress(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Address::class, 'user_id')->where('is_default_shipping', true);
+    }
+
+    /**
+     * Relationship to default billing address.
+     */
+    public function defaultBillingAddress(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Address::class, 'user_id')->where('is_default_billing', true);
+    }
+
+    /**
+     * Relationship to Orders.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'user_id');
+    }
+
+    /**
+     * Relationship to Wishlist.
+     */
+    public function wishlistItems(): HasMany
+    {
+        return $this->hasMany(Wishlist::class, 'user_id');
+    }
+
+    /**
+     * Relationship to active customer cart.
+     */
+    public function cart(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Cart::class, 'user_id');
+    }
+
+    /**
+     * Relationship to coupon usages.
+     */
+    public function couponUsages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CouponUsage::class, 'user_id');
+    }
 }

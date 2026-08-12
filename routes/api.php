@@ -130,6 +130,78 @@ Route::prefix('v1')->group(function () {
             Route::put('/variants/{variant}', [VariantController::class, 'update'])->middleware('permission:products.update');
             Route::patch('/variants/{variant}/status', [VariantController::class, 'toggleStatus'])->middleware('permission:products.update');
             Route::delete('/variants/{variant}', [VariantController::class, 'destroy'])->middleware('permission:products.delete');
+
+            // Media Management
+            Route::post('/media/upload', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'upload'])->middleware('permission:media.create');
+            Route::get('/media', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'index'])->middleware('permission:media.view');
+            Route::get('/media/{id}', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'show'])->middleware('permission:media.view');
+            Route::post('/media/attach', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'attach'])->middleware('permission:media.update');
+            Route::post('/media/detach', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'detach'])->middleware('permission:media.update');
+            Route::put('/media/{id}', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'update'])->middleware('permission:media.update');
+            Route::post('/media/sort', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'sort'])->middleware('permission:media.update');
+            Route::delete('/media/unused', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'purgeUnused'])->middleware('permission:media.delete');
+            Route::delete('/media/{id}', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'destroy'])->middleware('permission:media.delete');
+
+            // Inventory Management
+            Route::get('/inventory', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'index'])->middleware('permission:inventory.view');
+            Route::get('/inventory/dashboard', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'dashboard'])->middleware('permission:inventory.view');
+            Route::get('/inventory/alerts', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'alerts'])->middleware('permission:inventory.view');
+            Route::get('/inventory/history', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'history'])->middleware('permission:inventory.view');
+            Route::get('/inventory/{variant_id}', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'show'])->middleware('permission:inventory.view');
+            Route::post('/inventory/adjust', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'adjust'])->middleware('permission:inventory.adjust');
+            Route::post('/inventory/reserve', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'reserve'])->middleware('permission:inventory.update');
+            Route::post('/inventory/release', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'release'])->middleware('permission:inventory.update');
+            Route::post('/inventory/commit', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'commit'])->middleware('permission:inventory.update');
+
+            // Coupon Management
+            Route::get('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'index']);
+            Route::post('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'store']);
+            Route::get('/coupons/{id}', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'show']);
+            Route::put('/coupons/{id}', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'update']);
+            Route::delete('/coupons/{id}', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'destroy']);
+            Route::patch('/coupons/{id}/status', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'toggleStatus']);
+            Route::get('/coupons/{id}/reports', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'report']);
+
+            // Tax Class Management
+            Route::get('/tax-classes', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'index']);
+            Route::post('/tax-classes', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'store']);
+            Route::get('/tax-classes/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'show']);
+            Route::put('/tax-classes/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'update']);
+            Route::delete('/tax-classes/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'destroy']);
+
+            // Tax Rate Management
+            Route::get('/tax-rates', [\App\Http\Controllers\Api\V1\Admin\TaxRateController::class, 'index']);
+            Route::post('/tax-rates', [\App\Http\Controllers\Api\V1\Admin\TaxRateController::class, 'store']);
+            Route::get('/tax-rates/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxRateController::class, 'show']);
+            Route::put('/tax-rates/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxRateController::class, 'update']);
+            Route::delete('/tax-rates/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxRateController::class, 'destroy']);
+
+            // Shipping Zone Management
+            Route::get('/shipping-zones', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'index']);
+            Route::post('/shipping-zones', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'store']);
+            Route::get('/shipping-zones/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'show']);
+            Route::put('/shipping-zones/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'update']);
+            Route::delete('/shipping-zones/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'destroy']);
+
+            // Shipping Method Management
+            Route::get('/shipping-methods', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'index']);
+            Route::post('/shipping-methods', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'store']);
+            Route::get('/shipping-methods/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'show']);
+            Route::put('/shipping-methods/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'update']);
+            Route::delete('/shipping-methods/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'destroy']);
+
+            // Shipping Rate Management
+            Route::get('/shipping-rates', [\App\Http\Controllers\Api\V1\Admin\ShippingRateController::class, 'index']);
+            Route::post('/shipping-rates', [\App\Http\Controllers\Api\V1\Admin\ShippingRateController::class, 'store']);
+            Route::get('/shipping-rates/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingRateController::class, 'show']);
+            Route::put('/shipping-rates/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingRateController::class, 'update']);
+            Route::delete('/shipping-rates/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingRateController::class, 'destroy']);
+
+            // Shipment Management
+            Route::get('/shipments', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'index']);
+            Route::post('/shipments', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'store']);
+            Route::get('/shipments/{id}', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'show']);
+            Route::post('/shipments/{id}/tracking', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'addTracking']);
         });
     });
 });
@@ -137,3 +209,57 @@ Route::prefix('v1')->group(function () {
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Protected Customer Profile & Address Routes
+Route::middleware('auth:sanctum')->prefix('v1/customer')->group(function () {
+    Route::get('/profile', [\App\Http\Controllers\Api\V1\Customer\CustomerProfileController::class, 'show']);
+    Route::put('/profile', [\App\Http\Controllers\Api\V1\Customer\CustomerProfileController::class, 'update']);
+    Route::post('/change-password', [\App\Http\Controllers\Api\V1\Customer\CustomerProfileController::class, 'changePassword']);
+
+    Route::get('/addresses', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'index']);
+    Route::post('/addresses', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'store']);
+    Route::get('/addresses/{id}', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'show']);
+    Route::put('/addresses/{id}', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'update']);
+    Route::delete('/addresses/{id}', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'destroy']);
+    Route::patch('/addresses/{id}/default-shipping', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'setDefaultShipping']);
+    Route::patch('/addresses/{id}/default-billing', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'setDefaultBilling']);
+});
+
+// Protected Customer Wishlist Routes
+Route::middleware('auth:sanctum')->prefix('v1/wishlist')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Api\V1\Customer\WishlistController::class, 'index']);
+    Route::post('/', [\App\Http\Controllers\Api\V1\Customer\WishlistController::class, 'store']);
+    Route::get('/check/{product_id}', [\App\Http\Controllers\Api\V1\Customer\WishlistController::class, 'check']);
+    Route::post('/{id}/move-to-cart', [\App\Http\Controllers\Api\V1\Customer\WishlistController::class, 'moveToCart']);
+    Route::delete('/{id}', [\App\Http\Controllers\Api\V1\Customer\WishlistController::class, 'destroy']);
+    Route::delete('/', [\App\Http\Controllers\Api\V1\Customer\WishlistController::class, 'clear']);
+});
+
+// Shopping Cart Routes (supports guests via X-Session-ID + authenticated customers)
+Route::prefix('v1/cart')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Api\V1\Customer\CartController::class, 'index']);
+    Route::post('/items', [\App\Http\Controllers\Api\V1\Customer\CartController::class, 'addItem']);
+    Route::put('/items/{id}', [\App\Http\Controllers\Api\V1\Customer\CartController::class, 'updateItem']);
+    Route::delete('/items/{id}', [\App\Http\Controllers\Api\V1\Customer\CartController::class, 'removeItem']);
+    Route::delete('/', [\App\Http\Controllers\Api\V1\Customer\CartController::class, 'clear']);
+    Route::post('/apply-coupon', [\App\Http\Controllers\Api\V1\Customer\CartController::class, 'applyCoupon']);
+    Route::delete('/remove-coupon', [\App\Http\Controllers\Api\V1\Customer\CartController::class, 'removeCoupon']);
+    Route::post('/validate', [\App\Http\Controllers\Api\V1\Customer\CartController::class, 'validateCart']);
+    // Merge route requires authenticated user
+    Route::middleware('auth:sanctum')->post('/merge', [\App\Http\Controllers\Api\V1\Customer\CartController::class, 'merge']);
+});
+
+// Coupon Validation Route (public/guest + customer support)
+Route::post('v1/coupons/validate', [\App\Http\Controllers\Api\V1\Customer\CouponController::class, 'validateCode']);
+
+// Public Tax Calculation Route
+Route::post('v1/tax/calculate', [\App\Http\Controllers\Api\V1\TaxController::class, 'calculate']);
+
+// Public Shipping Engine Routes
+Route::post('v1/shipping/calculate', [\App\Http\Controllers\Api\V1\ShippingController::class, 'calculate']);
+Route::get('v1/shipments/track/{tracking_number}', [\App\Http\Controllers\Api\V1\ShippingController::class, 'track']);
+
+// Checkout & Order Routes (supports guests via X-Session-ID / guest fields & authenticated customers)
+Route::post('v1/checkout/process', [\App\Http\Controllers\Api\V1\Customer\CheckoutController::class, 'process']);
+Route::get('v1/orders/{order_number}', [\App\Http\Controllers\Api\V1\Customer\CheckoutController::class, 'show']);
+

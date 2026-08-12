@@ -15,6 +15,7 @@ class Product extends Model
 
     protected $fillable = [
         'brand_id',
+        'tax_class_id',
         'name',
         'slug',
         'sku',
@@ -107,6 +108,14 @@ class Product extends Model
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    /**
+     * Relationship to TaxClass.
+     */
+    public function taxClass(): BelongsTo
+    {
+        return $this->belongsTo(TaxClass::class, 'tax_class_id');
     }
 
     /**

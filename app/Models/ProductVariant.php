@@ -55,6 +55,29 @@ class ProductVariant extends Model
                 $variant->sku = static::generateUniqueSku();
             }
         });
+
+        static::created(function ($variant) {
+            Inventory::firstOrCreate(
+                ['product_variant_id' => $variant->id],
+                [
+                    'sku' => $variant->sku,
+                    'available_qty' => $variant->stock_qty ?? 0,
+                    'reserved_qty' => 0,
+                    'committed_qty' => 0,
+                    'damaged_qty' => 0,
+                    'returned_qty' => 0,
+                    'low_stock_threshold' => 10,
+                ]
+            );
+        });
+    }
+
+    /**
+     * Relationship to Inventory.
+     */
+    public function inventory(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Inventory::class, 'product_variant_id');
     }
 
     public static function generateUniqueSku(?string $prefix = 'VAR'): string
