@@ -44,6 +44,19 @@ class UpdateProductRequest extends FormRequest
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string'],
             'meta_keywords' => ['nullable', 'string', 'max:255'],
+            'variants' => ['nullable', 'array'],
+            'variants.*.id' => ['nullable', 'integer'],
+            'variants.*.sku' => ['nullable', 'string', 'max:100'],
+            'variants.*.price' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.sale_price' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.cost_price' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.stock_qty' => ['nullable', 'integer', 'min:0'],
+            'variants.*.image' => ['nullable', 'string'],
+            'variants.*.download_url' => ['nullable', 'string'],
+            'variants.*.download_limit' => ['nullable', 'integer'],
+            'variants.*.download_expiry_days' => ['nullable', 'integer'],
+            'variants.*.attribute_value_ids' => ['nullable', 'array'],
+            'variants.*.attribute_value_ids.*' => ['exists:attribute_values,id'],
         ];
     }
 }

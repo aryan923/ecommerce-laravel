@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, X, Check, AlertCircle } from 'lucide-react';
+import { Tag, X, Check, AlertCircle, Image as ImageIcon, Trash2 } from 'lucide-react';
 import axios from 'axios';
+import MediaLibraryModal from './MediaLibraryModal';
 
 export default function CategoryFormModal({ isOpen, mode = 'create', initialData = null, categories = [], onClose, onSuccess }) {
     const [formData, setFormData] = useState({
@@ -16,6 +17,22 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
     });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+
+    // Media Library Modal Picker State
+    const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+    const [mediaTargetField, setMediaTargetField] = useState('image_url'); // 'image_url' | 'banner_url'
+
+    const handleOpenMediaPicker = (fieldName) => {
+        setMediaTargetField(fieldName);
+        setIsMediaModalOpen(true);
+    };
+
+    const handleSelectMediaAsset = (selectedAsset) => {
+        if (selectedAsset?.url) {
+            setFormData((prev) => ({ ...prev, [mediaTargetField]: selectedAsset.url }));
+        }
+        setIsMediaModalOpen(false);
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -91,7 +108,7 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
 
     return (
         <div className="modal-overlay">
-            <div className="modal-card" style={{ maxWidth: '600px' }}>
+            <div className="modal-card" style={{ maxWidth: '640px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Tag size={22} style={{ color: 'var(--admin-primary)' }} />
@@ -110,7 +127,7 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
                         <div style={{ gridColumn: 'span 2' }}>
                             <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
                                 Category Name *
@@ -175,32 +192,98 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
                             </select>
                         </div>
 
+                        {/* Category Image Thumbnail Picker */}
                         <div style={{ gridColumn: 'span 2' }}>
                             <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Image Thumbnail URL
+                                Category Image Thumbnail
                             </label>
-                            <input
-                                type="text"
-                                name="image_url"
-                                className="form-control"
-                                placeholder="https://cdn.example.com/category-thumb.jpg"
-                                value={formData.image_url}
-                                onChange={handleChange}
-                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                                <div style={{ width: '64px', height: '64px', borderRadius: '8px', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    {formData.image_url ? (
+                                        <img src={formData.image_url} alt="Thumbnail preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <ImageIcon size={24} style={{ color: 'var(--admin-subtle)' }} />
+                                    )}
+                                </div>
+                                <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => handleOpenMediaPicker('image_url')}
+                                        >
+                                            <ImageIcon size={14} />
+                                            <span>Select from Media Library</span>
+                                        </button>
+                                        {formData.image_url && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary btn-sm"
+                                                style={{ color: 'var(--admin-danger)' }}
+                                                onClick={() => setFormData((prev) => ({ ...prev, image_url: '' }))}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="image_url"
+                                        className="form-control"
+                                        placeholder="Or paste image URL (https://...)"
+                                        value={formData.image_url}
+                                        onChange={handleChange}
+                                        style={{ fontSize: '0.8rem' }}
+                                    />
+                                </div>
+                            </div>
                         </div>
 
+                        {/* Category Banner Image Picker */}
                         <div style={{ gridColumn: 'span 2' }}>
                             <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Banner Image URL
+                                Category Banner Image
                             </label>
-                            <input
-                                type="text"
-                                name="banner_url"
-                                className="form-control"
-                                placeholder="https://cdn.example.com/category-banner.jpg"
-                                value={formData.banner_url}
-                                onChange={handleChange}
-                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                                <div style={{ width: '120px', height: '64px', borderRadius: '8px', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    {formData.banner_url ? (
+                                        <img src={formData.banner_url} alt="Banner preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <ImageIcon size={24} style={{ color: 'var(--admin-subtle)' }} />
+                                    )}
+                                </div>
+                                <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => handleOpenMediaPicker('banner_url')}
+                                        >
+                                            <ImageIcon size={14} />
+                                            <span>Select from Media Library</span>
+                                        </button>
+                                        {formData.banner_url && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary btn-sm"
+                                                style={{ color: 'var(--admin-danger)' }}
+                                                onClick={() => setFormData((prev) => ({ ...prev, banner_url: '' }))}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="banner_url"
+                                        className="form-control"
+                                        placeholder="Or paste banner image URL (https://...)"
+                                        value={formData.banner_url}
+                                        onChange={handleChange}
+                                        style={{ fontSize: '0.8rem' }}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -214,6 +297,15 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
                         </button>
                     </div>
                 </form>
+
+                {/* Centralized Media Library Picker Modal */}
+                <MediaLibraryModal
+                    isOpen={isMediaModalOpen}
+                    onClose={() => setIsMediaModalOpen(false)}
+                    onSelect={handleSelectMediaAsset}
+                    isMultiSelect={false}
+                    title={mediaTargetField === 'image_url' ? 'Select Category Thumbnail' : 'Select Category Banner'}
+                />
             </div>
         </div>
     );

@@ -16,6 +16,10 @@ class Product extends Model
     protected $fillable = [
         'brand_id',
         'tax_class_id',
+        'requires_shipping',
+        'is_free_shipping',
+        'shipping_class_id',
+        'shipping_fee',
         'name',
         'slug',
         'sku',
@@ -42,6 +46,9 @@ class Product extends Model
 
     protected $casts = [
         'featured' => 'boolean',
+        'requires_shipping' => 'boolean',
+        'is_free_shipping' => 'boolean',
+        'shipping_fee' => 'decimal:2',
         'tax_class' => 'array',
         'price' => 'decimal:2',
         'sale_price' => 'decimal:2',
@@ -119,6 +126,14 @@ class Product extends Model
     }
 
     /**
+     * Relationship to Shipping Method / Shipping Class.
+     */
+    public function shippingClass(): BelongsTo
+    {
+        return $this->belongsTo(ShippingMethod::class, 'shipping_class_id');
+    }
+
+    /**
      * Relationship to Categories pivot.
      */
     public function categories(): BelongsToMany
@@ -142,6 +157,14 @@ class Product extends Model
     public function variants(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ProductVariant::class, 'product_id');
+    }
+
+    /**
+     * MorphMany relationship to Media assets.
+     */
+    public function media(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Media::class, 'imageable', 'model_type', 'model_id');
     }
 
     /**

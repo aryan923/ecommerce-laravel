@@ -10,17 +10,31 @@ import {
     Upload,
     Filter,
     CheckCircle,
-    AlertCircle
+    AlertCircle,
+    Globe,
+    RotateCcw,
+    Image as ImageIcon
 } from 'lucide-react';
 import BulkActionsBar from '../components/BulkActionsBar';
 import ImportProductsModal from '../components/ImportProductsModal';
 import ProductFormModal from '../components/ProductFormModal';
+import { loadCurrenciesFromApi, getCurrencyList, formatCurrency } from '../utils/currency';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState([]);
     const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState([]);
+
+    // Multi-Currency State
+    const [displayCurrency, setDisplayCurrency] = useState('INR');
+    const [currenciesList, setCurrenciesList] = useState(getCurrencyList());
+
+    useEffect(() => {
+        loadCurrenciesFromApi().then((currMap) => {
+            setCurrenciesList(Object.values(currMap));
+        });
+    }, []);
 
     // Modal States
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -50,11 +64,14 @@ export default function ProductsPage() {
 
             const res = await axios.get(`/api/v1/admin/products?${params.toString()}`);
             if (res.data?.success) {
-                setProducts(res.data.data?.data || []);
+                const rawData = res.data.data;
+                const items = Array.isArray(rawData) ? rawData : (rawData?.data || []);
+                const meta = res.data.meta || (typeof rawData === 'object' && !Array.isArray(rawData) ? rawData : {});
+                setProducts(items);
                 setPagination({
-                    current_page: res.data.data?.current_page || 1,
-                    last_page: res.data.data?.last_page || 1,
-                    total: res.data.data?.total || 0,
+                    current_page: meta.current_page || 1,
+                    last_page: meta.last_page || 1,
+                    total: meta.total ?? (Array.isArray(items) ? items.length : 0),
                 });
             }
         } catch (err) {
@@ -72,6 +89,14 @@ export default function ProductsPage() {
         e.preventDefault();
         setPage(1);
         fetchProducts();
+    };
+
+    const handleResetFilters = () => {
+        setSearch('');
+        setStatus('');
+        setType('');
+        setSortBy('latest');
+        setPage(1);
     };
 
     const showNotify = (msg, type = 'success') => {
@@ -165,8 +190,13 @@ export default function ProductsPage() {
         }
     };
 
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
+    // Helper for main image url
+    const getProductImage = (prd) => {
+        if (prd.media && prd.media.length > 0) {
+            const mainMedia = prd.media.find((m) => m.type === 'main') || prd.media[0];
+            if (mainMedia?.url) return mainMedia.url;
+        }
+        return prd.image || 'https://via.placeholder.com/60?text=Product';
     };
 
     return (
@@ -196,9 +226,28 @@ export default function ProductsPage() {
             <div className="page-header-row">
                 <div>
                     <h2 className="page-header-title">Product Management</h2>
-                    <p className="page-header-subtitle">Manage store catalog, product variants, duplication, and bulk operations</p>
+                    <p className="page-header-subtitle">Manage store catalog, media assets, multi-currency pricing, and bulk operations</p>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Currency Switcher Control */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--admin-bg)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)' }}>
+                        <Globe size={16} style={{ color: 'var(--admin-primary)' }} />
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Display:</span>
+                        <select
+                            className="form-select"
+                            value={displayCurrency}
+                            onChange={(e) => setDisplayCurrency(e.target.value)}
+                            style={{ border: 'none', background: 'transparent', padding: '0', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+                        >
+                            {currenciesList.map((c) => (
+                                <option key={c.code} value={c.code}>
+                                    {c.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <button className="btn btn-secondary" onClick={() => setIsImportModalOpen(true)}>
                         <Upload size={16} />
                         <span>Import CSV</span>
@@ -212,7 +261,7 @@ export default function ProductsPage() {
 
             {/* Filters Toolbar */}
             <div className="dashboard-card" style={{ marginBottom: '24px', padding: '16px 20px' }}>
-                <form onSubmit={handleSearchSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
+                <form onSubmit={handleSearchSubmit} className="filters-toolbar-form" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
                     <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
                         <input
@@ -252,6 +301,12 @@ export default function ProductsPage() {
                         <Filter size={16} />
                         <span>Filter</span>
                     </button>
+
+                    {(search || status || type || sortBy !== 'latest') && (
+                        <button type="button" className="btn btn-secondary" onClick={handleResetFilters} title="Reset filters">
+                            <RotateCcw size={14} />
+                        </button>
+                    )}
                 </form>
             </div>
 
@@ -268,9 +323,10 @@ export default function ProductsPage() {
                                         checked={products.length > 0 && selectedIds.length === products.length}
                                     />
                                 </th>
-                                <th>Product Info</th>
+                                <th style={{ width: '60px' }}>Media</th>
+                                <th>Product Details</th>
                                 <th>Type</th>
-                                <th>Price</th>
+                                <th>Price ({displayCurrency})</th>
                                 <th>Status</th>
                                 <th style={{ textAlign: 'right' }}>Actions</th>
                             </tr>
@@ -278,80 +334,105 @@ export default function ProductsPage() {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="6" className="text-muted" style={{ textAlign: 'center', padding: '32px' }}>
+                                    <td colSpan="7" className="text-muted" style={{ textAlign: 'center', padding: '32px' }}>
                                         Loading product catalog...
                                     </td>
                                 </tr>
                             ) : products.length > 0 ? (
-                                products.map((prd) => (
-                                    <tr key={prd.id}>
-                                        <td>
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedIds.includes(prd.id)}
-                                                onChange={() => handleSelectOne(prd.id)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <div style={{ fontWeight: 600, color: 'var(--admin-text)' }}>{prd.name}</div>
-                                            <div className="text-muted" style={{ fontSize: '0.8rem' }}>SKU: {prd.sku}</div>
-                                        </td>
-                                        <td>
-                                            <span className="badge badge-shipped">{prd.type}</span>
-                                        </td>
-                                        <td>
-                                            <div style={{ fontWeight: 700 }}>{formatCurrency(prd.price)}</div>
-                                            {prd.sale_price && (
-                                                <div className="text-muted" style={{ fontSize: '0.75rem', textDecoration: 'line-through' }}>
-                                                    {formatCurrency(prd.sale_price)}
+                                products.map((prd) => {
+                                    const thumbUrl = getProductImage(prd);
+                                    const brandName = prd.brand?.name;
+                                    const primaryCategory = prd.categories?.[0]?.name;
+
+                                    return (
+                                        <tr key={prd.id}>
+                                            <td>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIds.includes(prd.id)}
+                                                    onChange={() => handleSelectOne(prd.id)}
+                                                />
+                                            </td>
+                                            <td>
+                                                <div style={{ width: '48px', height: '48px', borderRadius: '6px', overflow: 'hidden', backgroundColor: 'var(--admin-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <img
+                                                        src={thumbUrl}
+                                                        alt={prd.name}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        onError={(e) => {
+                                                            e.target.onerror = null;
+                                                            e.target.src = 'https://via.placeholder.com/48?text=Product';
+                                                        }}
+                                                    />
                                                 </div>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <select
-                                                className="form-select"
-                                                value={prd.status}
-                                                onChange={(e) => handleToggleStatus(prd.id, e.target.value)}
-                                                style={{ padding: '4px 8px', fontSize: '0.8rem', width: 'auto' }}
-                                            >
-                                                <option value="draft">Draft</option>
-                                                <option value="active">Active</option>
-                                                <option value="inactive">Inactive</option>
-                                                <option value="archived">Archived</option>
-                                            </select>
-                                        </td>
-                                        <td style={{ textAlign: 'right' }}>
-                                            <div style={{ display: 'inline-flex', gap: '8px' }}>
-                                                <button
-                                                    className="btn btn-secondary btn-sm"
-                                                    onClick={() => handleOpenEditModal(prd)}
-                                                    title="Edit Product"
+                                            </td>
+                                            <td>
+                                                <div style={{ fontWeight: 600, color: 'var(--admin-text)' }}>{prd.name}</div>
+                                                <div className="text-muted" style={{ fontSize: '0.8rem', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px', flexWrap: 'wrap' }}>
+                                                    <span>SKU: <strong>{prd.sku}</strong></span>
+                                                    {brandName && <span>• Brand: <strong>{brandName}</strong></span>}
+                                                    {primaryCategory && <span>• Category: <strong>{primaryCategory}</strong></span>}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className="badge badge-shipped">{prd.type}</span>
+                                            </td>
+                                            <td>
+                                                <div style={{ fontWeight: 700 }}>
+                                                    {formatCurrency(prd.price, displayCurrency, true)}
+                                                </div>
+                                                {prd.sale_price && (
+                                                    <div className="text-muted" style={{ fontSize: '0.75rem', textDecoration: 'line-through' }}>
+                                                        {formatCurrency(prd.sale_price, displayCurrency, true)}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <select
+                                                    className="form-select"
+                                                    value={prd.status}
+                                                    onChange={(e) => handleToggleStatus(prd.id, e.target.value)}
+                                                    style={{ padding: '4px 8px', fontSize: '0.8rem', width: 'auto' }}
                                                 >
-                                                    <Edit3 size={14} />
-                                                    <span>Edit</span>
-                                                </button>
-                                                <button
-                                                    className="btn btn-secondary btn-sm"
-                                                    onClick={() => handleDuplicate(prd.id)}
-                                                    title="Duplicate Product"
-                                                >
-                                                    <Copy size={14} />
-                                                </button>
-                                                <button
-                                                    className="btn btn-secondary btn-sm"
-                                                    style={{ color: 'var(--admin-danger)' }}
-                                                    onClick={() => handleDelete(prd.id)}
-                                                    title="Delete Product"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                                    <option value="draft">Draft</option>
+                                                    <option value="active">Active</option>
+                                                    <option value="inactive">Inactive</option>
+                                                    <option value="archived">Archived</option>
+                                                </select>
+                                            </td>
+                                            <td style={{ textAlign: 'right' }}>
+                                                <div style={{ display: 'inline-flex', gap: '8px' }}>
+                                                    <button
+                                                        className="btn btn-secondary btn-sm"
+                                                        onClick={() => handleOpenEditModal(prd)}
+                                                        title="Edit Product"
+                                                    >
+                                                        <Edit3 size={14} />
+                                                        <span>Edit</span>
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-secondary btn-sm"
+                                                        onClick={() => handleDuplicate(prd.id)}
+                                                        title="Duplicate Product"
+                                                    >
+                                                        <Copy size={14} />
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-secondary btn-sm"
+                                                        style={{ color: 'var(--admin-danger)' }}
+                                                        onClick={() => handleDelete(prd.id)}
+                                                        title="Delete Product"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="text-muted" style={{ textAlign: 'center', padding: '32px' }}>
+                                    <td colSpan="7" className="text-muted" style={{ textAlign: 'center', padding: '32px' }}>
                                         No products found matching your search query.
                                     </td>
                                 </tr>
@@ -362,7 +443,7 @@ export default function ProductsPage() {
 
                 {/* Pagination Controls */}
                 {pagination.last_page > 1 && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--admin-border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--admin-border)' }}>
                         <span className="text-muted" style={{ fontSize: '0.85rem' }}>
                             Showing page {pagination.current_page} of {pagination.last_page} ({pagination.total} total products)
                         </span>
@@ -389,6 +470,7 @@ export default function ProductsPage() {
             {/* Floating Bulk Actions Bar */}
             <BulkActionsBar
                 selectedIds={selectedIds}
+                displayCurrency={displayCurrency}
                 onClearSelection={() => setSelectedIds([])}
                 onExecuteBulk={handleExecuteBulk}
             />
@@ -398,6 +480,7 @@ export default function ProductsPage() {
                 isOpen={isProductModalOpen}
                 mode={productModalMode}
                 initialData={selectedProduct}
+                displayCurrency={displayCurrency}
                 onClose={() => setIsProductModalOpen(false)}
                 onSuccess={() => {
                     showNotify(productModalMode === 'edit' ? 'Product updated successfully!' : 'Product created successfully!');

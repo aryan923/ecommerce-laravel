@@ -89,6 +89,17 @@ export default function AttributesPage() {
         }
     };
 
+    const handleDeleteValue = async (valueId) => {
+        if (!window.confirm('Are you sure you want to delete this option value?')) return;
+        try {
+            await axios.delete(`/api/v1/admin/attribute-values/${valueId}`);
+            showNotify('Option value deleted successfully.');
+            fetchAttributes();
+        } catch (err) {
+            showNotify('Failed to delete option value.', 'error');
+        }
+    };
+
     return (
         <div>
             {notification && (
@@ -125,7 +136,7 @@ export default function AttributesPage() {
             </div>
 
             {/* Attributes Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
                 {loading ? (
                     <div className="dashboard-card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '32px' }}>
                         Loading attributes...
@@ -148,8 +159,17 @@ export default function AttributesPage() {
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                     {attr.values?.length ? (
                                         attr.values.map((v) => (
-                                            <span key={v.id} className="badge badge-shipped" style={{ fontSize: '0.8rem', padding: '4px 10px' }}>
-                                                {v.value}
+                                            <span key={v.id} className="badge badge-shipped" style={{ fontSize: '0.8rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                                <span>{v.value}</span>
+                                                <X
+                                                    size={12}
+                                                    style={{ cursor: 'pointer', opacity: 0.7 }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteValue(v.id);
+                                                    }}
+                                                    title={`Delete "${v.value}"`}
+                                                />
                                             </span>
                                         ))
                                     ) : (

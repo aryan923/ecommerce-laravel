@@ -18,7 +18,7 @@ class ProductService
      */
     public function list(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Product::with(['brand', 'categories']);
+        $query = Product::with(['brand', 'categories', 'taxClass', 'shippingClass', 'media', 'variants.attributeValues']);
 
         if (!empty($filters['search']) && is_string($filters['search'])) {
             $search = trim($filters['search']);
@@ -80,14 +80,19 @@ class ProductService
     {
         $categoryIds = $data['category_ids'] ?? [];
         $primaryCategoryId = $data['primary_category_id'] ?? ($categoryIds[0] ?? null);
+        $variantsData = $data['variants'] ?? null;
 
-        unset($data['category_ids'], $data['primary_category_id']);
+        unset($data['category_ids'], $data['primary_category_id'], $data['variants']);
 
         $product = Product::create($data);
 
         $this->syncCategories($product, $categoryIds, $primaryCategoryId);
 
-        return $product->load(['brand', 'categories']);
+        if ($variantsData !== null && is_array($variantsData)) {
+            $this->syncVariants($product, $variantsData);
+        }
+
+        return $product->load(['brand', 'categories', 'variants.attributeValues']);
     }
 
     /**
@@ -97,8 +102,9 @@ class ProductService
     {
         $categoryIds = $data['category_ids'] ?? null;
         $primaryCategoryId = $data['primary_category_id'] ?? null;
+        $variantsData = $data['variants'] ?? null;
 
-        unset($data['category_ids'], $data['primary_category_id']);
+        unset($data['category_ids'], $data['primary_category_id'], $data['variants']);
 
         $product->update($data);
 
@@ -106,7 +112,11 @@ class ProductService
             $this->syncCategories($product, $categoryIds, $primaryCategoryId);
         }
 
-        return $product->load(['brand', 'categories']);
+        if ($variantsData !== null && is_array($variantsData)) {
+            $this->syncVariants($product, $variantsData);
+        }
+
+        return $product->load(['brand', 'categories', 'variants.attributeValues']);
     }
 
     /**
@@ -234,6 +244,54 @@ class ProductService
         }
 
         $product->categories()->sync($pivotData);
+    }
+
+    /**
+     * Helper to sync product variants and their attribute value mappings.
+     */
+    protected function syncVariants(Product $product, array $variantsData): void
+    {
+        $keptVariantIds = [];
+
+        foreach ($variantsData as $vData) {
+            $variantId = $vData['id'] ?? null;
+            $attributeValueIds = $vData['attribute_value_ids'] ?? [];
+
+            $payload = [
+                'sku' => !empty($vData['sku']) ? $vData['sku'] : \App\Models\ProductVariant::generateUniqueSku('VAR'),
+                'price' => isset($vData['price']) && is_numeric($vData['price']) ? (float) $vData['price'] : $product->price,
+                'sale_price' => isset($vData['sale_price']) && is_numeric($vData['sale_price']) ? (float) $vData['sale_price'] : null,
+                'cost_price' => isset($vData['cost_price']) && is_numeric($vData['cost_price']) ? (float) $vData['cost_price'] : null,
+                'stock_qty' => isset($vData['stock_qty']) ? (int) $vData['stock_qty'] : 10,
+                'image' => $vData['image'] ?? null,
+                'download_url' => $vData['download_url'] ?? null,
+                'download_limit' => isset($vData['download_limit']) ? (int) $vData['download_limit'] : null,
+                'download_expiry_days' => isset($vData['download_expiry_days']) ? (int) $vData['download_expiry_days'] : null,
+                'status' => $vData['status'] ?? 'active',
+            ];
+
+            if ($variantId) {
+                $variant = $product->variants()->find($variantId);
+                if ($variant) {
+                    $variant->update($payload);
+                } else {
+                    $variant = $product->variants()->create($payload);
+                }
+            } else {
+                $variant = $product->variants()->create($payload);
+            }
+
+            $keptVariantIds[] = $variant->id;
+
+            if (!empty($attributeValueIds) && is_array($attributeValueIds)) {
+                $variant->attributeValues()->sync($attributeValueIds);
+            }
+        }
+
+        // Delete any existing variants that were removed from the form matrix
+        if ($product->type === 'variable' || $product->type === 'digital') {
+            $product->variants()->whereNotIn('id', $keptVariantIds)->delete();
+        }
     }
 
     /**

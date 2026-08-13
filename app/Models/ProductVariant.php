@@ -26,6 +26,9 @@ class ProductVariant extends Model
         'width',
         'height',
         'image',
+        'download_url',
+        'download_limit',
+        'download_expiry_days',
         'status',
     ];
 
@@ -35,6 +38,8 @@ class ProductVariant extends Model
         'sale_price' => 'decimal:2',
         'cost_price' => 'decimal:2',
         'stock_qty' => 'integer',
+        'download_limit' => 'integer',
+        'download_expiry_days' => 'integer',
         'weight' => 'decimal:2',
         'length' => 'decimal:2',
         'width' => 'decimal:2',

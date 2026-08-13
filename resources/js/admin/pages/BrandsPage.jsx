@@ -116,8 +116,8 @@ export default function BrandsPage() {
 
             {/* Filter Bar */}
             <div className="dashboard-card" style={{ marginBottom: '24px', padding: '16px 20px' }}>
-                <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <div style={{ position: 'relative', flex: 1, maxWidth: '360px' }}>
+                <form onSubmit={handleSearchSubmit} className="filters-toolbar-form" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '360px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
                         <input
                             type="text"

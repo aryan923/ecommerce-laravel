@@ -15,6 +15,8 @@ import {
     Store
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { Sun, Moon, Menu, X } from 'lucide-react';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProductsPage from './pages/ProductsPage';
@@ -43,6 +45,12 @@ function ProtectedRoute({ children }) {
 function AdminLayout() {
     const location = useLocation();
     const { user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
+    const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMobileNavOpen(false);
+    }, [location.pathname]);
 
     const getPageTitle = () => {
         if (location.pathname.includes('/products')) return 'Product Management';
@@ -54,13 +62,29 @@ function AdminLayout() {
 
     return (
         <div className="admin-layout">
+            {/* Mobile Drawer Overlay Backdrop */}
+            <div
+                className={`sidebar-overlay ${isMobileNavOpen ? 'active' : ''}`}
+                onClick={() => setIsMobileNavOpen(false)}
+            />
+
             {/* Sidebar */}
-            <aside className="admin-sidebar">
+            <aside className={`admin-sidebar ${isMobileNavOpen ? 'mobile-open' : ''}`}>
                 <div className="sidebar-brand">
                     <div className="sidebar-brand-logo">
                         <Store size={20} />
                     </div>
                     <span className="sidebar-brand-title">Admin Console</span>
+                    {isMobileNavOpen && (
+                        <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            style={{ marginLeft: 'auto', padding: '4px' }}
+                            onClick={() => setIsMobileNavOpen(false)}
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
                 </div>
 
                 <nav className="sidebar-nav">
@@ -126,7 +150,18 @@ function AdminLayout() {
                     </NavLink>
                 </nav>
 
-                <div style={{ padding: '16px', borderTop: '1px solid var(--admin-border)' }}>
+                <div className="sidebar-footer">
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={toggleTheme}
+                        title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    >
+                        {theme === 'dark' ? <Sun size={16} style={{ color: '#f59e0b' }} /> : <Moon size={16} style={{ color: '#6366f1' }} />}
+                        <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                    </button>
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div className="user-avatar">{user?.name ? user.name.charAt(0).toUpperCase() : 'A'}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -141,12 +176,32 @@ function AdminLayout() {
             <div className="admin-main">
                 <header className="admin-header">
                     <div className="header-title-area">
-                        <span style={{ color: 'var(--admin-muted)', fontSize: '0.9rem' }}>Admin</span>
-                        <ChevronRight size={14} style={{ color: 'var(--admin-subtle)' }} />
+                        <button
+                            type="button"
+                            className="btn btn-secondary btn-sm mobile-menu-btn"
+                            onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+                            title="Toggle Mobile Navigation"
+                            style={{ padding: '6px', marginRight: '4px' }}
+                        >
+                            {isMobileNavOpen ? <X size={18} /> : <Menu size={18} />}
+                        </button>
+                        <span className="header-breadcrumb-prefix" style={{ color: 'var(--admin-muted)', fontSize: '0.9rem' }}>Admin</span>
+                        <ChevronRight className="header-breadcrumb-icon" size={14} style={{ color: 'var(--admin-subtle)' }} />
                         <h1 className="header-page-title">{getPageTitle()}</h1>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div className="header-actions-area">
+                        <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={toggleTheme}
+                            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+                            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                            {theme === 'dark' ? <Sun size={16} style={{ color: '#f59e0b' }} /> : <Moon size={16} style={{ color: '#6366f1' }} />}
+                            <span className="header-btn-label" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+                        </button>
+
                         <button className="btn btn-secondary btn-sm" title="Notifications">
                             <Bell size={16} />
                         </button>
@@ -155,7 +210,7 @@ function AdminLayout() {
                             <div className="user-avatar" style={{ width: '22px', height: '22px', fontSize: '0.7rem' }}>
                                 {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
                             </div>
-                            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user?.name || 'Admin'}</span>
+                            <span className="header-user-name" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user?.name || 'Admin'}</span>
                         </div>
 
                         <button
@@ -165,7 +220,7 @@ function AdminLayout() {
                             style={{ color: 'var(--admin-danger)' }}
                         >
                             <LogOut size={16} />
-                            <span>Logout</span>
+                            <span className="header-btn-label">Logout</span>
                         </button>
                     </div>
                 </header>
@@ -187,20 +242,22 @@ function AdminLayout() {
 
 export default function App() {
     return (
-        <AuthProvider>
-            <BrowserRouter basename="/admin">
-                <Routes>
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route
-                        path="/*"
-                        element={
-                            <ProtectedRoute>
-                                <AdminLayout />
-                            </ProtectedRoute>
-                        }
-                    />
-                </Routes>
-            </BrowserRouter>
-        </AuthProvider>
+        <ThemeProvider>
+            <AuthProvider>
+                <BrowserRouter basename="/admin">
+                    <Routes>
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route
+                            path="/*"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminLayout />
+                                </ProtectedRoute>
+                            }
+                        />
+                    </Routes>
+                </BrowserRouter>
+            </AuthProvider>
+        </ThemeProvider>
     );
 }

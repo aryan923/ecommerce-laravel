@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Store, Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { Store, Lock, Mail, AlertCircle, ArrowRight, Sun, Moon } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -10,6 +10,7 @@ export default function LoginPage() {
     const [submitting, setSubmitting] = useState(false);
 
     const { login } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -35,8 +36,21 @@ export default function LoginPage() {
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: 'var(--admin-bg)',
-            padding: '20px'
+            padding: '20px',
+            position: 'relative',
         }}>
+            <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
+                <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={toggleTheme}
+                    title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                    {theme === 'dark' ? <Sun size={16} style={{ color: '#f59e0b' }} /> : <Moon size={16} style={{ color: '#6366f1' }} />}
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+                </button>
+            </div>
             <div className="modal-card" style={{ maxWidth: '420px', width: '100%' }}>
                 {/* Brand Header */}
                 <div style={{ textAlignment: 'center', textAlign: 'center', marginBottom: '28px' }}>

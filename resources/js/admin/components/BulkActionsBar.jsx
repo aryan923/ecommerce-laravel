@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { CheckSquare, X, Zap } from 'lucide-react';
+import { getCurrencySymbol } from '../utils/currency';
 
-export default function BulkActionsBar({ selectedIds, onClearSelection, onExecuteBulk }) {
+export default function BulkActionsBar({
+    selectedIds,
+    displayCurrency = 'INR',
+    onClearSelection,
+    onExecuteBulk
+}) {
     const [action, setAction] = useState('activate');
     const [inputValue, setInputValue] = useState('');
 
@@ -9,8 +15,14 @@ export default function BulkActionsBar({ selectedIds, onClearSelection, onExecut
         return null;
     }
 
+    const symbol = getCurrencySymbol(displayCurrency);
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (action === 'delete' && !window.confirm(`Are you sure you want to BULK DELETE ${selectedIds.length} selected products?`)) {
+            return;
+        }
+
         let payloadData = {};
         if (action === 'update_price') {
             payloadData.price = parseFloat(inputValue);
@@ -28,7 +40,7 @@ export default function BulkActionsBar({ selectedIds, onClearSelection, onExecut
                 <span>{selectedIds.length} items selected</span>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <select
                     className="form-select"
                     value={action}
@@ -38,7 +50,7 @@ export default function BulkActionsBar({ selectedIds, onClearSelection, onExecut
                     <option value="activate">Bulk Activate</option>
                     <option value="deactivate">Bulk Deactivate</option>
                     <option value="archive">Bulk Archive</option>
-                    <option value="update_price">Bulk Set Price ($)</option>
+                    <option value="update_price">Bulk Set Base Price ({symbol})</option>
                     <option value="update_stock">Bulk Set Stock Qty</option>
                     <option value="delete">Bulk Delete</option>
                 </select>
@@ -48,11 +60,11 @@ export default function BulkActionsBar({ selectedIds, onClearSelection, onExecut
                         type="number"
                         step={action === 'update_price' ? '0.01' : '1'}
                         className="form-control"
-                        placeholder={action === 'update_price' ? 'e.g. 199.99' : 'e.g. 50'}
+                        placeholder={action === 'update_price' ? `e.g. 1499.00 (${symbol})` : 'e.g. 50'}
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         required
-                        style={{ width: '120px', padding: '6px 10px', fontSize: '0.85rem' }}
+                        style={{ width: '150px', padding: '6px 10px', fontSize: '0.85rem' }}
                     />
                 )}
 

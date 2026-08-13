@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Award, X, Check, AlertCircle } from 'lucide-react';
+import { Award, X, Check, AlertCircle, Image as ImageIcon, Trash2 } from 'lucide-react';
 import axios from 'axios';
+import MediaLibraryModal from './MediaLibraryModal';
 
 export default function BrandFormModal({ isOpen, mode = 'create', initialData = null, onClose, onSuccess }) {
     const [formData, setFormData] = useState({
@@ -13,6 +14,16 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
     });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+
+    // Media Library Modal Picker State
+    const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+
+    const handleSelectMediaAsset = (selectedAsset) => {
+        if (selectedAsset?.url) {
+            setFormData((prev) => ({ ...prev, logo_url: selectedAsset.url }));
+        }
+        setIsMediaModalOpen(false);
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -79,7 +90,7 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
 
     return (
         <div className="modal-overlay">
-            <div className="modal-card" style={{ maxWidth: '540px' }}>
+            <div className="modal-card" style={{ maxWidth: '600px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Award size={22} style={{ color: 'var(--admin-primary)' }} />
@@ -98,7 +109,7 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
                         <div style={{ gridColumn: 'span 2' }}>
                             <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
                                 Brand Name *
@@ -138,18 +149,51 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
                             </select>
                         </div>
 
+                        {/* Brand Logo Picker */}
                         <div style={{ gridColumn: 'span 2' }}>
                             <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Brand Logo Image URL
+                                Brand Logo Image
                             </label>
-                            <input
-                                type="text"
-                                name="logo_url"
-                                className="form-control"
-                                placeholder="https://cdn.example.com/brand-logo.png"
-                                value={formData.logo_url}
-                                onChange={handleChange}
-                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                                <div style={{ width: '64px', height: '64px', borderRadius: '8px', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    {formData.logo_url ? (
+                                        <img src={formData.logo_url} alt="Brand logo preview" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
+                                    ) : (
+                                        <Award size={24} style={{ color: 'var(--admin-subtle)' }} />
+                                    )}
+                                </div>
+                                <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => setIsMediaModalOpen(true)}
+                                        >
+                                            <ImageIcon size={14} />
+                                            <span>Select from Media Library</span>
+                                        </button>
+                                        {formData.logo_url && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary btn-sm"
+                                                style={{ color: 'var(--admin-danger)' }}
+                                                onClick={() => setFormData((prev) => ({ ...prev, logo_url: '' }))}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="logo_url"
+                                        className="form-control"
+                                        placeholder="Or paste brand logo image URL (https://...)"
+                                        value={formData.logo_url}
+                                        onChange={handleChange}
+                                        style={{ fontSize: '0.8rem' }}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -163,6 +207,15 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
                         </button>
                     </div>
                 </form>
+
+                {/* Centralized Media Library Picker Modal */}
+                <MediaLibraryModal
+                    isOpen={isMediaModalOpen}
+                    onClose={() => setIsMediaModalOpen(false)}
+                    onSelect={handleSelectMediaAsset}
+                    isMultiSelect={false}
+                    title="Select Brand Logo"
+                />
             </div>
         </div>
     );

@@ -62,7 +62,9 @@ class ShippingController extends BaseController
             $request->input('state_code'),
             $request->input('postal_code'),
             (float) $request->input('subtotal', 0.0),
-            (float) $request->input('total_weight', 0.0)
+            (float) $request->input('total_weight', 0.0),
+            (array) $request->input('items', []),
+            $request->input('combination_strategy', 'highest_item_first')
         );
 
         return $this->successResponse($result, 'Shipping options calculated successfully.');

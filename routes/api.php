@@ -35,6 +35,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/brands', [PublicBrandController::class, 'index']);
     Route::get('/brands/{slug}', [PublicBrandController::class, 'show']);
     Route::get('/attributes', [PublicAttributeController::class, 'index']);
+    Route::get('/currencies', [\App\Http\Controllers\Api\V1\CurrencyController::class, 'index']);
 
     Route::get('/products', [PublicProductController::class, 'index']);
     Route::get('/products/{slug}', [PublicProductController::class, 'show']);

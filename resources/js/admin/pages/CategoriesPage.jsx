@@ -116,8 +116,8 @@ export default function CategoriesPage() {
 
             {/* Filter Bar */}
             <div className="dashboard-card" style={{ marginBottom: '24px', padding: '16px 20px' }}>
-                <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <div style={{ position: 'relative', flex: 1, maxWidth: '360px' }}>
+                <form onSubmit={handleSearchSubmit} className="filters-toolbar-form" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '360px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
                         <input
                             type="text"
@@ -140,6 +140,7 @@ export default function CategoriesPage() {
                     <table className="admin-table">
                         <thead>
                             <tr>
+                                <th style={{ width: '60px' }}>Media</th>
                                 <th>Category Name</th>
                                 <th>Slug</th>
                                 <th>Parent Category</th>
@@ -151,13 +152,30 @@ export default function CategoriesPage() {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="6" className="text-muted" style={{ textAlign: 'center', padding: '32px' }}>
+                                    <td colSpan="7" className="text-muted" style={{ textAlign: 'center', padding: '32px' }}>
                                         Loading categories...
                                     </td>
                                 </tr>
                             ) : categories.length > 0 ? (
                                 categories.map((cat) => (
                                     <tr key={cat.id}>
+                                        <td>
+                                            <div style={{ width: '44px', height: '44px', borderRadius: '6px', overflow: 'hidden', backgroundColor: 'var(--admin-bg)', border: '1px solid var(--admin-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                {cat.image_url ? (
+                                                    <img
+                                                        src={cat.image_url}
+                                                        alt={cat.name}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        onError={(e) => {
+                                                            e.target.onerror = null;
+                                                            e.target.style.display = 'none';
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <Tag size={18} style={{ color: 'var(--admin-subtle)' }} />
+                                                )}
+                                            </div>
+                                        </td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
                                                 {cat.parent_id && <CornerDownRight size={14} style={{ color: 'var(--admin-subtle)' }} />}

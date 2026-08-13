@@ -14,7 +14,7 @@ class AttributeService
      */
     public function list(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Attribute::withCount('values');
+        $query = Attribute::with('values')->withCount('values');
 
         if (!empty($filters['search']) && is_string($filters['search'])) {
             $search = trim($filters['search']);

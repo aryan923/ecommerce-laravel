@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { formatCurrency } from '../utils/currency';
 import {
     DollarSign,
     ShoppingCart,
@@ -50,10 +51,6 @@ export default function DashboardPage() {
     useEffect(() => {
         fetchDashboardData();
     }, [period]);
-
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
-    };
 
     // Calculate max value for chart scaling
     const maxChartVal = salesChart?.chart?.length

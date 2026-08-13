@@ -20,8 +20,14 @@ class ShippingService
      * @param float $totalWeight
      * @return array
      */
-    public function calculateShippingOptions(string $stateCode, ?string $postalCode = null, float $subtotal = 0.0, float $totalWeight = 0.0): array
-    {
+    public function calculateShippingOptions(
+        string $stateCode,
+        ?string $postalCode = null,
+        float $subtotal = 0.0,
+        float $totalWeight = 0.0,
+        array $items = [],
+        ?string $combinationStrategy = 'highest_item_first'
+    ): array {
         $stateCode = strtoupper(trim($stateCode));
         $postalCode = $postalCode ? trim($postalCode) : null;
 
@@ -84,6 +90,34 @@ class ShippingService
                 $fee = (float) $rate->rate_value;
             } elseif ($rate->rate_type === 'weight_based') {
                 $fee = round((float) $rate->rate_value * max(1.0, $totalWeight), 2);
+            } elseif ($rate->rate_type === 'price_based' || $rate->rate_type === 'price_bracket_combined') {
+                if ($subtotal >= 1999) {
+                    $fee = 0.00;
+                    $isFree = true;
+                } elseif ($subtotal >= 500) {
+                    $fee = 40.00;
+                } else {
+                    $fee = 80.00;
+                }
+            } elseif ($rate->rate_type === 'per_product' || $combinationStrategy === 'per_product') {
+                $perProductTotal = 0.0;
+                foreach ($items as $item) {
+                    $itemFee = isset($item['shipping_fee']) ? (float) $item['shipping_fee'] : (float) $rate->rate_value;
+                    $qty = isset($item['quantity']) ? (int) $item['quantity'] : 1;
+                    $isItemFree = !empty($item['is_free_shipping']);
+                    if (!$isItemFree) {
+                        $perProductTotal += ($itemFee * $qty);
+                    }
+                }
+                $fee = round($perProductTotal > 0 ? $perProductTotal : (float) $rate->rate_value, 2);
+            } elseif ($rate->rate_type === 'combined_shipping' || $combinationStrategy === 'highest_item_first') {
+                if (count($items) > 1) {
+                    $baseFee = (float) $rate->rate_value;
+                    $addonFee = (count($items) - 1) * 20.00; // ₹20 per additional item
+                    $fee = round($baseFee + $addonFee, 2);
+                } else {
+                    $fee = (float) $rate->rate_value;
+                }
             } elseif ($rate->rate_type === 'free_shipping') {
                 $fee = 0.00;
                 $isFree = true;
@@ -96,6 +130,7 @@ class ShippingService
                 'estimated_days' => $method->estimated_days,
                 'fee' => round($fee, 2),
                 'is_free' => $isFree,
+                'combination_strategy' => $combinationStrategy,
             ];
         }
 
