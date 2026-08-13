@@ -19,10 +19,12 @@ return new class extends Migration
             $table->decimal('amount', 12, 2);
             $table->string('currency', 3)->default('INR');
             $table->enum('status', [
+                'initiated',
                 'pending',
                 'authorized',
                 'captured',
                 'failed',
+                'cancelled',
                 'refunded',
                 'partially_refunded',
             ])->default('pending');

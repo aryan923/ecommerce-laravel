@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
+use App\Jobs\ImportProductsJob;
 use App\Models\Category;
+use App\Models\Inventory;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ProductService
@@ -250,5 +254,189 @@ class ProductService
         }
 
         return $breadcrumbs;
+    }
+
+    /**
+     * Duplicate a product and its associated categories and variants.
+     */
+    public function duplicate(Product $product): Product
+    {
+        return DB::transaction(function () use ($product) {
+            $product->load(['categories', 'variants']);
+
+            $newName = $product->name . ' (Copy)';
+            $newSlug = Product::generateUniqueSlug($newName);
+            $newSku = Product::generateUniqueSku('COPY');
+
+            $newProduct = Product::create([
+                'brand_id' => $product->brand_id,
+                'name' => $newName,
+                'slug' => $newSlug,
+                'sku' => $newSku,
+                'type' => $product->type,
+                'status' => 'draft',
+                'price' => $product->price,
+                'sale_price' => $product->sale_price,
+                'cost_price' => $product->cost_price,
+                'short_description' => $product->short_description,
+                'description' => $product->description,
+                'weight' => $product->weight,
+                'length' => $product->length,
+                'width' => $product->width,
+                'height' => $product->height,
+                'meta_title' => $product->meta_title,
+                'meta_description' => $product->meta_description,
+                'images' => $product->images,
+                'tax_class' => $product->tax_class,
+            ]);
+
+            // Sync categories
+            if ($product->categories->isNotEmpty()) {
+                $categoryIds = $product->categories->pluck('id')->toArray();
+                $primaryCat = $product->categories->first(fn ($c) => $c->pivot->is_primary);
+                $this->syncCategories($newProduct, $categoryIds, $primaryCat?->id);
+            }
+
+            // Clone variants
+            foreach ($product->variants as $variant) {
+                $newVarSku = $newSku . '-' . $variant->id;
+                ProductVariant::create([
+                    'product_id' => $newProduct->id,
+                    'sku' => $newVarSku,
+                    'price' => $variant->price,
+                    'sale_price' => $variant->sale_price,
+                    'stock_qty' => $variant->stock_qty,
+                    'status' => $variant->status,
+                ]);
+            }
+
+            return $newProduct->load(['brand', 'categories', 'variants']);
+        });
+    }
+
+    /**
+     * Perform bulk operations across selected product IDs.
+     */
+    public function bulkAction(array $productIds, string $action, array $data = []): int
+    {
+        return DB::transaction(function () use ($productIds, $action, $data) {
+            $count = 0;
+            $products = Product::whereIn('id', $productIds)->get();
+
+            foreach ($products as $product) {
+                switch ($action) {
+                    case 'activate':
+                        $product->update(['status' => 'active']);
+                        $count++;
+                        break;
+                    case 'deactivate':
+                        $product->update(['status' => 'inactive']);
+                        $count++;
+                        break;
+                    case 'archive':
+                        $product->update(['status' => 'archived']);
+                        $count++;
+                        break;
+                    case 'delete':
+                        $product->delete();
+                        $count++;
+                        break;
+                    case 'update_category':
+                        if (!empty($data['category_id'])) {
+                            $this->syncCategories($product, [(int) $data['category_id']], (int) $data['category_id']);
+                            $count++;
+                        }
+                        break;
+                    case 'update_price':
+                        if (isset($data['price']) && is_numeric($data['price'])) {
+                            $product->update(['price' => (float) $data['price']]);
+                            $count++;
+                        }
+                        break;
+                    case 'update_stock':
+                        if (isset($data['stock_qty']) && is_numeric($data['stock_qty'])) {
+                            $newStock = (int) $data['stock_qty'];
+                            foreach ($product->variants as $variant) {
+                                $variant->update(['stock_qty' => $newStock]);
+                                Inventory::updateOrCreate(
+                                    ['product_variant_id' => $variant->id],
+                                    ['sku' => $variant->sku, 'available_qty' => $newStock]
+                                );
+                            }
+                            $count++;
+                        }
+                        break;
+                }
+            }
+
+            return $count;
+        });
+    }
+
+    /**
+     * Submit CSV/XLSX product import batch.
+     */
+    public function importProducts(array $productsData): array
+    {
+        if (config('queue.default') === 'sync') {
+            return $this->processImportBatch($productsData);
+        }
+
+        ImportProductsJob::dispatch($productsData);
+
+        return [
+            'status' => 'queued',
+            'message' => 'Product import job queued successfully.',
+            'total_records' => count($productsData),
+        ];
+    }
+
+    /**
+     * Process product import batch.
+     */
+    public function processImportBatch(array $productsData): array
+    {
+        $importedCount = 0;
+        $errors = [];
+
+        foreach ($productsData as $index => $row) {
+            try {
+                if (empty($row['name']) || !isset($row['price'])) {
+                    $errors[] = "Row #" . ($index + 1) . ": Name and price are required.";
+                    continue;
+                }
+
+                $sku = !empty($row['sku']) ? $row['sku'] : Product::generateUniqueSku();
+
+                $product = Product::create([
+                    'name' => $row['name'],
+                    'type' => $row['type'] ?? 'simple',
+                    'status' => $row['status'] ?? 'draft',
+                    'price' => (float) $row['price'],
+                    'sale_price' => isset($row['sale_price']) ? (float) $row['sale_price'] : null,
+                    'sku' => $sku,
+                    'short_description' => $row['short_description'] ?? null,
+                    'description' => $row['description'] ?? null,
+                ]);
+
+                // Create default variant for simple product
+                ProductVariant::create([
+                    'product_id' => $product->id,
+                    'sku' => $sku,
+                    'price' => (float) $row['price'],
+                    'stock_qty' => isset($row['stock_qty']) ? (int) $row['stock_qty'] : 10,
+                ]);
+
+                $importedCount++;
+            } catch (\Throwable $e) {
+                $errors[] = "Row #" . ($index + 1) . ": " . $e->getMessage();
+            }
+        }
+
+        return [
+            'status' => 'completed',
+            'imported_count' => $importedCount,
+            'errors' => $errors,
+        ];
     }
 }

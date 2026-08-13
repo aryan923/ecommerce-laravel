@@ -38,6 +38,7 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/products', [PublicProductController::class, 'index']);
     Route::get('/products/{slug}', [PublicProductController::class, 'show']);
+    Route::get('/products/{product_id}/reviews', [\App\Http\Controllers\Api\V1\PublicProductReviewController::class, 'index']);
 
     // Customer Authentication Endpoints
     Route::prefix('auth')->group(function () {
@@ -118,9 +119,12 @@ Route::prefix('v1')->group(function () {
             // Product Management
             Route::get('/products', [ProductController::class, 'index'])->middleware('permission:products.view');
             Route::post('/products', [ProductController::class, 'store'])->middleware('permission:products.create');
+            Route::post('/products/bulk', [ProductController::class, 'bulk'])->middleware('permission:products.update');
+            Route::post('/products/import', [ProductController::class, 'import'])->middleware('permission:products.create');
             Route::get('/products/{product}', [ProductController::class, 'show'])->middleware('permission:products.view');
             Route::put('/products/{product}', [ProductController::class, 'update'])->middleware('permission:products.update');
             Route::patch('/products/{product}/status', [ProductController::class, 'toggleStatus'])->middleware('permission:products.update');
+            Route::post('/products/{product}/duplicate', [ProductController::class, 'duplicate'])->middleware('permission:products.create');
             Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('permission:products.delete');
 
             // Product Variant Management
@@ -202,6 +206,44 @@ Route::prefix('v1')->group(function () {
             Route::post('/shipments', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'store']);
             Route::get('/shipments/{id}', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'show']);
             Route::post('/shipments/{id}/tracking', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'addTracking']);
+
+            // Admin Payment Management
+            Route::get('/payments', [\App\Http\Controllers\Api\V1\Admin\PaymentAdminController::class, 'index']);
+            Route::get('/payments/{id}', [\App\Http\Controllers\Api\V1\Admin\PaymentAdminController::class, 'show']);
+            Route::post('/payments/{id}/mark-paid', [\App\Http\Controllers\Api\V1\Admin\PaymentAdminController::class, 'markPaid']);
+
+            // Admin Return Management
+            Route::get('/returns', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'index']);
+            Route::get('/returns/{id}', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'show']);
+            Route::post('/returns/{id}/status', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'updateStatus']);
+            Route::post('/returns/{id}/restock', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'restock']);
+
+            // Admin Refund Management
+            Route::get('/refunds', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'index']);
+            Route::post('/refunds/process', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'process']);
+
+            // Admin Review Management
+            Route::get('/reviews', [\App\Http\Controllers\Api\V1\Admin\ReviewAdminController::class, 'index']);
+            Route::get('/reviews/{id}', [\App\Http\Controllers\Api\V1\Admin\ReviewAdminController::class, 'show']);
+            Route::post('/reviews/{id}/status', [\App\Http\Controllers\Api\V1\Admin\ReviewAdminController::class, 'updateStatus']);
+            Route::delete('/reviews/{id}', [\App\Http\Controllers\Api\V1\Admin\ReviewAdminController::class, 'destroy']);
+
+            // Admin Notification Management
+            Route::get('/notifications/templates', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'indexTemplates']);
+            Route::post('/notifications/templates', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'storeTemplate']);
+            Route::get('/notifications/templates/{id}', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'showTemplate']);
+            Route::put('/notifications/templates/{id}', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'updateTemplate']);
+            Route::get('/notifications/logs', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'indexLogs']);
+            Route::post('/notifications/test-dispatch', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'testDispatch']);
+
+            // Admin Dashboard Management
+            Route::prefix('dashboard')->group(function () {
+                Route::get('/kpis', [\App\Http\Controllers\Api\V1\Admin\AdminDashboardController::class, 'kpis']);
+                Route::get('/sales-chart', [\App\Http\Controllers\Api\V1\Admin\AdminDashboardController::class, 'salesChart']);
+                Route::get('/order-stats', [\App\Http\Controllers\Api\V1\Admin\AdminDashboardController::class, 'orderStats']);
+                Route::get('/top-performers', [\App\Http\Controllers\Api\V1\Admin\AdminDashboardController::class, 'topPerformers']);
+                Route::get('/highlights', [\App\Http\Controllers\Api\V1\Admin\AdminDashboardController::class, 'highlights']);
+            });
         });
     });
 });
@@ -223,6 +265,25 @@ Route::middleware('auth:sanctum')->prefix('v1/customer')->group(function () {
     Route::delete('/addresses/{id}', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'destroy']);
     Route::patch('/addresses/{id}/default-shipping', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'setDefaultShipping']);
     Route::patch('/addresses/{id}/default-billing', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'setDefaultBilling']);
+
+    // Protected Customer Order Routes
+    Route::get('/orders', [\App\Http\Controllers\Api\V1\Customer\CustomerOrderController::class, 'index']);
+    Route::get('/orders/{order_number}', [\App\Http\Controllers\Api\V1\Customer\CustomerOrderController::class, 'show']);
+    Route::get('/orders/{order_number}/tracking', [\App\Http\Controllers\Api\V1\Customer\CustomerOrderController::class, 'tracking']);
+    Route::post('/orders/{order_number}/cancel', [\App\Http\Controllers\Api\V1\Customer\CustomerOrderController::class, 'cancel']);
+
+    // Protected Customer Return Routes
+    Route::get('/returns', [\App\Http\Controllers\Api\V1\Customer\ReturnController::class, 'index']);
+    Route::post('/returns', [\App\Http\Controllers\Api\V1\Customer\ReturnController::class, 'store']);
+    Route::get('/returns/{return_number}', [\App\Http\Controllers\Api\V1\Customer\ReturnController::class, 'show']);
+
+    // Protected Customer Review Routes
+    Route::get('/reviews', [\App\Http\Controllers\Api\V1\Customer\ReviewController::class, 'index']);
+    Route::post('/reviews', [\App\Http\Controllers\Api\V1\Customer\ReviewController::class, 'store']);
+
+    // Protected Customer Notification Routes
+    Route::get('/notifications', [\App\Http\Controllers\Api\V1\Customer\CustomerNotificationController::class, 'index']);
+    Route::patch('/notifications/{id}/read', [\App\Http\Controllers\Api\V1\Customer\CustomerNotificationController::class, 'markAsRead']);
 });
 
 // Protected Customer Wishlist Routes
@@ -262,4 +323,11 @@ Route::get('v1/shipments/track/{tracking_number}', [\App\Http\Controllers\Api\V1
 // Checkout & Order Routes (supports guests via X-Session-ID / guest fields & authenticated customers)
 Route::post('v1/checkout/process', [\App\Http\Controllers\Api\V1\Customer\CheckoutController::class, 'process']);
 Route::get('v1/orders/{order_number}', [\App\Http\Controllers\Api\V1\Customer\CheckoutController::class, 'show']);
+
+// Payment & Webhook Routes
+Route::get('v1/payments/methods', [\App\Http\Controllers\Api\V1\Customer\PaymentController::class, 'methods']);
+Route::post('v1/payments/initiate', [\App\Http\Controllers\Api\V1\Customer\PaymentController::class, 'initiate']);
+Route::post('v1/payments/verify', [\App\Http\Controllers\Api\V1\Customer\PaymentController::class, 'verify']);
+Route::post('v1/webhooks/payment/{gateway}', [\App\Http\Controllers\Api\V1\WebhookController::class, 'handle']);
+
 

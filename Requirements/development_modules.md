@@ -591,6 +591,7 @@
 - Return statuses: Requested → Approved → Pickup Scheduled → Received → Quality Check → Refunded
 - Full and partial refund processing
 - Refund via original payment gateway
+- Refund via manual/other accounts (admin)
 - Stock restocking on approved return
 - Admin return review and action workflow
 
@@ -647,6 +648,11 @@
 - `notification_logs` — `id`, `user_id`, `channel`, `template_id`, `status`, `sent_at`, `failure_reason`
 
 ---
+
+> [!NOTE]
+> **Admin Panel Frontend Requirement (Modules 22+):**
+> From Module 22 onwards, for every module containing Admin APIs, build both the backend API implementation AND the corresponding React Admin UI view for that module (one module at a time).
+> Each Admin Module shall deliver full end-to-end capabilities, pairing the Laravel backend API with its dedicated React Admin UI screen, forms, data tables, and actions in the React Admin SPA.
 
 ## MODULE 22 — Admin Dashboard
 

@@ -74,4 +74,14 @@ class Order extends Model
     {
         return $this->hasMany(OrderHistory::class, 'order_id')->orderBy('created_at', 'desc');
     }
+
+    public function returns(): HasMany
+    {
+        return $this->hasMany(ReturnRequest::class, 'order_id');
+    }
+
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class, 'order_id');
+    }
 }

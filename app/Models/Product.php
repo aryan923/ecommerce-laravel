@@ -179,4 +179,14 @@ class Product extends Model
     {
         return $query->where('featured', true);
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'product_id');
+    }
+
+    public function approvedReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'product_id')->where('status', 'approved');
+    }
 }

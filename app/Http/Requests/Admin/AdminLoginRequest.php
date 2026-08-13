@@ -11,6 +11,15 @@ class AdminLoginRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (!$this->has('login') && $this->has('email')) {
+            $this->merge([
+                'login' => $this->input('email'),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [

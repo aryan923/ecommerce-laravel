@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\BaseController;
+use App\Http\Requests\Admin\BulkProductActionRequest;
+use App\Http\Requests\Admin\ImportProductsRequest;
 use App\Http\Requests\Admin\StoreProductRequest;
 use App\Http\Requests\Admin\UpdateProductRequest;
 use App\Models\Product;
@@ -171,5 +173,90 @@ class ProductController extends BaseController
         $this->productService->delete($product);
 
         return $this->successResponse(null, 'Product deleted successfully.');
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/admin/products/{id}/duplicate",
+     *     summary="Duplicate Product",
+     *     description="Clone product properties, category attachments, and variants with new unique SKU and slug.",
+     *     operationId="adminDuplicateProduct",
+     *     tags={"Admin Product Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=201, description="Product duplicated successfully")
+     * )
+     */
+    public function duplicate(Product $product): JsonResponse
+    {
+        $duplicatedProduct = $this->productService->duplicate($product);
+
+        return $this->successResponse($duplicatedProduct, 'Product duplicated successfully.', 201);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/admin/products/bulk",
+     *     summary="Bulk Product Operations",
+     *     description="Execute bulk actions (activate, deactivate, archive, delete, update_category, update_price, update_stock) across selected product IDs.",
+     *     operationId="adminBulkProductAction",
+     *     tags={"Admin Product Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"product_ids", "action"},
+     *             @OA\Property(property="product_ids", type="array", @OA\Items(type="integer", example=1)),
+     *             @OA\Property(property="action", type="string", enum={"activate","deactivate","archive","delete","update_category","update_price","update_stock"}, example="activate"),
+     *             @OA\Property(property="data", type="object", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Bulk product operation completed successfully")
+     * )
+     */
+    public function bulk(BulkProductActionRequest $request): JsonResponse
+    {
+        $count = $this->productService->bulkAction(
+            $request->input('product_ids'),
+            $request->input('action'),
+            $request->input('data', [])
+        );
+
+        return $this->successResponse(['modified_count' => $count], "Bulk operation '{$request->input('action')}' completed successfully for {$count} products.");
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/admin/products/import",
+     *     summary="Import Products via CSV/Data Payload",
+     *     description="Batch import product records with automatic SKU resolution and queue processing.",
+     *     operationId="adminImportProducts",
+     *     tags={"Admin Product Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"products"},
+     *             @OA\Property(
+     *                 property="products",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     required={"name", "price"},
+     *                     @OA\Property(property="name", type="string", example="Imported Headphones"),
+     *                     @OA\Property(property="price", type="number", example=299.99),
+     *                     @OA\Property(property="sku", type="string", example="IMP-HD-01")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Product import processed or queued successfully")
+     * )
+     */
+    public function import(ImportProductsRequest $request): JsonResponse
+    {
+        $result = $this->productService->importProducts($request->input('products'));
+
+        return $this->successResponse($result, 'Product import request processed successfully.');
     }
 }
