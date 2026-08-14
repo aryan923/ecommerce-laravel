@@ -13,16 +13,21 @@ import {
     History,
     SlidersHorizontal,
     DollarSign,
-    ShieldAlert,
-    Eye,
-    TrendingDown,
-    Clock
+    Building2,
+    UploadCloud,
+    TrendingUp,
+    Clock,
+    X
 } from 'lucide-react';
 import StockAdjustmentModal from '../components/StockAdjustmentModal';
 import InventoryHistoryModal from '../components/InventoryHistoryModal';
+import WarehouseManagementModal from '../components/WarehouseManagementModal';
+import BulkStockImportModal from '../components/BulkStockImportModal';
+import { loadCurrenciesFromApi, getCurrencyList, formatCurrency } from '../utils/currency';
 
 export default function InventoryPage() {
     const [inventory, setInventory] = useState([]);
+    const [warehouses, setWarehouses] = useState([]);
     const [kpis, setKpis] = useState({
         total_skus: 0,
         total_stock_units: 0,
@@ -30,15 +35,23 @@ export default function InventoryPage() {
         out_of_stock_count: 0,
         reserved_stock_units: 0,
         damaged_stock_units: 0,
-        total_inventory_value: 0,
+        total_inventory_cost_value: 0,
+        total_inventory_retail_value: 0,
+        potential_margin_value: 0,
+        damaged_stock_loss_value: 0,
     });
     const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
 
+    // Multi-Currency State
+    const [displayCurrency, setDisplayCurrency] = useState('INR');
+    const [currenciesList, setCurrenciesList] = useState(getCurrencyList());
+
     // Filters State
     const [search, setSearch] = useState('');
     const [stockStatus, setStockStatus] = useState('');
+    const [warehouseFilter, setWarehouseFilter] = useState('');
     const [page, setPage] = useState(1);
 
     // Modals State
@@ -46,13 +59,34 @@ export default function InventoryPage() {
     const [selectedItemForAdjust, setSelectedItemForAdjust] = useState(null);
 
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-    const [selectedSkuForHistory, setSelectedSkuForHistory] = useState('');
+    const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-    const [selectedDetailItem, setSelectedDetailItem] = useState(null);
+    useEffect(() => {
+        const initCurrencies = async () => {
+            await loadCurrenciesFromApi();
+            setCurrenciesList(getCurrencyList());
+        };
+        initCurrencies();
+        fetchWarehouses();
+    }, []);
+
+    const fetchWarehouses = async () => {
+        try {
+            const res = await axios.get('/api/v1/admin/warehouses');
+            if (res.data?.success) {
+                setWarehouses(res.data.data || []);
+            }
+        } catch (err) {
+            console.error('Failed to fetch warehouses:', err);
+        }
+    };
 
     const fetchKpis = async () => {
         try {
-            const res = await axios.get('/api/v1/admin/inventory/kpis');
+            const params = new URLSearchParams();
+            if (warehouseFilter) params.append('warehouse_id', warehouseFilter);
+            const res = await axios.get(`/api/v1/admin/inventory/kpis?${params.toString()}`);
             if (res.data?.success) {
                 setKpis(res.data.data);
             }
@@ -67,8 +101,9 @@ export default function InventoryPage() {
             const params = new URLSearchParams();
             if (search) params.append('search', search);
             if (stockStatus) params.append('stock_status', stockStatus);
+            if (warehouseFilter) params.append('warehouse_id', warehouseFilter);
             params.append('page', page);
-            params.append('per_page', 10);
+            params.append('per_page', 12);
 
             const res = await axios.get(`/api/v1/admin/inventory?${params.toString()}`);
             if (res.data?.success) {
@@ -93,7 +128,7 @@ export default function InventoryPage() {
     useEffect(() => {
         fetchKpis();
         fetchInventory();
-    }, [page, stockStatus]);
+    }, [page, stockStatus, warehouseFilter]);
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
@@ -104,6 +139,7 @@ export default function InventoryPage() {
     const handleResetFilters = () => {
         setSearch('');
         setStockStatus('');
+        setWarehouseFilter('');
         setPage(1);
     };
 
@@ -117,14 +153,11 @@ export default function InventoryPage() {
         setIsAdjustmentModalOpen(true);
     };
 
-    const handleOpenHistory = (sku = '') => {
-        setSelectedSkuForHistory(sku);
-        setIsHistoryModalOpen(true);
-    };
-
     const handleExportCsv = async () => {
         try {
-            const res = await axios.get('/api/v1/admin/inventory/export', { responseType: 'blob' });
+            const params = new URLSearchParams();
+            if (warehouseFilter) params.append('warehouse_id', warehouseFilter);
+            const res = await axios.get(`/api/v1/admin/inventory/export?${params.toString()}`, { responseType: 'blob' });
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -162,18 +195,46 @@ export default function InventoryPage() {
                 </div>
             )}
 
-            {/* Page Header */}
-            <div className="page-header-row">
+            {/* Page Header Row */}
+            <div className="page-header-row" style={{ flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
                 <div>
-                    <h2 className="page-header-title">Inventory Management</h2>
-                    <p className="page-header-subtitle">Real-time SKU stock tracking, atomic reservations, low stock alerts, and audit logs</p>
+                    <h2 className="page-header-title">Multi-Warehouse Inventory Control</h2>
+                    <p className="page-header-subtitle">Real-time multi-location stock tracking, COGS valuation, inter-warehouse transfers & audit logging</p>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <button className="btn btn-secondary" onClick={() => handleOpenHistory('')}>
+                    {/* Currency Switcher */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', borderRadius: '8px', padding: '4px 10px' }}>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted)' }}>Currency:</span>
+                        <select
+                            className="form-select"
+                            style={{ padding: '2px 24px 2px 8px', fontSize: '0.82rem', border: 'none', backgroundColor: 'transparent', fontWeight: 700 }}
+                            value={displayCurrency}
+                            onChange={(e) => setDisplayCurrency(e.target.value)}
+                        >
+                            {currenciesList.map((c) => (
+                                <option key={c.code} value={c.code}>
+                                    {c.code} ({c.symbol})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <button className="btn btn-secondary" onClick={() => setIsHistoryModalOpen(true)}>
                         <History size={16} />
                         <span>Transaction Audit Logs</span>
                     </button>
+
+                    <button className="btn btn-secondary" onClick={() => setIsImportModalOpen(true)}>
+                        <UploadCloud size={16} />
+                        <span>Bulk Import CSV</span>
+                    </button>
+
+                    <button className="btn btn-secondary" onClick={() => setIsWarehouseModalOpen(true)}>
+                        <Building2 size={16} />
+                        <span>Manage Warehouses</span>
+                    </button>
+
                     <button className="btn btn-primary" onClick={handleExportCsv}>
                         <Download size={16} />
                         <span>Export CSV</span>
@@ -181,12 +242,12 @@ export default function InventoryPage() {
                 </div>
             </div>
 
-            {/* Executive KPI Metric Cards */}
+            {/* Executive KPI Cards */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
                 gap: '12px',
-                marginBottom: '24px'
+                marginBottom: '20px'
             }}>
                 <div className="kpi-card" style={{
                     padding: '12px 14px',
@@ -199,12 +260,12 @@ export default function InventoryPage() {
                     minWidth: 0
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Total SKUs</span>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Total SKUs</span>
                         <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--admin-primary)', flexShrink: 0 }}>
                             <Boxes size={14} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--admin-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--admin-text)' }}>
                         {kpis.total_skus}
                     </div>
                 </div>
@@ -220,24 +281,24 @@ export default function InventoryPage() {
                     minWidth: 0
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Available</span>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Available Units</span>
                         <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--admin-success)', flexShrink: 0 }}>
                             <Package size={14} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--admin-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--admin-text)' }}>
                         {kpis.total_stock_units}
                     </div>
                 </div>
 
                 <div
                     className="kpi-card"
-                    onClick={() => { setStockStatus('low_stock'); setPage(1); }}
+                    onClick={() => { setStockStatus(stockStatus === 'low_stock' ? '' : 'low_stock'); setPage(1); }}
                     style={{
                         padding: '12px 14px',
                         borderRadius: '10px',
                         backgroundColor: 'var(--admin-card-bg)',
-                        border: '1px solid var(--admin-border)',
+                        border: `1.5px solid ${stockStatus === 'low_stock' ? 'var(--admin-warning)' : 'var(--admin-border)'}`,
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
@@ -246,24 +307,24 @@ export default function InventoryPage() {
                     }}
                 >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Low Stock</span>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Low Stock</span>
                         <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--admin-warning)', flexShrink: 0 }}>
                             <AlertTriangle size={14} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: kpis.low_stock_count > 0 ? 'var(--admin-warning)' : 'var(--admin-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: kpis.low_stock_count > 0 ? 'var(--admin-warning)' : 'var(--admin-text)' }}>
                         {kpis.low_stock_count}
                     </div>
                 </div>
 
                 <div
                     className="kpi-card"
-                    onClick={() => { setStockStatus('out_of_stock'); setPage(1); }}
+                    onClick={() => { setStockStatus(stockStatus === 'out_of_stock' ? '' : 'out_of_stock'); setPage(1); }}
                     style={{
                         padding: '12px 14px',
                         borderRadius: '10px',
                         backgroundColor: 'var(--admin-card-bg)',
-                        border: '1px solid var(--admin-border)',
+                        border: `1.5px solid ${stockStatus === 'out_of_stock' ? 'var(--admin-danger)' : 'var(--admin-border)'}`,
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
@@ -272,12 +333,12 @@ export default function InventoryPage() {
                     }}
                 >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Out of Stock</span>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Out of Stock</span>
                         <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--admin-danger)', flexShrink: 0 }}>
                             <XCircle size={14} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: kpis.out_of_stock_count > 0 ? 'var(--admin-danger)' : 'var(--admin-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: kpis.out_of_stock_count > 0 ? 'var(--admin-danger)' : 'var(--admin-text)' }}>
                         {kpis.out_of_stock_count}
                     </div>
                 </div>
@@ -293,13 +354,13 @@ export default function InventoryPage() {
                     minWidth: 0
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Res / Dmg</span>
-                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(148, 163, 184, 0.1)', color: 'var(--admin-muted)', flexShrink: 0 }}>
-                            <Clock size={14} />
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Cost Asset Value</span>
+                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--admin-primary)', flexShrink: 0 }}>
+                            <DollarSign size={14} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--admin-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {kpis.reserved_stock_units || kpis.reserved_stock_count || 0} / {kpis.damaged_stock_units || kpis.damaged_stock_count || 0}
+                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                        {formatCurrency(kpis.total_inventory_cost_value, displayCurrency, true)}
                     </div>
                 </div>
 
@@ -314,31 +375,57 @@ export default function InventoryPage() {
                     minWidth: 0
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Valuation</span>
-                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--admin-primary)', flexShrink: 0 }}>
-                            <DollarSign size={14} />
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Retail Valuation</span>
+                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--admin-success)', flexShrink: 0 }}>
+                            <TrendingUp size={14} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--admin-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={`$${kpis.total_inventory_value?.toLocaleString()}`}>
-                        ${kpis.total_inventory_value?.toLocaleString()}
+                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                        {formatCurrency(kpis.total_inventory_retail_value, displayCurrency, true)}
                     </div>
                 </div>
             </div>
 
             {/* Filters Toolbar */}
-            <div className="dashboard-card" style={{ marginBottom: '24px', padding: '16px 20px' }}>
+            <div className="dashboard-card" style={{ marginBottom: '20px', padding: '16px 20px' }}>
                 <form onSubmit={handleSearchSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
                     <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
                         <input
                             type="text"
                             className="form-control"
-                            placeholder="Search by SKU, Product Name..."
+                            placeholder="Search by SKU, Product, Location..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            style={{ paddingLeft: '36px' }}
+                            style={{ paddingLeft: '36px', paddingRight: search ? '32px' : '12px' }}
                         />
+                        {search && (
+                            <button
+                                type="button"
+                                onClick={() => { setSearch(''); setPage(1); fetchInventory(); }}
+                                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-muted)' }}
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
                     </div>
+
+                    <select
+                        className="form-select"
+                        style={{ width: 'auto' }}
+                        value={warehouseFilter}
+                        onChange={(e) => {
+                            setWarehouseFilter(e.target.value);
+                            setPage(1);
+                        }}
+                    >
+                        <option value="">All Warehouses</option>
+                        {warehouses.map((wh) => (
+                            <option key={wh.id} value={wh.id}>
+                                {wh.name} ({wh.code}) {wh.is_default ? '[Default]' : ''}
+                            </option>
+                        ))}
+                    </select>
 
                     <select
                         className="form-select"
@@ -360,7 +447,7 @@ export default function InventoryPage() {
                         <span>Filter</span>
                     </button>
 
-                    {(search || stockStatus) && (
+                    {(search || stockStatus || warehouseFilter) && (
                         <button type="button" className="btn btn-secondary" onClick={handleResetFilters} title="Reset filters">
                             <RotateCcw size={14} />
                         </button>
@@ -374,13 +461,13 @@ export default function InventoryPage() {
                     <table className="admin-table">
                         <thead>
                             <tr>
-                                <th>SKU</th>
-                                <th>Product Details</th>
+                                <th>SKU & Product</th>
+                                <th>Warehouse Location</th>
                                 <th>Available Stock</th>
-                                <th>Breakdown (Res/Com/Dmg/Ret)</th>
-                                <th>Alert Limit</th>
+                                <th>Cost / Retail Price</th>
+                                <th>Threshold / Reorder Qty</th>
                                 <th>Status</th>
-                                <th style={{ textAlign: 'right' }}>Actions</th>
+                                <th style={{ textAlign: 'right' }}>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -396,19 +483,39 @@ export default function InventoryPage() {
                                     const brandName = item.variant?.product?.brand?.name;
                                     const available = item.available_qty ?? 0;
                                     const threshold = item.low_stock_threshold ?? 10;
+                                    const reorder = item.reorder_qty ?? 50;
                                     const isOut = available <= 0;
                                     const isLow = available > 0 && available <= threshold;
+                                    const warehouseName = item.warehouse?.name || 'Main Warehouse';
+                                    const locationCode = item.location_code;
 
                                     return (
                                         <tr key={item.id}>
-                                            <td style={{ fontWeight: 700, color: 'var(--admin-text)' }}>
-                                                {item.sku}
+                                            <td>
+                                                <div style={{ fontWeight: 700, color: 'var(--admin-text)', fontSize: '0.9rem' }}>
+                                                    {item.sku}
+                                                </div>
+                                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--admin-text)', marginTop: '2px' }}>
+                                                    {productName}
+                                                </div>
+                                                {brandName && (
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
+                                                        Brand: {brandName}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td>
-                                                <div style={{ fontWeight: 600, color: 'var(--admin-text)' }}>{productName}</div>
-                                                {brandName && (
-                                                    <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                                                        Brand: {brandName}
+                                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--admin-text)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <Building2 size={13} style={{ color: 'var(--admin-primary)' }} />
+                                                    <span>{warehouseName}</span>
+                                                </div>
+                                                {locationCode ? (
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                                                        Loc: <strong>{locationCode}</strong>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                                                        Unassigned Location
                                                     </div>
                                                 )}
                                             </td>
@@ -416,18 +523,25 @@ export default function InventoryPage() {
                                                 <div style={{ fontSize: '1.05rem', fontWeight: 800, color: isOut ? 'var(--admin-danger)' : (isLow ? 'var(--admin-warning)' : 'var(--admin-text)') }}>
                                                     {available} units
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                                    <span title="Reserved Stock">Res: <strong>{item.reserved_qty ?? 0}</strong></span>
-                                                    <span>•</span>
-                                                    <span title="Committed/Sold Stock">Com: <strong>{item.committed_qty ?? 0}</strong></span>
-                                                    <span>•</span>
-                                                    <span title="Damaged Stock" style={{ color: item.damaged_qty > 0 ? 'var(--admin-danger)' : 'inherit' }}>Dmg: <strong>{item.damaged_qty ?? 0}</strong></span>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
+                                                    Res: {item.reserved_qty ?? 0} | Dmg: {item.damaged_qty ?? 0}
                                                 </div>
                                             </td>
-                                            <td style={{ color: 'var(--admin-muted)', fontWeight: 600 }}>
-                                                {threshold}
+                                            <td>
+                                                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--admin-text)' }}>
+                                                    Cost: {formatCurrency(item.cost_price ?? 0, displayCurrency, true)}
+                                                </div>
+                                                <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+                                                    Retail: {formatCurrency(item.variant?.price ?? 0, displayCurrency, true)}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)' }}>
+                                                    Limit: <strong>{threshold}</strong>
+                                                </div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
+                                                    Reorder: <strong>{reorder}</strong>
+                                                </div>
                                             </td>
                                             <td>
                                                 {isOut ? (
@@ -439,32 +553,15 @@ export default function InventoryPage() {
                                                 )}
                                             </td>
                                             <td style={{ textAlign: 'right' }}>
-                                                <div style={{ display: 'inline-flex', gap: '6px' }}>
-                                                    <button
-                                                        className="btn btn-primary btn-sm"
-                                                        onClick={() => handleOpenAdjustment(item)}
-                                                        title="Adjust Stock Quantity & Threshold"
-                                                    >
-                                                        <SlidersHorizontal size={14} />
-                                                        <span>Adjust</span>
-                                                    </button>
-
-                                                    <button
-                                                        className="btn btn-secondary btn-sm"
-                                                        onClick={() => handleOpenHistory(item.sku)}
-                                                        title="View History Logs"
-                                                    >
-                                                        <History size={14} />
-                                                    </button>
-
-                                                    <button
-                                                        className="btn btn-secondary btn-sm"
-                                                        onClick={() => setSelectedDetailItem(item)}
-                                                        title="View Single Item Detail"
-                                                    >
-                                                        <Eye size={14} />
-                                                    </button>
-                                                </div>
+                                                {/* Single Primary Action per Row */}
+                                                <button
+                                                    className="btn btn-primary btn-sm"
+                                                    onClick={() => handleOpenAdjustment(item)}
+                                                    title="Adjust Stock Quantity, Transfer, or Cost"
+                                                >
+                                                    <SlidersHorizontal size={14} />
+                                                    <span>Adjust Stock</span>
+                                                </button>
                                             </td>
                                         </tr>
                                     );
@@ -472,7 +569,7 @@ export default function InventoryPage() {
                             ) : (
                                 <tr>
                                     <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--admin-muted)' }}>
-                                        No inventory items found matching your filters.
+                                        No inventory items found matching your search filters.
                                     </td>
                                 </tr>
                             )}
@@ -510,6 +607,7 @@ export default function InventoryPage() {
             <StockAdjustmentModal
                 isOpen={isAdjustmentModalOpen}
                 initialItem={selectedItemForAdjust}
+                warehouses={warehouses}
                 onClose={() => setIsAdjustmentModalOpen(false)}
                 onSuccess={(msg) => {
                     showNotify(msg);
@@ -518,76 +616,36 @@ export default function InventoryPage() {
                 }}
             />
 
-            {/* Inventory History Modal */}
+            {/* Unified Transaction Audit History Modal */}
             <InventoryHistoryModal
                 isOpen={isHistoryModalOpen}
-                initialSku={selectedSkuForHistory}
+                warehouses={warehouses}
                 onClose={() => setIsHistoryModalOpen(false)}
             />
 
-            {/* Item Detail Modal */}
-            {selectedDetailItem && (
-                <div className="modal-backdrop" style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(15, 23, 42, 0.65)',
-                    backdropFilter: 'blur(4px)',
-                    zIndex: 1050,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '16px'
-                }}>
-                    <div className="modal-container" style={{
-                        backgroundColor: 'var(--admin-card-bg)',
-                        borderRadius: '12px',
-                        width: '100%',
-                        maxWidth: '520px',
-                        padding: '24px',
-                        boxShadow: 'var(--shadow-xl)',
-                        border: '1px solid var(--admin-border)'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--admin-text)' }}>SKU Detail: {selectedDetailItem.sku}</h3>
-                            <button className="btn btn-secondary btn-sm" onClick={() => setSelectedDetailItem(null)} style={{ padding: '4px' }}>
-                                <XCircle size={16} />
-                            </button>
-                        </div>
+            {/* Warehouse Management Modal */}
+            <WarehouseManagementModal
+                isOpen={isWarehouseModalOpen}
+                onClose={() => setIsWarehouseModalOpen(false)}
+                onSuccess={(msg) => {
+                    showNotify(msg);
+                    fetchWarehouses();
+                    fetchKpis();
+                    fetchInventory();
+                }}
+            />
 
-                        <div style={{ backgroundColor: 'var(--admin-bg)', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-                            <div style={{ fontWeight: 600, color: 'var(--admin-text)' }}>{selectedDetailItem.variant?.product?.name}</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--admin-muted)', marginTop: '4px' }}>
-                                Price: ${selectedDetailItem.variant?.price} | Stock Status: <strong>{selectedDetailItem.available_qty <= 0 ? 'Out of Stock' : (selectedDetailItem.available_qty <= selectedDetailItem.low_stock_threshold ? 'Low Stock' : 'In Stock')}</strong>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.85rem' }}>
-                            <div style={{ padding: '12px', borderRadius: '8px', backgroundColor: 'var(--admin-bg)' }}>
-                                <div style={{ color: 'var(--admin-muted)' }}>Available Stock</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--admin-text)', marginTop: '4px' }}>{selectedDetailItem.available_qty}</div>
-                            </div>
-                            <div style={{ padding: '12px', borderRadius: '8px', backgroundColor: 'var(--admin-bg)' }}>
-                                <div style={{ color: 'var(--admin-muted)' }}>Reserved Stock</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--admin-text)', marginTop: '4px' }}>{selectedDetailItem.reserved_qty ?? 0}</div>
-                            </div>
-                            <div style={{ padding: '12px', borderRadius: '8px', backgroundColor: 'var(--admin-bg)' }}>
-                                <div style={{ color: 'var(--admin-muted)' }}>Committed Stock</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--admin-text)', marginTop: '4px' }}>{selectedDetailItem.committed_qty ?? 0}</div>
-                            </div>
-                            <div style={{ padding: '12px', borderRadius: '8px', backgroundColor: 'var(--admin-bg)' }}>
-                                <div style={{ color: 'var(--admin-muted)' }}>Damaged Stock</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--admin-danger)', marginTop: '4px' }}>{selectedDetailItem.damaged_qty ?? 0}</div>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-                            <button className="btn btn-secondary" onClick={() => setSelectedDetailItem(null)}>
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Bulk Stock Import Modal */}
+            <BulkStockImportModal
+                isOpen={isImportModalOpen}
+                warehouses={warehouses}
+                onClose={() => setIsImportModalOpen(false)}
+                onSuccess={(msg) => {
+                    showNotify(msg);
+                    fetchKpis();
+                    fetchInventory();
+                }}
+            />
         </div>
     );
 }

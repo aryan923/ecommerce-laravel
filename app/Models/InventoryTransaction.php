@@ -16,6 +16,8 @@ class InventoryTransaction extends Model
 
     protected $fillable = [
         'inventory_id',
+        'warehouse_id',
+        'destination_warehouse_id',
         'product_variant_id',
         'sku',
         'previous_qty',
@@ -31,6 +33,8 @@ class InventoryTransaction extends Model
 
     protected $casts = [
         'inventory_id' => 'integer',
+        'warehouse_id' => 'integer',
+        'destination_warehouse_id' => 'integer',
         'product_variant_id' => 'integer',
         'previous_qty' => 'integer',
         'quantity_change' => 'integer',
@@ -46,6 +50,22 @@ class InventoryTransaction extends Model
     public function inventory(): BelongsTo
     {
         return $this->belongsTo(Inventory::class, 'inventory_id');
+    }
+
+    /**
+     * Relationship to Warehouse.
+     */
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'warehouse_id');
+    }
+
+    /**
+     * Relationship to Destination Warehouse for transfers.
+     */
+    public function destinationWarehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'destination_warehouse_id');
     }
 
     /**

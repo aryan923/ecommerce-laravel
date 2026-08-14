@@ -23,8 +23,14 @@ class AdjustStockRequest extends FormRequest
     {
         return [
             'product_variant_id' => ['required', 'integer', 'exists:product_variants,id'],
-            'type' => ['required', 'string', 'in:add,deduct,set'],
+            'warehouse_id' => ['nullable', 'integer', 'exists:warehouses,id'],
+            'type' => ['required', 'string', 'in:add,deduct,set,damage'],
             'quantity' => ['required', 'integer', 'min:0'],
+            'cost_price' => ['nullable', 'numeric', 'min:0'],
+            'low_stock_threshold' => ['nullable', 'integer', 'min:0'],
+            'reorder_qty' => ['nullable', 'integer', 'min:0'],
+            'allow_backorder' => ['nullable', 'boolean'],
+            'location_code' => ['nullable', 'string', 'max:100'],
             'reason' => ['required', 'string', 'max:100'],
             'remarks' => ['nullable', 'string', 'max:500'],
         ];

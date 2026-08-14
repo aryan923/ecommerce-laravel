@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { X, History, Search, ArrowUpRight, ArrowDownRight, RefreshCw, Calendar, User } from 'lucide-react';
+import { X, History, Search, ArrowUpRight, ArrowDownRight, RefreshCw, Calendar, User, Building2, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 
 export default function InventoryHistoryModal({
     isOpen,
-    initialSku = '',
+    warehouses = [],
     onClose
 }) {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState(initialSku || '');
+    const [search, setSearch] = useState('');
+    const [warehouseId, setWarehouseId] = useState('');
     const [transactionType, setTransactionType] = useState('');
     const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
     const [page, setPage] = useState(1);
@@ -19,9 +20,10 @@ export default function InventoryHistoryModal({
         try {
             const params = new URLSearchParams();
             if (search) params.append('search', search);
+            if (warehouseId) params.append('warehouse_id', warehouseId);
             if (transactionType) params.append('transaction_type', transactionType);
             params.append('page', page);
-            params.append('per_page', 10);
+            params.append('per_page', 12);
 
             const res = await axios.get(`/api/v1/admin/inventory/transactions?${params.toString()}`);
             if (res.data?.success) {
@@ -36,7 +38,7 @@ export default function InventoryHistoryModal({
                 });
             }
         } catch (err) {
-            console.error('Failed to fetch inventory transactions:', err);
+            console.error('Failed to fetch inventory transaction audit logs:', err);
         } finally {
             setLoading(false);
         }
@@ -44,11 +46,10 @@ export default function InventoryHistoryModal({
 
     useEffect(() => {
         if (isOpen) {
-            setSearch(initialSku || '');
             setPage(1);
             fetchHistory();
         }
-    }, [isOpen, initialSku, page, transactionType]);
+    }, [isOpen, page, warehouseId, transactionType]);
 
     if (!isOpen) return null;
 
@@ -56,6 +57,13 @@ export default function InventoryHistoryModal({
         e.preventDefault();
         setPage(1);
         fetchHistory();
+    };
+
+    const handleResetFilters = () => {
+        setSearch('');
+        setWarehouseId('');
+        setTransactionType('');
+        setPage(1);
     };
 
     const formatTransactionTypeLabel = (typeStr) => {
@@ -79,8 +87,8 @@ export default function InventoryHistoryModal({
                 backgroundColor: 'var(--admin-card-bg)',
                 borderRadius: '12px',
                 width: '100%',
-                maxWidth: '900px',
-                maxHeight: '90vh',
+                maxWidth: '960px',
+                maxHeight: '92vh',
                 display: 'flex',
                 flexDirection: 'column',
                 boxShadow: 'var(--shadow-xl)',
@@ -90,7 +98,7 @@ export default function InventoryHistoryModal({
             }}>
                 {/* Modal Header */}
                 <div style={{
-                    padding: '20px 24px',
+                    padding: '18px 24px',
                     borderBottom: '1px solid var(--admin-border)',
                     display: 'flex',
                     alignItems: 'center',
@@ -110,8 +118,8 @@ export default function InventoryHistoryModal({
                             <History size={20} />
                         </div>
                         <div>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--admin-text)' }}>Inventory Transaction Audit Log</h3>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--admin-muted)' }}>Historical record of manual adjustments, purchases, & order reservations</span>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--admin-text)' }}>Unified Transaction Audit Log</h3>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--admin-muted)' }}>Complete audit trail of stock adjustments, warehouse transfers, reservations & restocks</span>
                         </div>
                     </div>
                     <button
@@ -127,17 +135,32 @@ export default function InventoryHistoryModal({
                 {/* Filter Toolbar */}
                 <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)' }}>
                     <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+                        <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
                             <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Filter by SKU or Product..."
+                                placeholder="Search by SKU or Product Name..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 style={{ paddingLeft: '36px' }}
                             />
                         </div>
+
+                        <select
+                            className="form-select"
+                            style={{ width: 'auto' }}
+                            value={warehouseId}
+                            onChange={(e) => {
+                                setWarehouseId(e.target.value);
+                                setPage(1);
+                            }}
+                        >
+                            <option value="">All Warehouses</option>
+                            {warehouses.map((wh) => (
+                                <option key={wh.id} value={wh.id}>{wh.name} ({wh.code})</option>
+                            ))}
+                        </select>
 
                         <select
                             className="form-select"
@@ -152,14 +175,21 @@ export default function InventoryHistoryModal({
                             <option value="manual_addition">Manual Addition</option>
                             <option value="manual_deduction">Manual Deduction</option>
                             <option value="adjustment">Set Adjustment</option>
-                            <option value="purchase">Purchase</option>
                             <option value="order_reservation">Order Reservation</option>
-                            <option value="return">Return</option>
+                            <option value="order_shipment">Order Shipment</option>
+                            <option value="damage">Damage Write-Off</option>
+                            <option value="return">Customer Return</option>
                         </select>
 
                         <button type="submit" className="btn btn-primary btn-sm">
-                            <span>Search</span>
+                            <span>Filter Logs</span>
                         </button>
+
+                        {(search || warehouseId || transactionType) && (
+                            <button type="button" className="btn btn-secondary btn-sm" onClick={handleResetFilters}>
+                                Reset
+                            </button>
+                        )}
                     </form>
                 </div>
 
@@ -171,18 +201,19 @@ export default function InventoryHistoryModal({
                                 <tr>
                                     <th>Timestamp</th>
                                     <th>SKU & Product</th>
+                                    <th>Location / Warehouse</th>
                                     <th>Type</th>
                                     <th>Prev Qty</th>
                                     <th>Change</th>
                                     <th>New Qty</th>
-                                    <th>Author / Remarks</th>
+                                    <th>Author & Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--admin-muted)' }}>
-                                            Loading audit logs...
+                                        <td colSpan="8" style={{ textAlign: 'center', padding: '32px', color: 'var(--admin-muted)' }}>
+                                            Loading audit transaction logs...
                                         </td>
                                     </tr>
                                 ) : transactions.length > 0 ? (
@@ -190,21 +221,39 @@ export default function InventoryHistoryModal({
                                         const isPositive = tx.quantity_change > 0;
                                         const isNegative = tx.quantity_change < 0;
                                         const authorName = tx.admin?.name || 'System Admin';
+                                        const warehouseName = tx.warehouse?.name || 'Main Warehouse';
+                                        const destName = tx.destination_warehouse?.name;
 
                                         return (
                                             <tr key={tx.id}>
-                                                <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', color: 'var(--admin-muted)' }}>
+                                                <td style={{ fontSize: '0.78rem', whiteSpace: 'nowrap', color: 'var(--admin-muted)' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                        <Calendar size={14} />
+                                                        <Calendar size={13} />
                                                         <span>{new Date(tx.created_at).toLocaleString()}</span>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--admin-text)' }}>{tx.variant?.product?.name || 'SKU Item'}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>SKU: <strong>{tx.sku}</strong></div>
+                                                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--admin-text)' }}>
+                                                        {tx.variant?.product?.name || 'SKU Product'}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
+                                                        SKU: <strong>{tx.sku}</strong>
+                                                    </div>
                                                 </td>
                                                 <td>
-                                                    <span className="badge badge-shipped" style={{ fontSize: '0.75rem' }}>
+                                                    <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-text)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <Building2 size={13} style={{ color: 'var(--admin-primary)' }} />
+                                                        <span>{warehouseName}</span>
+                                                        {destName && (
+                                                            <>
+                                                                <ArrowRight size={12} style={{ color: 'var(--admin-muted)' }} />
+                                                                <span>{destName}</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span className="badge badge-shipped" style={{ fontSize: '0.72rem' }}>
                                                         {formatTransactionTypeLabel(tx.transaction_type)}
                                                     </span>
                                                 </td>
@@ -222,13 +271,13 @@ export default function InventoryHistoryModal({
                                                     </div>
                                                 </td>
                                                 <td style={{ fontWeight: 700, color: 'var(--admin-text)' }}>{tx.new_qty}</td>
-                                                <td style={{ fontSize: '0.8rem' }}>
+                                                <td style={{ fontSize: '0.78rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, color: 'var(--admin-text)' }}>
                                                         <User size={12} />
                                                         <span>{authorName}</span>
                                                     </div>
                                                     {tx.remarks && (
-                                                        <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                                                        <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
                                                             {tx.remarks}
                                                         </div>
                                                     )}
@@ -238,8 +287,8 @@ export default function InventoryHistoryModal({
                                     })
                                 ) : (
                                     <tr>
-                                        <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--admin-muted)' }}>
-                                            No transaction records found matching your filters.
+                                        <td colSpan="8" style={{ textAlign: 'center', padding: '32px', color: 'var(--admin-muted)' }}>
+                                            No audit transaction records found matching your filters.
                                         </td>
                                     </tr>
                                 )}
@@ -254,11 +303,11 @@ export default function InventoryHistoryModal({
                         padding: '16px 24px',
                         borderTop: '1px solid var(--admin-border)',
                         display: 'flex',
-                        justify: 'space-between',
+                        justifyContent: 'space-between',
                         alignItems: 'center'
                     }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--admin-muted)' }}>
-                            Page {pagination.current_page} of {pagination.last_page} ({pagination.total} total logs)
+                        <span style={{ fontSize: '0.82rem', color: 'var(--admin-muted)' }}>
+                            Page {pagination.current_page} of {pagination.last_page} ({pagination.total} total audit logs)
                         </span>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button
