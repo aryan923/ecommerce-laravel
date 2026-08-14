@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { X, UploadCloud, FileText, Download, AlertTriangle, CheckCircle } from 'lucide-react';
+import {
+    X,
+    UploadCloud,
+    FileText,
+    Download,
+    AlertTriangle,
+    CheckCircle2,
+    Check,
+    Building2,
+    Boxes,
+    FileSpreadsheet
+} from 'lucide-react';
 import axios from 'axios';
 
 export default function BulkStockImportModal({
@@ -74,108 +85,102 @@ export default function BulkStockImportModal({
     };
 
     return (
-        <div className="modal-backdrop" style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 1050,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px'
-        }}>
-            <div className="modal-container" style={{
-                backgroundColor: 'var(--admin-card-bg)',
-                borderRadius: '12px',
-                width: '100%',
-                maxWidth: '540px',
-                boxShadow: 'var(--shadow-xl)',
-                border: '1px solid var(--admin-border)',
-                overflow: 'hidden',
-                animation: 'modalSlideIn 0.2s ease-out'
-            }}>
+        <div className="modal-overlay">
+            <div
+                className="modal-card"
+                style={{
+                    maxWidth: '580px',
+                    width: '96%',
+                    maxHeight: '90vh',
+                }}
+            >
                 {/* Header */}
-                <div style={{
-                    padding: '20px 24px',
-                    borderBottom: '1px solid var(--admin-border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '8px',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            color: 'var(--admin-primary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
+                <div className="modal-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div
+                            style={{
+                                width: '38px',
+                                height: '38px',
+                                borderRadius: '10px',
+                                backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                                color: 'var(--admin-primary)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
                             <UploadCloud size={20} />
                         </div>
                         <div>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--admin-text)' }}>Bulk Stock Audit Import</h3>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--admin-muted)' }}>Upload CSV file for physical inventory stock-taking audits</span>
+                            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                                Bulk Stock CSV Import
+                            </h3>
+                            <p style={{ margin: '2px 0 0 0', fontSize: '0.76rem', color: 'var(--admin-muted)' }}>
+                                Ingest physical stock-taking counts, batch restocks, and warehouse reconciliations
+                            </p>
                         </div>
                     </div>
+
                     <button
                         type="button"
                         className="btn btn-secondary btn-sm"
                         onClick={onClose}
-                        style={{ padding: '6px' }}
+                        style={{ borderRadius: '8px', width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                         <X size={16} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+                {/* Form Body */}
+                <div className="modal-body">
                     {error && (
-                        <div style={{
-                            padding: '12px 16px',
-                            borderRadius: '8px',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.2)',
-                            color: 'var(--admin-danger)',
-                            fontSize: '0.85rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            marginBottom: '16px'
-                        }}>
+                        <div
+                            style={{
+                                padding: '10px 14px',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                color: '#ef4444',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                borderRadius: '8px',
+                                fontSize: '0.82rem',
+                                marginBottom: '14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontWeight: 600
+                            }}
+                        >
                             <AlertTriangle size={16} />
                             <span>{error}</span>
                         </div>
                     )}
 
                     {result && (
-                        <div style={{ marginBottom: '16px' }}>
+                        <div style={{ marginBottom: '14px' }}>
                             <div style={{
-                                padding: '12px 16px',
+                                padding: '10px 14px',
                                 borderRadius: '8px',
                                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                border: '1px solid rgba(16, 185, 129, 0.2)',
-                                color: 'var(--admin-success)',
-                                fontSize: '0.85rem',
+                                border: '1px solid rgba(16, 185, 129, 0.3)',
+                                color: '#10b981',
+                                fontSize: '0.82rem',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',
+                                fontWeight: 600,
                                 marginBottom: result.skipped_count > 0 || (result.warnings && result.warnings.length > 0) ? '8px' : '0'
                             }}>
-                                <CheckCircle size={16} />
+                                <CheckCircle2 size={16} />
                                 <span>Processed <strong>{result.rows_processed}</strong> rows. Updated <strong>{result.skus_updated}</strong> SKUs in <strong>{result.warehouse}</strong>.</span>
                             </div>
 
                             {result.skipped_count > 0 && (
                                 <div style={{
-                                    padding: '10px 14px',
+                                    padding: '8px 12px',
                                     borderRadius: '8px',
                                     backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                                    border: '1px solid rgba(245, 158, 11, 0.2)',
-                                    color: 'var(--admin-warning)',
-                                    fontSize: '0.8rem'
+                                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                                    color: '#f59e0b',
+                                    fontSize: '0.76rem'
                                 }}>
                                     <strong>{result.skipped_count} SKU(s) Skipped:</strong> {result.skipped_skus?.join(', ')}
                                 </div>
@@ -184,16 +189,16 @@ export default function BulkStockImportModal({
                             {result.warnings && result.warnings.length > 0 && (
                                 <div style={{
                                     marginTop: '8px',
-                                    padding: '10px 14px',
+                                    padding: '8px 12px',
                                     borderRadius: '8px',
-                                    backgroundColor: 'rgba(99, 102, 241, 0.08)',
-                                    border: '1px solid rgba(99, 102, 241, 0.2)',
+                                    backgroundColor: 'var(--admin-card-hover)',
+                                    border: '1px solid var(--admin-border)',
                                     color: 'var(--admin-text)',
-                                    fontSize: '0.78rem',
-                                    maxHeight: '120px',
+                                    fontSize: '0.75rem',
+                                    maxHeight: '100px',
                                     overflowY: 'auto'
                                 }}>
-                                    <div style={{ fontWeight: 700, marginBottom: '4px' }}>Import Notes & Warnings:</div>
+                                    <div style={{ fontWeight: 700, marginBottom: '2px' }}>Import Notes & Warnings:</div>
                                     <ul style={{ margin: 0, paddingLeft: '16px' }}>
                                         {result.warnings.map((w, idx) => (
                                             <li key={idx}>{w}</li>
@@ -204,67 +209,97 @@ export default function BulkStockImportModal({
                         </div>
                     )}
 
-                    <div style={{ marginBottom: '16px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                            Target Warehouse Location
-                        </label>
-                        <select
-                            className="form-select"
-                            value={warehouseId}
-                            onChange={(e) => setWarehouseId(e.target.value)}
-                        >
-                            <option value="">Default Primary Warehouse</option>
-                            {warehouses.map((wh) => (
-                                <option key={wh.id} value={wh.id}>
-                                    {wh.name} ({wh.code})
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <form id="bulkStockForm" onSubmit={handleSubmit}>
+                        <div className="form-section-box">
+                            <div className="form-section-header">
+                                <h4 className="form-section-title">
+                                    <Building2 size={15} style={{ color: 'var(--admin-primary)' }} />
+                                    <span>Destination Warehouse Location</span>
+                                </h4>
+                            </div>
 
-                    <div style={{
-                        border: '2px dashed var(--admin-border)',
-                        borderRadius: '10px',
-                        padding: '24px',
-                        textAlign: 'center',
-                        backgroundColor: 'var(--admin-bg)',
-                        marginBottom: '16px'
-                    }}>
-                        <FileText size={32} style={{ color: 'var(--admin-muted)', marginBottom: '8px' }} />
-                        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--admin-text)', marginBottom: '4px' }}>
-                            {file ? file.name : 'Select or Drop Stock Audit CSV'}
+                            <div className="form-section-body">
+                                <select
+                                    className="form-select"
+                                    value={warehouseId}
+                                    onChange={(e) => setWarehouseId(e.target.value)}
+                                    style={{ fontWeight: 600 }}
+                                >
+                                    <option value="">Default Primary Warehouse</option>
+                                    {warehouses.map((wh) => (
+                                        <option key={wh.id} value={wh.id}>
+                                            {wh.name} ({wh.code}) {wh.is_default ? '★ [Default]' : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginBottom: '14px' }}>
-                            Columns: SKU, Action (add / deduct / set / damage), Quantity, Unit Cost, Low Limit, Reorder Qty, Location Code
-                        </div>
-                        <input
-                            type="file"
-                            accept=".csv,text/csv"
-                            id="csv-file-input"
-                            onChange={handleFileChange}
-                            style={{ display: 'none' }}
-                        />
-                        <label htmlFor="csv-file-input" className="btn btn-secondary btn-sm" style={{ cursor: 'pointer', display: 'inline-flex' }}>
-                            Choose CSV File
-                        </label>
-                    </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--admin-border)' }}>
-                        <button type="button" className="btn btn-secondary btn-sm" onClick={handleDownloadTemplate}>
-                            <Download size={14} />
-                            <span>Download Template CSV</span>
+                        {/* File Upload Drop Zone */}
+                        <div style={{
+                            border: file ? '2px solid var(--admin-primary)' : '2px dashed var(--admin-border)',
+                            borderRadius: '12px',
+                            padding: '24px 16px',
+                            textAlign: 'center',
+                            backgroundColor: file ? 'rgba(99, 102, 241, 0.04)' : 'var(--admin-card-hover)',
+                            marginBottom: '14px',
+                            transition: 'all 0.15s ease'
+                        }}>
+                            <FileSpreadsheet size={36} style={{ color: file ? 'var(--admin-primary)' : 'var(--admin-muted)', marginBottom: '8px' }} />
+                            <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--admin-text)', marginBottom: '2px' }}>
+                                {file ? file.name : 'Select or Drop Stock Audit CSV File'}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', marginBottom: '14px' }}>
+                                Format: SKU, Action (add / deduct / set / damage), Quantity, Unit Cost, Low Limit, Reorder Qty, Location Code
+                            </div>
+
+                            <input
+                                type="file"
+                                accept=".csv,text/csv"
+                                id="csv-file-input"
+                                onChange={handleFileChange}
+                                style={{ display: 'none' }}
+                            />
+                            <label
+                                htmlFor="csv-file-input"
+                                className="btn btn-secondary btn-sm"
+                                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
+                            >
+                                <UploadCloud size={14} />
+                                <span>{file ? 'Change File' : 'Browse Local CSV'}</span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Footer */}
+                <div className="modal-footer" style={{ justifyContent: 'space-between' }}>
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={handleDownloadTemplate}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem' }}
+                    >
+                        <Download size={13} />
+                        <span>Download Sample CSV Template</span>
+                    </button>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button type="button" className="btn btn-secondary btn-sm" onClick={onClose} disabled={uploading}>
+                            Cancel
                         </button>
-
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={uploading}>
-                                Cancel
-                            </button>
-                            <button type="submit" className="btn btn-primary" disabled={uploading || !file}>
-                                {uploading ? 'Processing CSV...' : 'Upload & Audit Stock'}
-                            </button>
-                        </div>
+                        <button
+                            type="submit"
+                            form="bulkStockForm"
+                            className="btn btn-primary btn-sm"
+                            disabled={uploading || !file}
+                            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, padding: '7px 16px' }}
+                        >
+                            <Check size={15} />
+                            <span>{uploading ? 'Processing CSV...' : 'Ingest & Audit Stock'}</span>
+                        </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     );

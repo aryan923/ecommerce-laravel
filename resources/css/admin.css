@@ -1720,6 +1720,158 @@ body.admin-body {
   }
 }
 
+/* ==========================================================================
+   Modal Dialog Design System
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: modalFadeIn 0.15s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-card {
+  background-color: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--admin-border);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--admin-card-bg);
+  flex-shrink: 0;
+}
+
+.modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  background-color: var(--admin-card-bg);
+  flex-shrink: 0;
+}
+
+/* Modal Tabs Navigation */
+.modal-tabs-nav {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--admin-border);
+  padding: 8px 16px;
+  background-color: var(--admin-bg);
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+
+.modal-tabs-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--admin-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.modal-tab-pill:hover {
+  background-color: var(--admin-card-hover);
+  color: var(--admin-text);
+}
+
+.modal-tab-pill.active {
+  background-color: var(--admin-primary);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.modal-tab-pill.active .badge-count {
+  background-color: #ffffff;
+  color: var(--admin-primary);
+}
+
+/* Modal Form Card Sections */
+.form-section-box {
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background-color: var(--admin-card-bg);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.form-section-box:last-child {
+  margin-bottom: 0;
+}
+
+.form-section-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--admin-card-hover);
+}
+
+.form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--admin-text);
+  margin: 0;
+}
+
+.form-section-body {
+  padding: 14px;
+}
+
+
 
 
 

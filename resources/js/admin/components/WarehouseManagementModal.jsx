@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { X, Building2, Plus, Edit2, Check, Trash2, Shield, AlertTriangle } from 'lucide-react';
+import {
+    X,
+    Building2,
+    Plus,
+    Edit2,
+    Check,
+    Trash2,
+    Shield,
+    AlertTriangle,
+    MapPin,
+    Phone,
+    Mail,
+    Boxes,
+    Star,
+    ArrowLeft
+} from 'lucide-react';
 import axios from 'axios';
 
 export default function WarehouseManagementModal({
@@ -158,81 +173,83 @@ export default function WarehouseManagementModal({
     };
 
     return (
-        <div className="modal-backdrop" style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 1050,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px'
-        }}>
-            <div className="modal-container" style={{
-                backgroundColor: 'var(--admin-card-bg)',
-                borderRadius: '12px',
-                width: '100%',
-                maxWidth: '780px',
-                maxHeight: '90vh',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: 'var(--shadow-xl)',
-                border: '1px solid var(--admin-border)',
-                overflow: 'hidden',
-                animation: 'modalSlideIn 0.2s ease-out'
-            }}>
+        <div className="modal-overlay">
+            <div
+                className="modal-card"
+                style={{
+                    maxWidth: '840px',
+                    width: '96%',
+                    maxHeight: '90vh',
+                }}
+            >
                 {/* Header */}
-                <div style={{
-                    padding: '18px 24px',
-                    borderBottom: '1px solid var(--admin-border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '8px',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            color: 'var(--admin-primary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
+                <div className="modal-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div
+                            style={{
+                                width: '38px',
+                                height: '38px',
+                                borderRadius: '10px',
+                                backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                                color: 'var(--admin-primary)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
                             <Building2 size={20} />
                         </div>
                         <div>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--admin-text)' }}>Warehouse Locations Management</h3>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--admin-muted)' }}>Configure fulfillment hubs, physical warehouses, and storefront locations</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                                    Warehouse Locations & Fulfillment Hubs
+                                </h3>
+                                <span style={{
+                                    fontSize: '0.7rem',
+                                    fontWeight: 800,
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                                    color: 'var(--admin-primary)',
+                                    border: '1px solid rgba(99, 102, 241, 0.25)'
+                                }}>
+                                    {warehouses.length} Active Hubs
+                                </span>
+                            </div>
+                            <p style={{ margin: '2px 0 0 0', fontSize: '0.76rem', color: 'var(--admin-muted)' }}>
+                                Configure multi-location inventory hubs, storefront stock points, and shipping origin addresses
+                            </p>
                         </div>
                     </div>
+
                     <button
                         type="button"
                         className="btn btn-secondary btn-sm"
                         onClick={onClose}
-                        style={{ padding: '6px' }}
+                        style={{ borderRadius: '8px', width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                         <X size={16} />
                     </button>
                 </div>
 
                 {/* Body Content */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+                <div className="modal-body">
                     {error && (
-                        <div style={{
-                            padding: '12px 16px',
-                            borderRadius: '8px',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.2)',
-                            color: 'var(--admin-danger)',
-                            fontSize: '0.85rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            marginBottom: '20px'
-                        }}>
+                        <div
+                            style={{
+                                padding: '10px 14px',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                color: '#ef4444',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                borderRadius: '8px',
+                                fontSize: '0.82rem',
+                                marginBottom: '14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontWeight: 600
+                            }}
+                        >
                             <AlertTriangle size={16} />
                             <span>{error}</span>
                         </div>
@@ -240,13 +257,13 @@ export default function WarehouseManagementModal({
 
                     {!isFormOpen ? (
                         <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--admin-text)' }}>
-                                    Active Warehouses ({warehouses.length})
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                                    Registered Warehouse Locations ({warehouses.length})
                                 </span>
-                                <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
-                                    <Plus size={16} />
-                                    <span>Add New Warehouse</span>
+                                <button className="btn btn-primary btn-sm" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}>
+                                    <Plus size={14} />
+                                    <span>Add New Hub</span>
                                 </button>
                             </div>
 
@@ -255,70 +272,89 @@ export default function WarehouseManagementModal({
                                     Loading warehouse locations...
                                 </div>
                             ) : warehouses.length > 0 ? (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '14px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '10px' }}>
                                     {warehouses.map((wh) => (
-                                        <div key={wh.id} style={{
-                                            padding: '16px',
-                                            borderRadius: '10px',
-                                            backgroundColor: 'var(--admin-bg)',
-                                            border: `1.5px solid ${wh.is_default ? 'var(--admin-primary)' : 'var(--admin-border)'}`,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'space-between',
-                                            gap: '12px'
-                                        }}>
+                                        <div
+                                            key={wh.id}
+                                            style={{
+                                                padding: '14px 16px',
+                                                borderRadius: '12px',
+                                                backgroundColor: 'var(--admin-card-bg)',
+                                                border: `1.5px solid ${wh.is_default ? 'var(--admin-primary)' : 'var(--admin-border)'}`,
+                                                boxShadow: 'var(--shadow-sm)',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'space-between',
+                                                gap: '10px'
+                                            }}
+                                        >
                                             <div>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                                                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--admin-text)' }}>
-                                                        {wh.name}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <span style={{ fontWeight: 800, fontSize: '0.94rem', color: 'var(--admin-text)' }}>
+                                                            {wh.name}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.72rem', fontFamily: 'monospace', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', backgroundColor: 'var(--admin-card-hover)', border: '1px solid var(--admin-border)', color: 'var(--admin-muted)' }}>
+                                                            {wh.code}
+                                                        </span>
                                                     </div>
-                                                    <div style={{ display: 'flex', gap: '6px' }}>
+
+                                                    <div style={{ display: 'flex', gap: '4px' }}>
                                                         {wh.is_default && (
-                                                            <span className="badge badge-completed" style={{ fontSize: '0.7rem' }}>Default Primary</span>
+                                                            <span style={{ fontSize: '0.68rem', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', backgroundColor: 'rgba(99, 102, 241, 0.15)', color: 'var(--admin-primary)', border: '1px solid rgba(99, 102, 241, 0.25)', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                                <Star size={10} fill="currentColor" />
+                                                                <span>Default Hub</span>
+                                                            </span>
                                                         )}
-                                                        <span className={`badge ${wh.is_active ? 'badge-completed' : 'badge-cancelled'}`} style={{ fontSize: '0.7rem' }}>
+                                                        <span style={{ fontSize: '0.68rem', fontWeight: 800, padding: '2px 6px', borderRadius: '4px', backgroundColor: wh.is_active ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)', color: wh.is_active ? '#10b981' : '#ef4444', border: `1px solid ${wh.is_active ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'}` }}>
                                                             {wh.is_active ? 'Active' : 'Inactive'}
                                                         </span>
                                                     </div>
                                                 </div>
 
-                                                <div style={{ fontSize: '0.8rem', color: 'var(--admin-muted)', marginBottom: '4px' }}>
-                                                    Code: <strong>{wh.code}</strong> | SKUs Stored: <strong>{wh.inventories_count ?? 0}</strong>
+                                                <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <Boxes size={12} />
+                                                    <span>Unique SKUs Stocked: <strong style={{ color: 'var(--admin-text)' }}>{wh.inventories_count ?? 0}</strong></span>
                                                 </div>
 
                                                 {wh.city && (
-                                                    <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                                                        Location: {wh.city}, {wh.state || wh.country}
+                                                    <div style={{ fontSize: '0.76rem', color: 'var(--admin-muted)', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+                                                        <MapPin size={12} />
+                                                        <span>{wh.address ? `${wh.address}, ` : ''}{wh.city}, {wh.state || wh.country} {wh.postal_code || ''}</span>
                                                     </div>
                                                 )}
+
                                                 {wh.contact_phone && (
-                                                    <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                                                        Contact: {wh.contact_name ? `${wh.contact_name} (${wh.contact_phone})` : wh.contact_phone}
+                                                    <div style={{ fontSize: '0.76rem', color: 'var(--admin-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <Phone size={12} />
+                                                        <span>{wh.contact_name ? `${wh.contact_name} • ` : ''}{wh.contact_phone}</span>
                                                     </div>
                                                 )}
                                             </div>
 
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--admin-border)' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px solid var(--admin-border)' }}>
                                                 <div>
                                                     {!wh.is_default && (
                                                         <button
+                                                            type="button"
                                                             className="btn btn-secondary btn-sm"
                                                             onClick={() => handleSetDefault(wh.id)}
-                                                            style={{ fontSize: '0.75rem', padding: '4px 8px' }}
+                                                            style={{ fontSize: '0.72rem', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
                                                         >
-                                                            Set as Default
+                                                            <Star size={11} />
+                                                            <span>Set Default</span>
                                                         </button>
                                                     )}
                                                 </div>
 
                                                 <div style={{ display: 'flex', gap: '6px' }}>
-                                                    <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit(wh)} style={{ padding: '4px 8px' }}>
-                                                        <Edit2 size={14} />
+                                                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit(wh)} style={{ padding: '3px 8px', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <Edit2 size={12} />
                                                         <span>Edit</span>
                                                     </button>
                                                     {!wh.is_default && (
-                                                        <button className="btn btn-secondary btn-sm" onClick={() => handleDelete(wh)} style={{ padding: '4px 8px', color: 'var(--admin-danger)' }}>
-                                                            <Trash2 size={14} />
+                                                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleDelete(wh)} style={{ padding: '3px 8px', color: '#ef4444' }} title="Delete Warehouse">
+                                                            <Trash2 size={12} />
                                                         </button>
                                                     )}
                                                 </div>
@@ -328,155 +364,199 @@ export default function WarehouseManagementModal({
                                 </div>
                             ) : (
                                 <div style={{ textAlign: 'center', padding: '32px', color: 'var(--admin-muted)' }}>
-                                    No warehouse locations found. Click "Add New Warehouse" to create one.
+                                    No warehouse locations configured yet. Click "Add New Hub" to create one.
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                <h4 style={{ margin: 0, color: 'var(--admin-text)' }}>
-                                    {editingWarehouse ? `Edit Warehouse: ${editingWarehouse.name}` : 'Create New Warehouse'}
+                        <form id="warehouseForm" onSubmit={handleSubmit}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                                    {editingWarehouse ? `Edit Hub: ${editingWarehouse.name}` : 'Register New Fulfillment Warehouse'}
                                 </h4>
-                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsFormOpen(false)}>
-                                    Back to List
+                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsFormOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <ArrowLeft size={13} />
+                                    <span>Back to List</span>
                                 </button>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '14px' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)', marginBottom: '4px' }}>
-                                        Warehouse Name <span style={{ color: 'var(--admin-danger)' }}>*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="e.g. Regional Fulfillment Center"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        required
-                                    />
+                            <div className="form-section-box">
+                                <div className="form-section-header">
+                                    <h4 className="form-section-title">
+                                        <Building2 size={15} style={{ color: 'var(--admin-primary)' }} />
+                                        <span>Hub Name & Unique Identifier</span>
+                                    </h4>
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)', marginBottom: '4px' }}>
-                                        Warehouse Code <span style={{ color: 'var(--admin-danger)' }}>*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="e.g. WH-EAST-01"
-                                        value={formData.code}
-                                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                                        required
-                                    />
-                                </div>
-                            </div>
+                                <div className="form-section-body">
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                Warehouse Name *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="e.g. Central Warehouse Mumbai"
+                                                value={formData.name}
+                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                required
+                                                style={{ fontWeight: 700 }}
+                                            />
+                                        </div>
 
-                            <div style={{ marginBottom: '14px' }}>
-                                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)', marginBottom: '4px' }}>
-                                    Street Address
-                                </label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="Plot # / Building / Street details..."
-                                    value={formData.address}
-                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                />
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px', marginBottom: '14px' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)', marginBottom: '4px' }}>City</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={formData.city}
-                                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)', marginBottom: '4px' }}>State</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={formData.state}
-                                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)', marginBottom: '4px' }}>Postal Code</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={formData.postal_code}
-                                        onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
-                                    />
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                Warehouse Code *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="e.g. WH-BOM-01"
+                                                value={formData.code}
+                                                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                                                required
+                                                style={{ fontFamily: 'monospace', fontWeight: 700 }}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px', marginBottom: '16px' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)', marginBottom: '4px' }}>Contact Person</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={formData.contact_name}
-                                        onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
-                                    />
+                            <div className="form-section-box">
+                                <div className="form-section-header">
+                                    <h4 className="form-section-title">
+                                        <MapPin size={15} style={{ color: '#0ea5e9' }} />
+                                        <span>Physical Address & Origin Coordinates</span>
+                                    </h4>
                                 </div>
 
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)', marginBottom: '4px' }}>Contact Phone</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={formData.contact_phone}
-                                        onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
-                                    />
+                                <div className="form-section-body">
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+                                        <div style={{ gridColumn: '1 / -1' }}>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                Street Address
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Plot # / Building / Industrial Area..."
+                                                value={formData.address}
+                                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>City</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Mumbai"
+                                                value={formData.city}
+                                                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>State</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Maharashtra"
+                                                value={formData.state}
+                                                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>PIN / Postal Code</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="400001"
+                                                value={formData.postal_code}
+                                                onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '20px', marginBottom: '24px', flexWrap: 'wrap' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--admin-text)' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.is_active}
-                                        onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                                    />
-                                    <span>Active Status</span>
-                                </label>
+                            <div className="form-section-box">
+                                <div className="form-section-header">
+                                    <h4 className="form-section-title">
+                                        <Phone size={15} style={{ color: '#10b981' }} />
+                                        <span>Dispatch Contact & Status</span>
+                                    </h4>
+                                </div>
 
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--admin-text)' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.is_default}
-                                        onChange={(e) => setFormData({ ...formData, is_default: e.target.checked })}
-                                    />
-                                    <span>Set as Default Primary Warehouse</span>
-                                </label>
-                            </div>
+                                <div className="form-section-body">
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>Contact Manager</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Rajesh Kumar"
+                                                value={formData.contact_name}
+                                                onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
+                                            />
+                                        </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: '1px solid var(--admin-border)' }}>
-                                <button type="button" className="btn btn-secondary" onClick={() => setIsFormOpen(false)} disabled={submitting}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                                    {submitting ? 'Saving Warehouse...' : (editingWarehouse ? 'Update Warehouse' : 'Create Warehouse')}
-                                </button>
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>Contact Phone</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="+91 98765 43210"
+                                                value={formData.contact_phone}
+                                                onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '16px', flexWrap: 'wrap', paddingTop: '4px' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.82rem' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.is_active}
+                                                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                                                />
+                                                <span style={{ fontWeight: 600 }}>Active Warehouse Status</span>
+                                            </label>
+
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.82rem' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.is_default}
+                                                    onChange={(e) => setFormData({ ...formData, is_default: e.target.checked })}
+                                                />
+                                                <span style={{ fontWeight: 600, color: 'var(--admin-primary)' }}>Set as Primary Default Hub</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div style={{ padding: '16px 24px', borderTop: '1px solid var(--admin-border)', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button className="btn btn-secondary" onClick={onClose}>
-                        Close
+                <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>
+                        {isFormOpen ? 'Cancel' : 'Close'}
                     </button>
+                    {isFormOpen && (
+                        <button
+                            type="submit"
+                            form="warehouseForm"
+                            className="btn btn-primary btn-sm"
+                            disabled={submitting}
+                            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, padding: '7px 18px' }}
+                        >
+                            <Check size={15} />
+                            <span>{submitting ? 'Saving Warehouse...' : (editingWarehouse ? 'Update Hub' : 'Create Hub')}</span>
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

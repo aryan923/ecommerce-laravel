@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, RefreshCw, AlertTriangle, Package, ShieldAlert, ArrowRightLeft } from 'lucide-react';
+import {
+    X,
+    Plus,
+    Minus,
+    RefreshCw,
+    AlertTriangle,
+    Package,
+    ShieldAlert,
+    ArrowRightLeft,
+    Check,
+    Building2,
+    SlidersHorizontal,
+    DollarSign,
+    Tag,
+    MapPin,
+    RotateCcw
+} from 'lucide-react';
 import axios from 'axios';
 
 export default function StockAdjustmentModal({
@@ -111,452 +127,436 @@ export default function StockAdjustmentModal({
         }
     };
 
+    const operations = [
+        { key: 'add', label: 'Add Stock', icon: Plus, color: '#10b981', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(16, 185, 129, 0.3)' },
+        { key: 'deduct', label: 'Deduct Qty', icon: Minus, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(239, 68, 68, 0.3)' },
+        { key: 'damage', label: 'Mark Damaged', icon: ShieldAlert, color: '#dc2626', bg: 'rgba(220, 38, 38, 0.12)', border: 'rgba(220, 38, 38, 0.3)' },
+        { key: 'set', label: 'Set Absolute', icon: RefreshCw, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.3)' },
+        { key: 'transfer', label: 'Transfer Hub', icon: ArrowRightLeft, color: 'var(--admin-primary)', bg: 'rgba(99, 102, 241, 0.12)', border: 'rgba(99, 102, 241, 0.3)' },
+    ];
+
     return (
-        <div className="modal-backdrop" style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 1050,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px'
-        }}>
-            <div className="modal-container" style={{
-                backgroundColor: 'var(--admin-card-bg)',
-                borderRadius: '12px',
-                width: '100%',
-                maxWidth: '640px',
-                maxHeight: '92vh',
-                overflowY: 'auto',
-                boxShadow: 'var(--shadow-xl)',
-                border: '1px solid var(--admin-border)',
-                animation: 'modalSlideIn 0.2s ease-out'
-            }}>
+        <div className="modal-overlay">
+            <div
+                className="modal-card"
+                style={{
+                    maxWidth: '680px',
+                    width: '96%',
+                }}
+            >
                 {/* Header */}
-                <div style={{
-                    padding: '18px 24px',
-                    borderBottom: '1px solid var(--admin-border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    position: 'sticky',
-                    top: 0,
-                    backgroundColor: 'var(--admin-card-bg)',
-                    zIndex: 10
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '8px',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            color: 'var(--admin-primary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <Package size={20} />
+                <div className="modal-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div
+                            style={{
+                                width: '38px',
+                                height: '38px',
+                                borderRadius: '10px',
+                                backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                                color: 'var(--admin-primary)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <SlidersHorizontal size={20} />
                         </div>
                         <div>
-                            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--admin-text)' }}>Adjust Inventory & Thresholds</h3>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--admin-muted)' }}>SKU: <strong>{sku}</strong> ({currentWarehouseName})</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                                    Stock Adjustment & Logistics
+                                </h3>
+                                <span style={{
+                                    fontSize: '0.7rem',
+                                    fontWeight: 800,
+                                    fontFamily: 'monospace',
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    backgroundColor: 'var(--admin-card-hover)',
+                                    color: 'var(--admin-primary)',
+                                    border: '1px solid var(--admin-border)'
+                                }}>
+                                    {sku}
+                                </span>
+                            </div>
+                            <p style={{ margin: '2px 0 0 0', fontSize: '0.76rem', color: 'var(--admin-muted)' }}>
+                                Manage stock levels, threshold limits, COGS valuation, and hub transfers
+                            </p>
                         </div>
                     </div>
+
                     <button
                         type="button"
                         className="btn btn-secondary btn-sm"
                         onClick={onClose}
-                        style={{ padding: '6px' }}
+                        style={{ borderRadius: '8px', width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                         <X size={16} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+                {/* Form Body */}
+                <div className="modal-body">
                     {error && (
-                        <div style={{
-                            padding: '12px 16px',
-                            borderRadius: '8px',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.2)',
-                            color: 'var(--admin-danger)',
-                            fontSize: '0.85rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            marginBottom: '20px'
-                        }}>
+                        <div
+                            style={{
+                                padding: '10px 14px',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                color: '#ef4444',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                borderRadius: '8px',
+                                fontSize: '0.82rem',
+                                marginBottom: '14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontWeight: 600
+                            }}
+                        >
                             <AlertTriangle size={16} />
                             <span>{error}</span>
                         </div>
                     )}
 
-                    {/* Product Card Overview */}
+                    {/* Product Summary Card */}
                     <div style={{
-                        backgroundColor: 'var(--admin-bg)',
-                        padding: '14px 16px',
-                        borderRadius: '8px',
-                        marginBottom: '20px',
+                        padding: '12px 16px',
+                        backgroundColor: 'var(--admin-card-hover)',
+                        border: '1px solid var(--admin-border)',
+                        borderRadius: '12px',
+                        marginBottom: '14px',
                         display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        gap: '12px'
                     }}>
-                        <div>
-                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--admin-text)' }}>{productName}</div>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
-                                Location: <strong>{initialItem.location_code || 'Unassigned'}</strong> | Unit Cost: <strong>₹{initialItem.cost_price ?? 0}</strong>
+                        <div style={{ minWidth: 0 }}>
+                            <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--admin-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {productName}
+                            </div>
+                            <div style={{ fontSize: '0.76rem', color: 'var(--admin-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <span>Warehouse: <strong style={{ color: 'var(--admin-text)' }}>{currentWarehouseName}</strong></span>
+                                <span>•</span>
+                                <span>Bin / Aisle: <strong style={{ color: 'var(--admin-text)' }}>{initialItem.location_code || 'Unassigned'}</strong></span>
+                                <span>•</span>
+                                <span>Cost Price: <strong style={{ color: 'var(--admin-text)' }}>₹{initialItem.cost_price ?? 0}</strong></span>
                             </div>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>Available Stock</div>
+
+                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                                Current Available
+                            </div>
                             <div style={{
-                                fontSize: '1.4rem',
+                                fontSize: '1.35rem',
                                 fontWeight: 800,
-                                color: currentAvailable <= 0 ? 'var(--admin-danger)' : (currentAvailable <= (initialItem.low_stock_threshold || 5) ? 'var(--admin-warning)' : 'var(--admin-success)')
+                                color: currentAvailable <= 0 ? '#ef4444' : (currentAvailable <= (initialItem.low_stock_threshold || 5) ? '#f59e0b' : '#10b981')
                             }}>
-                                {currentAvailable} units
+                                {currentAvailable} <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>units</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Action Selector Tabs */}
-                    <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '8px', color: 'var(--admin-text)' }}>Select Adjustment Operation</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '6px' }}>
-                            <button
-                                type="button"
-                                onClick={() => handleReasonTypeChange('add')}
-                                style={{
-                                    padding: '8px 4px',
-                                    borderRadius: '6px',
-                                    border: `1.5px solid ${type === 'add' ? 'var(--admin-primary)' : 'var(--admin-border)'}`,
-                                    backgroundColor: type === 'add' ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-                                    color: type === 'add' ? 'var(--admin-primary)' : 'var(--admin-text)',
-                                    fontWeight: 600,
-                                    fontSize: '0.78rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <Plus size={16} />
-                                <span>Add Stock</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => handleReasonTypeChange('deduct')}
-                                style={{
-                                    padding: '8px 4px',
-                                    borderRadius: '6px',
-                                    border: `1.5px solid ${type === 'deduct' ? 'var(--admin-danger)' : 'var(--admin-border)'}`,
-                                    backgroundColor: type === 'deduct' ? 'rgba(239, 68, 68, 0.1)' : 'transparent',
-                                    color: type === 'deduct' ? 'var(--admin-danger)' : 'var(--admin-text)',
-                                    fontWeight: 600,
-                                    fontSize: '0.78rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <Minus size={16} />
-                                <span>Deduct</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => handleReasonTypeChange('damage')}
-                                style={{
-                                    padding: '8px 4px',
-                                    borderRadius: '6px',
-                                    border: `1.5px solid ${type === 'damage' ? '#dc2626' : 'var(--admin-border)'}`,
-                                    backgroundColor: type === 'damage' ? 'rgba(220, 38, 38, 0.1)' : 'transparent',
-                                    color: type === 'damage' ? '#dc2626' : 'var(--admin-text)',
-                                    fontWeight: 600,
-                                    fontSize: '0.78rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <ShieldAlert size={16} />
-                                <span>Mark Damaged</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => handleReasonTypeChange('set')}
-                                style={{
-                                    padding: '8px 4px',
-                                    borderRadius: '6px',
-                                    border: `1.5px solid ${type === 'set' ? '#f59e0b' : 'var(--admin-border)'}`,
-                                    backgroundColor: type === 'set' ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
-                                    color: type === 'set' ? '#f59e0b' : 'var(--admin-text)',
-                                    fontWeight: 600,
-                                    fontSize: '0.78rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <RefreshCw size={16} />
-                                <span>Set Absolute</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => handleReasonTypeChange('transfer')}
-                                style={{
-                                    padding: '8px 4px',
-                                    borderRadius: '6px',
-                                    border: `1.5px solid ${type === 'transfer' ? 'var(--admin-primary)' : 'var(--admin-border)'}`,
-                                    backgroundColor: type === 'transfer' ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-                                    color: type === 'transfer' ? 'var(--admin-primary)' : 'var(--admin-text)',
-                                    fontWeight: 600,
-                                    fontSize: '0.78rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <ArrowRightLeft size={16} />
-                                <span>Transfer</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Warehouse & Destination Selection Row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                                {type === 'transfer' ? 'Source Warehouse' : 'Target Warehouse'}
+                    <form id="stockAdjustmentForm" onSubmit={handleSubmit}>
+                        {/* Adjustment Mode Selector */}
+                        <div style={{ marginBottom: '14px' }}>
+                            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', marginBottom: '6px', textTransform: 'uppercase' }}>
+                                Select Adjustment Operation *
                             </label>
-                            <select
-                                className="form-select"
-                                value={warehouseId}
-                                onChange={(e) => setWarehouseId(e.target.value)}
-                            >
-                                {warehouses.map((wh) => (
-                                    <option key={wh.id} value={wh.id}>
-                                        {wh.name} ({wh.code}) {wh.is_default ? '[Default]' : ''}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {type === 'transfer' && (
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                                    Destination Warehouse <span style={{ color: 'var(--admin-danger)' }}>*</span>
-                                </label>
-                                <select
-                                    className="form-select"
-                                    value={targetWarehouseId}
-                                    onChange={(e) => setTargetWarehouseId(e.target.value)}
-                                    required
-                                >
-                                    <option value="">Select Destination Warehouse</option>
-                                    {warehouses.filter(w => String(w.id) !== String(warehouseId)).map((wh) => (
-                                        <option key={wh.id} value={wh.id}>
-                                            {wh.name} ({wh.code})
-                                        </option>
-                                    ))}
-                                </select>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))', gap: '6px' }}>
+                                {operations.map((op) => {
+                                    const Icon = op.icon;
+                                    const isSelected = type === op.key;
+                                    return (
+                                        <button
+                                            key={op.key}
+                                            type="button"
+                                            onClick={() => handleReasonTypeChange(op.key)}
+                                            style={{
+                                                padding: '8px 6px',
+                                                borderRadius: '8px',
+                                                border: `1.5px solid ${isSelected ? op.color : 'var(--admin-border)'}`,
+                                                backgroundColor: isSelected ? op.bg : 'var(--admin-card-bg)',
+                                                color: isSelected ? op.color : 'var(--admin-muted)',
+                                                fontWeight: isSelected ? 800 : 600,
+                                                fontSize: '0.76rem',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.15s ease'
+                                            }}
+                                        >
+                                            <Icon size={16} />
+                                            <span>{op.label}</span>
+                                        </button>
+                                    );
+                                })}
                             </div>
-                        )}
-                    </div>
-
-                    {/* Quantity & Unit Cost Price Row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                                {type === 'set' ? 'New Total Available Qty' : 'Quantity Units'} <span style={{ color: 'var(--admin-danger)' }}>*</span>
-                            </label>
-                            <input
-                                type="number"
-                                min={type === 'set' ? "0" : "1"}
-                                className="form-control"
-                                value={quantity}
-                                onChange={(e) => setQuantity(e.target.value)}
-                                required
-                            />
                         </div>
 
-                        {type !== 'transfer' && (
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                                    Unit Purchase Cost Price (COGS ₹)
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    className="form-control"
-                                    value={costPrice}
-                                    onChange={(e) => setCostPrice(e.target.value)}
-                                />
-                                {type === 'add' && (
-                                    <div style={{ fontSize: '0.73rem', color: 'var(--admin-muted)', marginTop: '3px' }}>
-                                        * Recalculates Weighted Average Unit Cost (AVCO)
+                        {/* Warehouses & Quantity Section */}
+                        <div className="form-section-box">
+                            <div className="form-section-header">
+                                <h4 className="form-section-title">
+                                    <Building2 size={15} style={{ color: 'var(--admin-primary)' }} />
+                                    <span>Warehouse & Quantity Parameters</span>
+                                </h4>
+                            </div>
+
+                            <div className="form-section-body">
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                            {type === 'transfer' ? 'Source Warehouse *' : 'Target Warehouse *'}
+                                        </label>
+                                        <select
+                                            className="form-select"
+                                            value={warehouseId}
+                                            onChange={(e) => setWarehouseId(e.target.value)}
+                                            style={{ fontWeight: 600 }}
+                                        >
+                                            {warehouses.map((wh) => (
+                                                <option key={wh.id} value={wh.id}>
+                                                    {wh.name} ({wh.code}) {wh.is_default ? '★ [Default]' : ''}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
-                                )}
+
+                                    {type === 'transfer' && (
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                Destination Hub *
+                                            </label>
+                                            <select
+                                                className="form-select"
+                                                value={targetWarehouseId}
+                                                onChange={(e) => setTargetWarehouseId(e.target.value)}
+                                                required
+                                                style={{ fontWeight: 600 }}
+                                            >
+                                                <option value="">Select Target Warehouse</option>
+                                                {warehouses.filter(w => String(w.id) !== String(warehouseId)).map((wh) => (
+                                                    <option key={wh.id} value={wh.id}>
+                                                        {wh.name} ({wh.code})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                            {type === 'set' ? 'New Total Stock Qty *' : 'Quantity Units *'}
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min={type === 'set' ? "0" : "1"}
+                                            className="form-control"
+                                            value={quantity}
+                                            onChange={(e) => setQuantity(e.target.value)}
+                                            required
+                                            style={{ fontWeight: 800, fontSize: '0.92rem' }}
+                                        />
+                                    </div>
+
+                                    {type !== 'transfer' && (
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                Unit Purchase Cost (₹ COGS)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                className="form-control"
+                                                value={costPrice}
+                                                onChange={(e) => setCostPrice(e.target.value)}
+                                                style={{ fontWeight: 700 }}
+                                            />
+                                            {type === 'add' && (
+                                                <span style={{ fontSize: '0.68rem', color: 'var(--admin-muted)' }}>
+                                                    * Updates Weighted Average Cost (AVCO)
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Thresholds & Location (Non-transfer) */}
+                        {type !== 'transfer' && (
+                            <div className="form-section-box">
+                                <div className="form-section-header">
+                                    <h4 className="form-section-title">
+                                        <AlertTriangle size={15} style={{ color: '#f59e0b' }} />
+                                        <span>Threshold Alerts & Bin Location</span>
+                                    </h4>
+                                </div>
+
+                                <div className="form-section-body">
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                Low Stock Alert Limit
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                className="form-control"
+                                                value={lowStockThreshold}
+                                                onChange={(e) => setLowStockThreshold(e.target.value)}
+                                                style={{ fontWeight: 700 }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                Suggested Reorder Qty
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                className="form-control"
+                                                value={reorderQty}
+                                                onChange={(e) => setReorderQty(e.target.value)}
+                                                style={{ fontWeight: 700 }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                Warehouse Bin / Location Code
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="e.g. Aisle 3, Bin 12"
+                                                value={locationCode}
+                                                onChange={(e) => setLocationCode(e.target.value)}
+                                                style={{ fontWeight: 600 }}
+                                            />
+                                        </div>
+
+                                        <div style={{ gridColumn: '1 / -1' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.82rem', padding: '8px 12px', backgroundColor: 'var(--admin-card-hover)', borderRadius: '8px', border: '1px solid var(--admin-border)' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={allowBackorder}
+                                                    onChange={(e) => setAllowBackorder(e.target.checked)}
+                                                />
+                                                <span style={{ fontWeight: 600 }}>Allow customer backorders on storefront when stock is depleted</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
-                    </div>
 
-                    {/* Thresholds & Location Code Row */}
-                    {type !== 'transfer' && (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '16px' }}>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                                    Low Stock Alert Limit
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    className="form-control"
-                                    value={lowStockThreshold}
-                                    onChange={(e) => setLowStockThreshold(e.target.value)}
-                                />
+                        {/* Audit Reason & Remarks */}
+                        <div className="form-section-box">
+                            <div className="form-section-header">
+                                <h4 className="form-section-title">
+                                    <Tag size={15} style={{ color: 'var(--admin-primary)' }} />
+                                    <span>Audit Log Reason & Remarks</span>
+                                </h4>
                             </div>
 
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                                    Suggested Reorder Qty
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    className="form-control"
-                                    value={reorderQty}
-                                    onChange={(e) => setReorderQty(e.target.value)}
-                                />
-                            </div>
+                            <div className="form-section-body">
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                            Reason Category *
+                                        </label>
+                                        <select
+                                            className="form-select"
+                                            value={reason}
+                                            onChange={(e) => setReason(e.target.value)}
+                                            required
+                                            style={{ fontWeight: 600 }}
+                                        >
+                                            {type === 'add' && (
+                                                <>
+                                                    <option value="Supplier Restock">Supplier Restock (PO Inbound)</option>
+                                                    <option value="Customer Return">Customer Return (Restock)</option>
+                                                    <option value="Inventory Transfer">Inventory Transfer</option>
+                                                    <option value="Audit Correction">Audit Correction</option>
+                                                </>
+                                            )}
+                                            {type === 'deduct' && (
+                                                <>
+                                                    <option value="Damaged Stock">Damaged / Broken Stock</option>
+                                                    <option value="Expired Product">Expired Product</option>
+                                                    <option value="Theft / Shrinkage">Theft / Shrinkage</option>
+                                                    <option value="Internal Use / Sample">Internal Use / Demo Sample</option>
+                                                </>
+                                            )}
+                                            {type === 'damage' && (
+                                                <>
+                                                    <option value="Damaged Write-Off">Damaged Write-Off</option>
+                                                    <option value="Shipping Damage">Shipping Transit Damage</option>
+                                                    <option value="Defective Factory Return">Defective Factory Return</option>
+                                                </>
+                                            )}
+                                            {type === 'set' && (
+                                                <>
+                                                    <option value="Physical Inventory Audit">Physical Inventory Audit</option>
+                                                    <option value="Warehouse Reconciliation">Warehouse Reconciliation</option>
+                                                    <option value="System Reset">System Reset</option>
+                                                </>
+                                            )}
+                                            {type === 'transfer' && (
+                                                <>
+                                                    <option value="Inter-Warehouse Transfer">Inter-Warehouse Transfer</option>
+                                                    <option value="Storefront Restock">Storefront Restock</option>
+                                                    <option value="Hub Balancing">Hub Rebalancing</option>
+                                                </>
+                                            )}
+                                        </select>
+                                    </div>
 
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                                    Storage Location Code
-                                </label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="e.g. Aisle 3, Bin 12"
-                                    value={locationCode}
-                                    onChange={(e) => setLocationCode(e.target.value)}
-                                />
+                                    <div>
+                                        <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                            Internal Reference / Audit Note
+                                        </label>
+                                        <textarea
+                                            className="form-control"
+                                            rows="2"
+                                            placeholder="Enter purchase order number, audit ticket, or reference note..."
+                                            value={remarks}
+                                            onChange={(e) => setRemarks(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    )}
+                    </form>
+                </div>
 
-                    {/* Allow Backorders Toggle */}
-                    {type !== 'transfer' && (
-                        <div style={{ marginBottom: '16px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--admin-text)' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={allowBackorder}
-                                    onChange={(e) => setAllowBackorder(e.target.checked)}
-                                />
-                                <span>Allow customer backorders when available stock reaches zero</span>
-                            </label>
-                        </div>
-                    )}
-
-                    {/* Reason & Remarks */}
-                    <div style={{ marginBottom: '16px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                            Reason Category <span style={{ color: 'var(--admin-danger)' }}>*</span>
-                        </label>
-                        <select
-                            className="form-select"
-                            value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            required
-                        >
-                            {type === 'add' && (
-                                <>
-                                    <option value="Supplier Restock">Supplier Restock</option>
-                                    <option value="Customer Return">Customer Return</option>
-                                    <option value="Inventory Transfer">Inventory Transfer</option>
-                                    <option value="Audit Correction">Audit Correction</option>
-                                </>
-                            )}
-                            {type === 'deduct' && (
-                                <>
-                                    <option value="Damaged Stock">Damaged / Broken Stock</option>
-                                    <option value="Expired Product">Expired Product</option>
-                                    <option value="Theft / Shrinkage">Theft / Shrinkage</option>
-                                    <option value="Internal Use / Sample">Internal Use / Sample</option>
-                                </>
-                            )}
-                            {type === 'damage' && (
-                                <>
-                                    <option value="Damaged Write-Off">Damaged Write-Off</option>
-                                    <option value="Shipping Damage">Shipping Damage</option>
-                                    <option value="Defective Factory Return">Defective Factory Return</option>
-                                </>
-                            )}
-                            {type === 'set' && (
-                                <>
-                                    <option value="Physical Inventory Audit">Physical Inventory Audit</option>
-                                    <option value="Warehouse Reconciliation">Warehouse Reconciliation</option>
-                                    <option value="System Reset">System Reset</option>
-                                </>
-                            )}
-                            {type === 'transfer' && (
-                                <>
-                                    <option value="Inter-Warehouse Transfer">Inter-Warehouse Transfer</option>
-                                    <option value="Storefront Restock">Storefront Restock</option>
-                                    <option value="Hub Balancing">Hub Balancing</option>
-                                </>
-                            )}
-                        </select>
-                    </div>
-
-                    <div style={{ marginBottom: '24px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--admin-text)' }}>
-                            Internal Remarks / Reference Code
-                        </label>
-                        <textarea
-                            className="form-control"
-                            rows="2"
-                            placeholder="Enter purchase order number, audit ticket, or reference note..."
-                            value={remarks}
-                            onChange={(e) => setRemarks(e.target.value)}
-                        />
-                    </div>
-
-                    {/* Action Footer */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid var(--admin-border)', paddingTop: '16px' }}>
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={onClose}
-                            disabled={submitting}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={submitting}
-                        >
-                            {submitting ? 'Processing...' : (type === 'transfer' ? 'Confirm Stock Transfer' : 'Confirm Stock Adjustment')}
-                        </button>
-                    </div>
-                </form>
+                {/* Footer */}
+                <div className="modal-footer">
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={onClose}
+                        disabled={submitting}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        form="stockAdjustmentForm"
+                        className="btn btn-primary btn-sm"
+                        disabled={submitting}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, padding: '7px 18px' }}
+                    >
+                        <Check size={15} />
+                        <span>{submitting ? 'Processing...' : (type === 'transfer' ? 'Confirm Stock Transfer' : 'Confirm Stock Adjustment')}</span>
+                    </button>
+                </div>
             </div>
         </div>
     );
