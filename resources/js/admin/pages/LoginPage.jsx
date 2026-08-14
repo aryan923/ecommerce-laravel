@@ -24,7 +24,14 @@ export default function LoginPage() {
             navigate('/');
         } catch (err) {
             console.error('Login error:', err);
-            setError(err.response?.data?.message || err.message || 'Invalid admin credentials.');
+            const serverErrors = err.response?.data?.errors;
+            let formattedMsg = '';
+
+            if (serverErrors && typeof serverErrors === 'object') {
+                formattedMsg = Object.values(serverErrors).flat().join(' ');
+            }
+
+            setError(formattedMsg || err.response?.data?.message || err.message || 'Invalid admin credentials.');
         } finally {
             setSubmitting(false);
         }
