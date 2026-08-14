@@ -62,27 +62,41 @@ class ProductVariant extends Model
         });
 
         static::created(function ($variant) {
+            $defaultWh = Warehouse::getDefaultWarehouse();
             Inventory::firstOrCreate(
-                ['product_variant_id' => $variant->id],
+                [
+                    'product_variant_id' => $variant->id,
+                    'warehouse_id' => $defaultWh?->id,
+                ],
                 [
                     'sku' => $variant->sku,
+                    'cost_price' => $variant->cost_price ?? 0.00,
                     'available_qty' => $variant->stock_qty ?? 0,
                     'reserved_qty' => 0,
                     'committed_qty' => 0,
                     'damaged_qty' => 0,
                     'returned_qty' => 0,
                     'low_stock_threshold' => 10,
+                    'reorder_qty' => 50,
                 ]
             );
         });
     }
 
     /**
-     * Relationship to Inventory.
+     * Relationship to primary Inventory record.
      */
     public function inventory(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Inventory::class, 'product_variant_id');
+    }
+
+    /**
+     * Relationship to multi-warehouse Inventories.
+     */
+    public function inventories(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Inventory::class, 'product_variant_id');
     }
 
     public static function generateUniqueSku(?string $prefix = 'VAR'): string

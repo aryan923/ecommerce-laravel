@@ -407,6 +407,11 @@ export default function StockAdjustmentModal({
                                     value={costPrice}
                                     onChange={(e) => setCostPrice(e.target.value)}
                                 />
+                                {type === 'add' && (
+                                    <div style={{ fontSize: '0.73rem', color: 'var(--admin-muted)', marginTop: '3px' }}>
+                                        * Recalculates Weighted Average Unit Cost (AVCO)
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

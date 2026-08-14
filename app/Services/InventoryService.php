@@ -239,9 +239,6 @@ class InventoryService
             if ($threshold !== null && $threshold >= 0) {
                 $inventory->low_stock_threshold = $threshold;
             }
-            if ($costPrice !== null && $costPrice >= 0) {
-                $inventory->cost_price = $costPrice;
-            }
             if ($reorderQty !== null && $reorderQty >= 0) {
                 $inventory->reorder_qty = $reorderQty;
             }
@@ -266,47 +263,67 @@ class InventoryService
                 $quantityChange = $qty;
                 $newQty = $previousQty + $quantityChange;
                 $transactionType = 'manual_addition';
-            } elseif ($type === 'deduct') {
-                if ($qty <= 0) {
-                    throw ValidationException::withMessages([
-                        'quantity' => ['Quantity for deduction must be greater than zero.'],
-                    ]);
+
+                // Calculate Moving Weighted Average Cost (AVCO)
+                if ($costPrice !== null && $costPrice >= 0) {
+                    if ($previousQty > 0 && (float)$inventory->cost_price > 0) {
+                        $existingValuation = $previousQty * (float) $inventory->cost_price;
+                        $newValuation = $qty * $costPrice;
+                        $inventory->cost_price = round(($existingValuation + $newValuation) / ($previousQty + $qty), 2);
+                    } else {
+                        $inventory->cost_price = $costPrice;
+                    }
                 }
-                if ($qty > $previousQty) {
-                    throw ValidationException::withMessages([
-                        'quantity' => ["Cannot deduct more stock than currently available in {$targetWarehouse->name} (Available: {$previousQty}, Requested: {$qty})."],
-                    ]);
+            } else {
+                if ($costPrice !== null && $costPrice >= 0) {
+                    $inventory->cost_price = $costPrice;
                 }
-                $quantityChange = -$qty;
-                $newQty = $previousQty + $quantityChange;
-                $transactionType = 'manual_deduction';
-            } elseif ($type === 'damage') {
-                if ($qty <= 0) {
-                    throw ValidationException::withMessages([
-                        'quantity' => ['Quantity for damage write-off must be greater than zero.'],
-                    ]);
+
+                if ($type === 'deduct') {
+                    if ($qty <= 0) {
+                        throw ValidationException::withMessages([
+                            'quantity' => ['Quantity for deduction must be greater than zero.'],
+                        ]);
+                    }
+                    if ($qty > $previousQty) {
+                        throw ValidationException::withMessages([
+                            'quantity' => ["Cannot deduct more stock than currently available in {$targetWarehouse->name} (Available: {$previousQty}, Requested: {$qty})."],
+                        ]);
+                    }
+                    $quantityChange = -$qty;
+                    $newQty = $previousQty + $quantityChange;
+                    $transactionType = 'manual_deduction';
+                } elseif ($type === 'damage') {
+                    if ($qty <= 0) {
+                        throw ValidationException::withMessages([
+                            'quantity' => ['Quantity for damage write-off must be greater than zero.'],
+                        ]);
+                    }
+                    if ($qty > $previousQty) {
+                        throw ValidationException::withMessages([
+                            'quantity' => ["Cannot mark more stock damaged than currently available."],
+                        ]);
+                    }
+                    $quantityChange = -$qty;
+                    $newQty = $previousQty + $quantityChange;
+                    $inventory->damaged_qty += $qty;
+                    $transactionType = 'damage';
+                } elseif ($type === 'set') {
+                    $newQty = $qty;
+                    $quantityChange = $newQty - $previousQty;
+                    $transactionType = 'adjustment';
                 }
-                if ($qty > $previousQty) {
-                    throw ValidationException::withMessages([
-                        'quantity' => ["Cannot mark more stock damaged than currently available."],
-                    ]);
-                }
-                $quantityChange = -$qty;
-                $newQty = $previousQty + $quantityChange;
-                $inventory->damaged_qty += $qty;
-                $transactionType = 'damage';
-            } elseif ($type === 'set') {
-                $newQty = $qty;
-                $quantityChange = $newQty - $previousQty;
-                $transactionType = 'adjustment';
             }
 
             $inventory->available_qty = $newQty;
             $inventory->save();
 
-            // Sync total aggregate stock_qty on ProductVariant across all active warehouses
+            // Sync total aggregate stock_qty and weighted cost_price on ProductVariant across all active warehouses
             $totalStockAcrossWarehouses = (int) Inventory::where('product_variant_id', $variant->id)->sum('available_qty');
             $variant->stock_qty = $totalStockAcrossWarehouses;
+            if ($inventory->cost_price > 0) {
+                $variant->cost_price = $inventory->cost_price;
+            }
             $variant->save();
 
             // Audit log
@@ -318,6 +335,7 @@ class InventoryService
                 'previous_qty' => $previousQty,
                 'quantity_change' => $quantityChange,
                 'new_qty' => $newQty,
+                'unit_cost_price' => $costPrice ?? $inventory->cost_price,
                 'transaction_type' => $transactionType,
                 'reference_type' => 'Manual Adjustment',
                 'admin_id' => $adminId,
