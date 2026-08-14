@@ -154,29 +154,31 @@ export default function BrandsPage() {
                                     </td>
                                 </tr>
                             ) : brands.length > 0 ? (
-                                brands.map((brand) => (
-                                    <tr key={brand.id}>
-                                        <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{
-                                                    width: '36px',
-                                                    height: '36px',
-                                                    borderRadius: '6px',
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                                                    border: '1px solid var(--admin-border)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}>
-                                                    {brand.logo_url ? (
-                                                        <img src={brand.logo_url} alt={brand.name} style={{ maxWidth: '28px', maxHeight: '28px', objectFit: 'contain' }} />
-                                                    ) : (
-                                                        <Award size={18} style={{ color: 'var(--admin-primary)' }} />
-                                                    )}
+                                brands.map((brand) => {
+                                    const brandLogo = brand.logo || brand.logo_url || (brand.media && brand.media.length > 0 ? brand.media[0]?.url : null);
+                                    return (
+                                        <tr key={brand.id}>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{
+                                                        width: '36px',
+                                                        height: '36px',
+                                                        borderRadius: '6px',
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                                        border: '1px solid var(--admin-border)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center'
+                                                    }}>
+                                                        {brandLogo ? (
+                                                            <img src={brandLogo} alt={brand.name} style={{ maxWidth: '28px', maxHeight: '28px', objectFit: 'contain' }} />
+                                                        ) : (
+                                                            <Award size={18} style={{ color: 'var(--admin-primary)' }} />
+                                                        )}
+                                                    </div>
+                                                    <span style={{ fontWeight: 600, color: 'var(--admin-text)' }}>{brand.name}</span>
                                                 </div>
-                                                <span style={{ fontWeight: 600, color: 'var(--admin-text)' }}>{brand.name}</span>
-                                            </div>
-                                        </td>
+                                            </td>
                                         <td className="text-muted" style={{ fontSize: '0.85rem' }}>{brand.slug}</td>
                                         <td>
                                             <button
@@ -200,7 +202,8 @@ export default function BrandsPage() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))
+                                );
+                            })
                             ) : (
                                 <tr>
                                     <td colSpan="4" className="text-muted" style={{ textAlign: 'center', padding: '32px' }}>

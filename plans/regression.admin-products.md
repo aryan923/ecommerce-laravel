@@ -1,6 +1,6 @@
-# Regression Strategy: Frontend Auth Hook Import Fix
+# Regression Strategy: Media Preview URL Resolution Fix
 
-**Module Name:** Admin Auth Module  
+**Module Name:** Media Management Module  
 **Module ID:** 23  
 **Regression File:** `plans/regression.admin-products.md`  
 
@@ -8,5 +8,5 @@
 
 ## 1. Regression Coverage
 
-- Verify Admin Authentication & Login Page.
+- Verify Media Library Popup Image Previews & Storage URLs.
 - Verify Vite asset build (`cmd /c npm run build`).

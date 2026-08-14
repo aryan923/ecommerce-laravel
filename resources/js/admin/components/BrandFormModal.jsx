@@ -19,8 +19,14 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
     const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
     const handleSelectMediaAsset = (selectedAsset) => {
-        if (selectedAsset?.url) {
-            setFormData((prev) => ({ ...prev, logo_url: selectedAsset.url }));
+        if (selectedAsset) {
+            const url = typeof selectedAsset === 'object' ? (selectedAsset.url || (selectedAsset.file_path ? `/storage/${selectedAsset.file_path}` : '')) : selectedAsset;
+            const mediaObj = typeof selectedAsset === 'object' ? selectedAsset : null;
+            setFormData((prev) => ({
+                ...prev,
+                logo_url: url,
+                logo_media: mediaObj
+            }));
         }
         setIsMediaModalOpen(false);
     };
@@ -32,10 +38,11 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
                 setFormData({
                     name: initialData.name || '',
                     slug: initialData.slug || '',
-                    logo_url: initialData.logo_url || '',
+                    logo_url: initialData.logo || initialData.logo_url || '',
                     status: initialData.status || 'active',
                     seo_title: initialData.seo_title || '',
                     seo_description: initialData.seo_description || '',
+                    logo_media: null,
                 });
             } else {
                 setFormData({
@@ -45,6 +52,7 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
                     status: 'active',
                     seo_title: '',
                     seo_description: '',
+                    logo_media: null,
                 });
             }
         }
@@ -65,6 +73,7 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
         const payload = {
             name: formData.name,
             status: formData.status,
+            logo: formData.logo_url || null,
             logo_url: formData.logo_url || null,
             seo_title: formData.seo_title || null,
             seo_description: formData.seo_description || null,
@@ -73,11 +82,29 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
         if (formData.slug) payload.slug = formData.slug;
 
         try {
+            let res;
             if (mode === 'edit' && initialData?.id) {
-                await axios.put(`/api/v1/admin/brands/${initialData.id}`, payload);
+                res = await axios.put(`/api/v1/admin/brands/${initialData.id}`, payload);
             } else {
-                await axios.post('/api/v1/admin/brands', payload);
+                res = await axios.post('/api/v1/admin/brands', payload);
             }
+
+            const savedBrand = res.data?.data;
+            const brandId = savedBrand?.id || initialData?.id;
+
+            if (brandId && formData.logo_media?.id) {
+                try {
+                    await axios.post('/api/v1/admin/media/attach', {
+                        media_id: formData.logo_media.id,
+                        model_type: 'brand',
+                        model_id: brandId,
+                        type: 'main',
+                    });
+                } catch (mErr) {
+                    console.error('Failed to attach brand logo media:', mErr);
+                }
+            }
+
             onSuccess();
             onClose();
         } catch (err) {
@@ -170,28 +197,26 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
                                             onClick={() => setIsMediaModalOpen(true)}
                                         >
                                             <ImageIcon size={14} />
-                                            <span>Select from Media Library</span>
+                                            <span>{formData.logo_url ? 'Change Logo' : 'Select from Media Library'}</span>
                                         </button>
                                         {formData.logo_url && (
                                             <button
                                                 type="button"
                                                 className="btn btn-secondary btn-sm"
                                                 style={{ color: 'var(--admin-danger)' }}
-                                                onClick={() => setFormData((prev) => ({ ...prev, logo_url: '' }))}
+                                                onClick={() => setFormData((prev) => ({ ...prev, logo_url: '', logo_media: null }))}
+                                                title="Remove Logo"
                                             >
                                                 <Trash2 size={14} />
+                                                <span>Remove</span>
                                             </button>
                                         )}
                                     </div>
-                                    <input
-                                        type="text"
-                                        name="logo_url"
-                                        className="form-control"
-                                        placeholder="Or paste brand logo image URL (https://...)"
-                                        value={formData.logo_url}
-                                        onChange={handleChange}
-                                        style={{ fontSize: '0.8rem' }}
-                                    />
+                                    {formData.logo_url && (
+                                        <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', wordBreak: 'break-all' }}>
+                                            Selected: {formData.logo_url.split('/').pop()}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -214,6 +239,7 @@ export default function BrandFormModal({ isOpen, mode = 'create', initialData = 
                     onClose={() => setIsMediaModalOpen(false)}
                     onSelect={handleSelectMediaAsset}
                     isMultiSelect={false}
+                    targetType="brand"
                     title="Select Brand Logo"
                 />
             </div>

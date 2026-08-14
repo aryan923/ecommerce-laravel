@@ -82,4 +82,26 @@ class Media extends Model
     {
         return $query->where('model_type', $modelType)->where('model_id', $modelId);
     }
+
+    /**
+     * Get normalized relative asset URL.
+     */
+    public function getUrlAttribute(?string $value): string
+    {
+        if ($value) {
+            if (str_starts_with($value, 'http://localhost/storage/')) {
+                return str_replace('http://localhost/storage/', '/storage/', $value);
+            }
+            if (str_starts_with($value, 'http://127.0.0.1/storage/')) {
+                return str_replace('http://127.0.0.1/storage/', '/storage/', $value);
+            }
+            return $value;
+        }
+
+        if ($this->file_path) {
+            return '/storage/' . ltrim($this->file_path, '/');
+        }
+
+        return '';
+    }
 }

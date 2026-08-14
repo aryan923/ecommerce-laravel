@@ -60,7 +60,7 @@ class MediaService
         $folderPath = 'media/' . date('Y/m');
 
         $filePath = Storage::disk($disk)->putFileAs($folderPath, $file, $filename);
-        $url = Storage::disk($disk)->url($filePath);
+        $url = '/storage/' . ltrim($filePath, '/');
 
         $modelType = $attributes['model_type'] ?? null;
         $modelId = isset($attributes['model_id']) ? (int) $attributes['model_id'] : null;

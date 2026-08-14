@@ -28,8 +28,15 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
     };
 
     const handleSelectMediaAsset = (selectedAsset) => {
-        if (selectedAsset?.url) {
-            setFormData((prev) => ({ ...prev, [mediaTargetField]: selectedAsset.url }));
+        if (selectedAsset) {
+            const url = typeof selectedAsset === 'object' ? (selectedAsset.url || (selectedAsset.file_path ? `/storage/${selectedAsset.file_path}` : '')) : selectedAsset;
+            const mediaObj = typeof selectedAsset === 'object' ? selectedAsset : null;
+
+            setFormData((prev) => ({
+                ...prev,
+                [mediaTargetField]: url,
+                [mediaTargetField === 'image_url' ? 'image_media' : 'banner_media']: mediaObj,
+            }));
         }
         setIsMediaModalOpen(false);
     };
@@ -44,10 +51,12 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
                     parent_id: initialData.parent_id || '',
                     sort_order: initialData.sort_order || 0,
                     status: initialData.status || 'active',
-                    image_url: initialData.image_url || '',
-                    banner_url: initialData.banner_url || '',
+                    image_url: initialData.image || initialData.image_url || '',
+                    banner_url: initialData.banner || initialData.banner_url || '',
                     seo_title: initialData.seo_title || '',
                     seo_description: initialData.seo_description || '',
+                    image_media: null,
+                    banner_media: null,
                 });
             } else {
                 setFormData({
@@ -60,6 +69,8 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
                     banner_url: '',
                     seo_title: '',
                     seo_description: '',
+                    image_media: null,
+                    banner_media: null,
                 });
             }
         }
@@ -82,6 +93,8 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
             parent_id: formData.parent_id ? parseInt(formData.parent_id) : null,
             sort_order: parseInt(formData.sort_order) || 0,
             status: formData.status,
+            image: formData.image_url || null,
+            banner: formData.banner_url || null,
             image_url: formData.image_url || null,
             banner_url: formData.banner_url || null,
             seo_title: formData.seo_title || null,
@@ -91,11 +104,44 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
         if (formData.slug) payload.slug = formData.slug;
 
         try {
+            let res;
             if (mode === 'edit' && initialData?.id) {
-                await axios.put(`/api/v1/admin/categories/${initialData.id}`, payload);
+                res = await axios.put(`/api/v1/admin/categories/${initialData.id}`, payload);
             } else {
-                await axios.post('/api/v1/admin/categories', payload);
+                res = await axios.post('/api/v1/admin/categories', payload);
             }
+
+            const savedCategory = res.data?.data;
+            const catId = savedCategory?.id || initialData?.id;
+
+            if (catId) {
+                if (formData.image_media?.id) {
+                    try {
+                        await axios.post('/api/v1/admin/media/attach', {
+                            media_id: formData.image_media.id,
+                            model_type: 'category',
+                            model_id: catId,
+                            type: 'thumbnail',
+                        });
+                    } catch (mErr) {
+                        console.error('Failed to attach category image:', mErr);
+                    }
+                }
+
+                if (formData.banner_media?.id) {
+                    try {
+                        await axios.post('/api/v1/admin/media/attach', {
+                            media_id: formData.banner_media.id,
+                            model_type: 'category',
+                            model_id: catId,
+                            type: 'banner',
+                        });
+                    } catch (bErr) {
+                        console.error('Failed to attach category banner:', bErr);
+                    }
+                }
+            }
+
             onSuccess();
             onClose();
         } catch (err) {
@@ -213,28 +259,26 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
                                             onClick={() => handleOpenMediaPicker('image_url')}
                                         >
                                             <ImageIcon size={14} />
-                                            <span>Select from Media Library</span>
+                                            <span>{formData.image_url ? 'Change Image' : 'Select from Media Library'}</span>
                                         </button>
                                         {formData.image_url && (
                                             <button
                                                 type="button"
                                                 className="btn btn-secondary btn-sm"
                                                 style={{ color: 'var(--admin-danger)' }}
-                                                onClick={() => setFormData((prev) => ({ ...prev, image_url: '' }))}
+                                                onClick={() => setFormData((prev) => ({ ...prev, image_url: '', image_media: null }))}
+                                                title="Remove Thumbnail"
                                             >
                                                 <Trash2 size={14} />
+                                                <span>Remove</span>
                                             </button>
                                         )}
                                     </div>
-                                    <input
-                                        type="text"
-                                        name="image_url"
-                                        className="form-control"
-                                        placeholder="Or paste image URL (https://...)"
-                                        value={formData.image_url}
-                                        onChange={handleChange}
-                                        style={{ fontSize: '0.8rem' }}
-                                    />
+                                    {formData.image_url && (
+                                        <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', wordBreak: 'break-all' }}>
+                                            Selected: {formData.image_url.split('/').pop()}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -260,28 +304,26 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
                                             onClick={() => handleOpenMediaPicker('banner_url')}
                                         >
                                             <ImageIcon size={14} />
-                                            <span>Select from Media Library</span>
+                                            <span>{formData.banner_url ? 'Change Banner' : 'Select from Media Library'}</span>
                                         </button>
                                         {formData.banner_url && (
                                             <button
                                                 type="button"
                                                 className="btn btn-secondary btn-sm"
                                                 style={{ color: 'var(--admin-danger)' }}
-                                                onClick={() => setFormData((prev) => ({ ...prev, banner_url: '' }))}
+                                                onClick={() => setFormData((prev) => ({ ...prev, banner_url: '', banner_media: null }))}
+                                                title="Remove Banner"
                                             >
                                                 <Trash2 size={14} />
+                                                <span>Remove</span>
                                             </button>
                                         )}
                                     </div>
-                                    <input
-                                        type="text"
-                                        name="banner_url"
-                                        className="form-control"
-                                        placeholder="Or paste banner image URL (https://...)"
-                                        value={formData.banner_url}
-                                        onChange={handleChange}
-                                        style={{ fontSize: '0.8rem' }}
-                                    />
+                                    {formData.banner_url && (
+                                        <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', wordBreak: 'break-all' }}>
+                                            Selected: {formData.banner_url.split('/').pop()}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -304,6 +346,7 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
                     onClose={() => setIsMediaModalOpen(false)}
                     onSelect={handleSelectMediaAsset}
                     isMultiSelect={false}
+                    targetType="category"
                     title={mediaTargetField === 'image_url' ? 'Select Category Thumbnail' : 'Select Category Banner'}
                 />
             </div>

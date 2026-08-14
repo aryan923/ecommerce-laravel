@@ -261,17 +261,27 @@ export default function ProductFormModal({
 
     // Handle Media Selection
     const handleMediaSelected = (media) => {
+        if (!media) return;
         if (mediaPickerTarget === 'main') {
-            setFormData((prev) => ({ ...prev, main_image: media }));
+            const item = Array.isArray(media) ? media[0] : media;
+            setFormData((prev) => ({ ...prev, main_image: item }));
         } else if (mediaPickerTarget === 'gallery') {
-            const newGallery = Array.isArray(media) ? media : [media];
-            setFormData((prev) => ({
-                ...prev,
-                gallery: [...prev.gallery, ...newGallery],
-            }));
+            const newItems = Array.isArray(media) ? media : [media];
+            setFormData((prev) => {
+                const existingIds = new Set(prev.gallery.map((g) => (typeof g === 'object' ? g?.id : g)));
+                const filteredNew = newItems.filter((m) => !existingIds.has(typeof m === 'object' ? m?.id : m));
+                return {
+                    ...prev,
+                    gallery: [...prev.gallery, ...filteredNew],
+                };
+            });
         } else if (mediaPickerTarget === 'variant' && selectedVariantIndex !== null) {
+            const item = Array.isArray(media) ? media[0] : media;
+            const imageUrl = typeof item === 'object' ? (item.url || (item.file_path ? `/storage/${item.file_path}` : '')) : item;
             const updatedVariants = [...formData.variants];
-            updatedVariants[selectedVariantIndex].image = media.url || media.file_path;
+            if (updatedVariants[selectedVariantIndex]) {
+                updatedVariants[selectedVariantIndex].image = imageUrl;
+            }
             setFormData((prev) => ({ ...prev, variants: updatedVariants }));
         }
     };
@@ -509,11 +519,73 @@ export default function ProductFormModal({
         }
 
         try {
+            let res;
             if (mode === 'edit' && initialData?.id) {
-                await axios.put(`/api/v1/admin/products/${initialData.id}`, payload);
+                res = await axios.put(`/api/v1/admin/products/${initialData.id}`, payload);
             } else {
-                await axios.post('/api/v1/admin/products', payload);
+                res = await axios.post('/api/v1/admin/products', payload);
             }
+
+            const savedProduct = res.data?.data;
+            const productId = savedProduct?.id || initialData?.id;
+
+            if (productId) {
+                // Attach Main Image
+                if (formData.main_image?.id) {
+                    try {
+                        await axios.post('/api/v1/admin/media/attach', {
+                            media_id: formData.main_image.id,
+                            model_type: 'product',
+                            model_id: productId,
+                            type: 'main',
+                        });
+                    } catch (mErr) {
+                        console.error('Failed to attach main image:', mErr);
+                    }
+                }
+
+                // Attach Gallery Images
+                if (Array.isArray(formData.gallery) && formData.gallery.length > 0) {
+                    for (const gItem of formData.gallery) {
+                        const mediaId = typeof gItem === 'object' ? gItem?.id : null;
+                        if (mediaId) {
+                            try {
+                                await axios.post('/api/v1/admin/media/attach', {
+                                    media_id: mediaId,
+                                    model_type: 'product',
+                                    model_id: productId,
+                                    type: 'gallery',
+                                });
+                            } catch (gErr) {
+                                console.error('Failed to attach gallery item:', gErr);
+                            }
+                        }
+                    }
+                }
+
+                // Detach removed images if in edit mode
+                if (mode === 'edit' && initialData?.media) {
+                    const currentMainId = formData.main_image?.id || null;
+                    const currentGalleryIds = (formData.gallery || [])
+                        .map((g) => (typeof g === 'object' ? g?.id : null))
+                        .filter(Boolean);
+
+                    const removedItems = initialData.media.filter((m) => {
+                        if (m.type === 'main' && currentMainId && m.id !== currentMainId) return true;
+                        if (m.type === 'gallery' && !currentGalleryIds.includes(m.id)) return true;
+                        return false;
+                    });
+
+                    for (const rm of removedItems) {
+                        try {
+                            await axios.post('/api/v1/admin/media/detach', { media_id: rm.id });
+                        } catch (dErr) {
+                            console.error('Failed to detach media:', dErr);
+                        }
+                    }
+                }
+            }
+
             onSuccess();
             onClose();
         } catch (err) {
@@ -1195,7 +1267,8 @@ export default function ProductFormModal({
                                             </thead>
                                             <tbody>
                                                 {formData.variants.map((v, vIdx) => {
-                                                    const vImgSrc = v.image || formData.main_image?.url || 'https://via.placeholder.com/36?text=Var';
+                                                    const SVG_VARIANT_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2' ry='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E";
+                                                    const vImgSrc = v.image || formData.main_image?.url || SVG_VARIANT_PLACEHOLDER;
 
                                                     const valueLookup = {};
                                                     attributes.forEach((attr) => {

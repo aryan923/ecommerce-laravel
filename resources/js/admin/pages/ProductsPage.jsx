@@ -190,13 +190,15 @@ export default function ProductsPage() {
         }
     };
 
+    const SVG_IMAGE_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E";
+
     // Helper for main image url
     const getProductImage = (prd) => {
         if (prd.media && prd.media.length > 0) {
             const mainMedia = prd.media.find((m) => m.type === 'main') || prd.media[0];
             if (mainMedia?.url) return mainMedia.url;
         }
-        return prd.image || 'https://via.placeholder.com/60?text=Product';
+        return prd.image || SVG_IMAGE_PLACEHOLDER;
     };
 
     return (
@@ -361,7 +363,7 @@ export default function ProductsPage() {
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                         onError={(e) => {
                                                             e.target.onerror = null;
-                                                            e.target.src = 'https://via.placeholder.com/48?text=Product';
+                                                            e.target.src = SVG_IMAGE_PLACEHOLDER;
                                                         }}
                                                     />
                                                 </div>

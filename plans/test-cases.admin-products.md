@@ -1,14 +1,14 @@
-# Test Cases: Frontend Auth Hook Import Fix
+# Test Cases: Media Preview URL Resolution Fix
 
-**Module Name:** Admin Auth Module  
+**Module Name:** Media Management Module  
 **Module ID:** 23  
 **Test File:** `plans/test-cases.admin-products.md`  
 
 ---
 
-## 1. Auth Import Test Scenarios
+## 1. Media Preview Test Scenarios
 
-### TC-AUTH-001: Admin Login Page Load & Authentication Execution
-- **Preconditions**: Open browser at `/admin/login`.
-- **Input**: Inspect browser console.
-- **Expected Result**: Page renders cleanly without `ReferenceError: useAuth is not defined` console errors, and admin login executes properly.
+### TC-MED-PREVIEW-001: Centralized Media Popup Image Preview
+- **Preconditions**: Open Media Library Modal in product, category, or brand form.
+- **Input**: Inspect grid cards in "Media Repository" tab and uploaded asset preview cards.
+- **Expected Result**: Image thumbnails render properly without broken placeholder fallbacks.
