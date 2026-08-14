@@ -163,11 +163,21 @@ class Product extends Model
     }
 
     /**
-     * MorphMany relationship to Media assets.
+     * Relationship to ProductImage attachment models.
      */
-    public function media(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function productImages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->morphMany(Media::class, 'imageable', 'model_type', 'model_id');
+        return $this->hasMany(ProductImage::class, 'product_id')->orderBy('sort_order');
+    }
+
+    /**
+     * BelongsToMany relationship to Media assets via product_images pivot table.
+     */
+    public function media(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Media::class, 'product_images', 'product_id', 'media_id')
+                    ->withPivot(['id', 'type', 'sort_order', 'alt'])
+                    ->withTimestamps();
     }
 
     /**
@@ -175,13 +185,25 @@ class Product extends Model
      */
     public function getMainImageUrlAttribute(): ?string
     {
+        // 1. Try productImages relationship with eager loaded media
+        if ($this->relationLoaded('productImages') && $this->productImages->isNotEmpty()) {
+            $mainImg = $this->productImages->firstWhere('type', 'main') ?? $this->productImages->first();
+            if ($mainImg && $mainImg->media && !empty($mainImg->media->url)) {
+                return $mainImg->media->url;
+            }
+        }
+
+        // 2. Try media pivot relationship
         if ($this->relationLoaded('media') && $this->media->isNotEmpty()) {
-            $main = $this->media->firstWhere('type', 'main') ?? $this->media->first();
+            $main = $this->media->first(fn($m) => $m->pivot && $m->pivot->type === 'main') ?? $this->media->first();
             if ($main && !empty($main->url)) return $main->url;
         }
 
-        $mainMedia = $this->media()->where('type', 'main')->first() ?? $this->media()->first();
-        if ($mainMedia && !empty($mainMedia->url)) return $mainMedia->url;
+        // 3. Query directly
+        $mainProductImg = $this->productImages()->where('type', 'main')->with('media')->first() ?? $this->productImages()->with('media')->first();
+        if ($mainProductImg && $mainProductImg->media && !empty($mainProductImg->media->url)) {
+            return $mainProductImg->media->url;
+        }
 
         return null;
     }
@@ -191,11 +213,23 @@ class Product extends Model
      */
     public function getGalleryImageUrlsAttribute(): array
     {
-        if ($this->relationLoaded('media') && $this->media->isNotEmpty()) {
-            return $this->media->where('type', 'gallery')->pluck('url')->filter()->values()->toArray();
+        if ($this->relationLoaded('productImages') && $this->productImages->isNotEmpty()) {
+            return $this->productImages
+                ->where('type', 'gallery')
+                ->map(fn($pi) => $pi->media ? $pi->media->url : null)
+                ->filter()
+                ->values()
+                ->toArray();
         }
 
-        return $this->media()->where('type', 'gallery')->pluck('url')->filter()->values()->toArray();
+        return $this->productImages()
+            ->where('type', 'gallery')
+            ->with('media')
+            ->get()
+            ->map(fn($pi) => $pi->media ? $pi->media->url : null)
+            ->filter()
+            ->values()
+            ->toArray();
     }
 
     /**

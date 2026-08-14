@@ -14,7 +14,6 @@ class Brand extends Model
     protected $fillable = [
         'name',
         'slug',
-        'logo',
         'description',
         'website',
         'status',
@@ -25,6 +24,11 @@ class Brand extends Model
 
     protected $casts = [
         'sort_order' => 'integer',
+    ];
+
+    protected $appends = [
+        'logo_url',
+        'banner_url',
     ];
 
     protected static function boot()
@@ -64,5 +68,49 @@ class Brand extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
+    }
+
+    /**
+     * Relationship to BrandImage attachment models.
+     */
+    public function brandImages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(BrandImage::class, 'brand_id')->orderBy('sort_order');
+    }
+
+    /**
+     * BelongsToMany relationship to Media assets via brand_images pivot table.
+     */
+    public function media(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Media::class, 'brand_images', 'brand_id', 'media_id')
+                    ->withPivot(['id', 'type', 'sort_order', 'alt'])
+                    ->withTimestamps();
+    }
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        if ($this->relationLoaded('brandImages') && $this->brandImages->isNotEmpty()) {
+            $img = $this->brandImages->firstWhere('type', 'logo') ?? $this->brandImages->firstWhere('type', 'main') ?? $this->brandImages->first();
+            if ($img && $img->media) return $img->media->url;
+        }
+
+        $direct = $this->brandImages()->whereIn('type', ['logo', 'main'])->with('media')->first();
+        if ($direct && $direct->media) return $direct->media->url;
+
+        return null;
+    }
+
+    public function getBannerUrlAttribute(): ?string
+    {
+        if ($this->relationLoaded('brandImages') && $this->brandImages->isNotEmpty()) {
+            $img = $this->brandImages->firstWhere('type', 'banner');
+            if ($img && $img->media) return $img->media->url;
+        }
+
+        $direct = $this->brandImages()->where('type', 'banner')->with('media')->first();
+        if ($direct && $direct->media) return $direct->media->url;
+
+        return null;
     }
 }

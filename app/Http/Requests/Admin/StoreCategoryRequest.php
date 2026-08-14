@@ -18,8 +18,6 @@ class StoreCategoryRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:160', 'unique:categories,slug'],
             'parent_id' => ['nullable', 'exists:categories,id'],
             'description' => ['nullable', 'string'],
-            'image' => ['nullable', 'string', 'max:255'],
-            'banner' => ['nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'in:active,inactive'],
             'sort_order' => ['sometimes', 'integer', 'min:0'],
             'seo_title' => ['nullable', 'string', 'max:255'],

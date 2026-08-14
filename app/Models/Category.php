@@ -18,8 +18,6 @@ class Category extends Model
         'name',
         'slug',
         'description',
-        'image',
-        'banner',
         'status',
         'sort_order',
         'seo_title',
@@ -30,6 +28,11 @@ class Category extends Model
     protected $casts = [
         'sort_order' => 'integer',
         'parent_id' => 'integer',
+    ];
+
+    protected $appends = [
+        'image_url',
+        'banner_url',
     ];
 
     protected static function boot()
@@ -93,5 +96,49 @@ class Category extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
+    }
+
+    /**
+     * Relationship to CategoryImage attachment models.
+     */
+    public function categoryImages(): HasMany
+    {
+        return $this->hasMany(CategoryImage::class, 'category_id')->orderBy('sort_order');
+    }
+
+    /**
+     * BelongsToMany relationship to Media assets via category_images pivot table.
+     */
+    public function media(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Media::class, 'category_images', 'category_id', 'media_id')
+                    ->withPivot(['id', 'type', 'sort_order', 'alt'])
+                    ->withTimestamps();
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if ($this->relationLoaded('categoryImages') && $this->categoryImages->isNotEmpty()) {
+            $img = $this->categoryImages->firstWhere('type', 'thumbnail') ?? $this->categoryImages->first();
+            if ($img && $img->media) return $img->media->url;
+        }
+
+        $direct = $this->categoryImages()->where('type', 'thumbnail')->with('media')->first();
+        if ($direct && $direct->media) return $direct->media->url;
+
+        return null;
+    }
+
+    public function getBannerUrlAttribute(): ?string
+    {
+        if ($this->relationLoaded('categoryImages') && $this->categoryImages->isNotEmpty()) {
+            $img = $this->categoryImages->firstWhere('type', 'banner');
+            if ($img && $img->media) return $img->media->url;
+        }
+
+        $direct = $this->categoryImages()->where('type', 'banner')->with('media')->first();
+        if ($direct && $direct->media) return $direct->media->url;
+
+        return null;
     }
 }

@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Models\Brand;
+use App\Models\BrandImage;
 use App\Models\Category;
+use App\Models\CategoryImage;
 use App\Models\Media;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -148,6 +151,14 @@ class MediaService
             $query->whereNull('model_type')->whereNull('model_id');
         }
 
+        // When listing the central media library repository (no entity filter specified),
+        // group by file_path to show unique media assets without duplicate cards.
+        if (empty($filters['model_type']) && empty($filters['model_id'])) {
+            $query->whereIn('id', function ($subQuery) {
+                $subQuery->selectRaw('MIN(id)')->from('media')->groupBy('file_path');
+            });
+        }
+
         return $query->orderBy('sort_order', 'asc')
                      ->orderBy('id', 'desc')
                      ->paginate($perPage);
@@ -169,18 +180,43 @@ class MediaService
         $media = Media::findOrFail($mediaId);
         $this->validateEntityExists($modelType, $modelId);
 
-        $targetType = $type ?? $media->type;
+        $normalizedModelType = strtolower($modelType);
+        $targetType = $type ?? 'gallery';
 
-        if ($targetType === 'main') {
-            $this->demoteExistingMainImage($modelType, $modelId);
+        if (in_array($normalizedModelType, ['product', 'products', Product::class])) {
+            if ($targetType === 'main') {
+                ProductImage::where('product_id', $modelId)->where('type', 'main')->delete();
+                ProductImage::create([
+                    'product_id' => $modelId,
+                    'media_id' => $mediaId,
+                    'type' => 'main',
+                    'alt' => $alt ?? $media->alt,
+                ]);
+            } else {
+                ProductImage::firstOrCreate(
+                    ['product_id' => $modelId, 'media_id' => $mediaId, 'type' => 'gallery'],
+                    ['alt' => $alt ?? $media->alt]
+                );
+            }
+        } elseif (in_array($normalizedModelType, ['category', 'categories', Category::class])) {
+            $catType = in_array($targetType, ['banner', 'thumbnail']) ? $targetType : 'thumbnail';
+            CategoryImage::where('category_id', $modelId)->where('type', $catType)->delete();
+            CategoryImage::create([
+                'category_id' => $modelId,
+                'media_id' => $mediaId,
+                'type' => $catType,
+                'alt' => $alt ?? $media->alt,
+            ]);
+        } elseif (in_array($normalizedModelType, ['brand', 'brands', Brand::class])) {
+            $brandType = in_array($targetType, ['banner', 'logo']) ? $targetType : 'logo';
+            BrandImage::where('brand_id', $modelId)->where('type', $brandType)->delete();
+            BrandImage::create([
+                'brand_id' => $modelId,
+                'media_id' => $mediaId,
+                'type' => $brandType,
+                'alt' => $alt ?? $media->alt,
+            ]);
         }
-
-        $media->update([
-            'model_type' => $modelType,
-            'model_id' => $modelId,
-            'type' => $targetType,
-            'alt' => $alt ?? $media->alt,
-        ]);
 
         return $media;
     }
@@ -189,15 +225,31 @@ class MediaService
      * Detach a media asset from its model entity.
      *
      * @param int $mediaId
+     * @param string|null $modelType
+     * @param int|null $modelId
+     * @param string|null $type
      * @return Media
      */
-    public function detach(int $mediaId): Media
+    public function detach(int $mediaId, ?string $modelType = null, ?int $modelId = null, ?string $type = null): Media
     {
         $media = Media::findOrFail($mediaId);
-        $media->update([
-            'model_type' => null,
-            'model_id' => null,
-        ]);
+
+        if ($modelType && $modelId) {
+            $normalizedModelType = strtolower($modelType);
+            if (in_array($normalizedModelType, ['product', 'products', Product::class])) {
+                $q = ProductImage::where('product_id', $modelId)->where('media_id', $mediaId);
+                if ($type) $q->where('type', $type);
+                $q->delete();
+            } elseif (in_array($normalizedModelType, ['category', 'categories', Category::class])) {
+                $q = CategoryImage::where('category_id', $modelId)->where('media_id', $mediaId);
+                if ($type) $q->where('type', $type);
+                $q->delete();
+            } elseif (in_array($normalizedModelType, ['brand', 'brands', Brand::class])) {
+                $q = BrandImage::where('brand_id', $modelId)->where('media_id', $mediaId);
+                if ($type) $q->where('type', $type);
+                $q->delete();
+            }
+        }
 
         return $media;
     }
