@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\BaseController;
-use App\Http\Requests\Admin\AdjustInventoryRequest;
-use App\Http\Requests\Admin\ReserveInventoryRequest;
-use App\Models\Inventory;
+use App\Http\Requests\Admin\AdjustStockRequest;
 use App\Services\InventoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 class InventoryController extends BaseController
 {
@@ -19,51 +18,87 @@ class InventoryController extends BaseController
 
     /**
      * @OA\Get(
-     *     path="/api/v1/admin/inventory",
-     *     summary="List Inventory Records (Admin)",
-     *     description="Retrieve paginated list of variant inventory levels with SKU search and stock status filters.",
-     *     operationId="adminListInventory",
+     *     path="/api/v1/admin/inventory/kpis",
+     *     summary="Inventory Dashboard KPIs",
+     *     description="Retrieve summary KPIs: total SKUs, total stock units, low stock count, out of stock count, reserved stock, damaged stock, and inventory value.",
+     *     operationId="adminInventoryKpis",
      *     tags={"Admin Inventory Management"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string", enum={"in_stock","low_stock","out_of_stock"})),
-     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
-     *     @OA\Response(response=200, description="Inventory records retrieved successfully")
+     *     @OA\Response(response=200, description="KPI metrics retrieved successfully")
      * )
      */
-    public function index(Request $request): JsonResponse
+    public function kpis(): JsonResponse
     {
-        $filters = $request->only(['search', 'status']);
-        $perPage = (int) $request->input('per_page', 15);
-
-        $inventories = $this->inventoryService->list($filters, $perPage);
-
-        return $this->paginatedResponse($inventories, 'Inventory records retrieved successfully.');
+        return $this->dashboard();
     }
 
     /**
      * @OA\Get(
      *     path="/api/v1/admin/inventory/dashboard",
-     *     summary="Get Inventory Dashboard Summary (Admin)",
-     *     description="Retrieve key inventory metrics including total SKUs, total units, low stock count, and valuation.",
-     *     operationId="adminGetInventoryDashboard",
+     *     summary="Inventory Dashboard Summary Metrics",
+     *     description="Retrieve summary metrics for inventory dashboard.",
+     *     operationId="adminInventoryDashboardMetrics",
      *     tags={"Admin Inventory Management"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Response(response=200, description="Inventory dashboard metrics retrieved successfully")
+     *     @OA\Response(response=200, description="Dashboard metrics retrieved successfully")
      * )
      */
     public function dashboard(): JsonResponse
     {
-        $metrics = $this->inventoryService->getDashboardMetrics();
-        return $this->successResponse($metrics, 'Inventory dashboard metrics retrieved successfully.');
+        $kpis = $this->inventoryService->getDashboardMetrics();
+
+        return $this->successResponse($kpis, 'Inventory dashboard metrics retrieved successfully.');
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/inventory",
+     *     summary="List Inventory Items",
+     *     description="Retrieve paginated inventory list with search, stock status, category, and brand filters.",
+     *     operationId="adminListInventory",
+     *     tags={"Admin Inventory Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="stock_status", in="query", required=false, @OA\Schema(type="string", enum={"in_stock","low_stock","out_of_stock"})),
+     *     @OA\Parameter(name="category_id", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="brand_id", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Response(response=200, description="Inventory list retrieved successfully")
+     * )
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $filters = $request->only(['search', 'stock_status', 'category_id', 'brand_id']);
+        $perPage = (int) $request->input('per_page', 15);
+
+        $inventory = $this->inventoryService->list($filters, $perPage);
+
+        return $this->paginatedResponse($inventory, 'Inventory list retrieved successfully.');
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/inventory/low-stock",
+     *     summary="List Low Stock Items",
+     *     description="Retrieve paginated list of SKUs where available stock is less than or equal to low stock threshold.",
+     *     operationId="adminListLowStockInventory",
+     *     tags={"Admin Inventory Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Response(response=200, description="Low stock items retrieved successfully")
+     * )
+     */
+    public function lowStock(Request $request): JsonResponse
+    {
+        return $this->alerts($request);
     }
 
     /**
      * @OA\Get(
      *     path="/api/v1/admin/inventory/alerts",
-     *     summary="Get Low & Out of Stock Alerts (Admin)",
-     *     description="Fetch paginated list of items with stock at or below low stock threshold.",
-     *     operationId="adminGetInventoryAlerts",
+     *     summary="Inventory Stock Alerts",
+     *     description="Retrieve low-stock and out-of-stock items requiring attention.",
+     *     operationId="adminInventoryAlerts",
      *     tags={"Admin Inventory Management"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
@@ -73,125 +108,96 @@ class InventoryController extends BaseController
     public function alerts(Request $request): JsonResponse
     {
         $perPage = (int) $request->input('per_page', 15);
-        $alerts = $this->inventoryService->getAlerts($perPage);
+        $items = $this->inventoryService->getAlerts($perPage);
 
-        return $this->paginatedResponse($alerts, 'Inventory alerts retrieved successfully.');
-    }
-
-    /**
-     * @OA\Get(
-     *     path="/api/v1/admin/inventory/history",
-     *     summary="Get Inventory Transaction Audit Trail (Admin)",
-     *     description="Retrieve paginated history of all stock movements and adjustments.",
-     *     operationId="adminGetInventoryHistory",
-     *     tags={"Admin Inventory Management"},
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="sku", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="product_variant_id", in="query", required=false, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="transaction_type", in="query", required=false, @OA\Schema(type="string")),
-     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
-     *     @OA\Response(response=200, description="Inventory audit history retrieved successfully")
-     * )
-     */
-    public function history(Request $request): JsonResponse
-    {
-        $filters = $request->only(['sku', 'product_variant_id', 'transaction_type']);
-        $perPage = (int) $request->input('per_page', 15);
-
-        $history = $this->inventoryService->getHistory($filters, $perPage);
-
-        return $this->paginatedResponse($history, 'Inventory audit history retrieved successfully.');
+        return $this->paginatedResponse($items, 'Inventory alerts retrieved successfully.');
     }
 
     /**
      * @OA\Get(
      *     path="/api/v1/admin/inventory/{variant_id}",
-     *     summary="Get Variant Inventory Detail (Admin)",
-     *     description="Fetch single inventory record details by variant ID.",
-     *     operationId="adminGetInventoryDetail",
+     *     summary="Single Variant Inventory Details",
+     *     description="Retrieve inventory breakdown, thresholds, and transactions for a specific variant.",
+     *     operationId="adminShowVariantInventory",
      *     tags={"Admin Inventory Management"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="variant_id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Inventory detail retrieved successfully"),
-     *     @OA\Response(response=404, description="Inventory not found")
+     *     @OA\Response(response=200, description="Variant inventory retrieved successfully")
      * )
      */
     public function show(int $variantId): JsonResponse
     {
-        $inventory = Inventory::with(['variant.product', 'transactions.admin'])
-            ->where('product_variant_id', $variantId)
-            ->firstOrFail();
+        $inventory = $this->inventoryService->getVariantInventory($variantId);
 
-        return $this->successResponse($inventory, 'Inventory detail retrieved successfully.');
+        return $this->successResponse($inventory, 'Variant inventory retrieved successfully.');
     }
 
     /**
      * @OA\Post(
      *     path="/api/v1/admin/inventory/adjust",
-     *     summary="Manual Stock Adjustment (Admin)",
-     *     description="Add, deduct, override, or mark damaged stock for a product variant with pessimistic row locking.",
-     *     operationId="adminAdjustInventory",
+     *     summary="Adjust Stock Quantity",
+     *     description="Perform atomic stock adjustment (add, deduct, set, damage) with mandatory reason and optional remarks.",
+     *     operationId="adminAdjustStock",
      *     tags={"Admin Inventory Management"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"product_variant_id","adjustment_type","quantity","remarks"},
-     *             @OA\Property(property="product_variant_id", type="integer"),
-     *             @OA\Property(property="adjustment_type", type="string", enum={"add","deduct","set","damage"}),
-     *             @OA\Property(property="quantity", type="integer", minimum=0),
-     *             @OA\Property(property="low_stock_threshold", type="integer", minimum=0),
-     *             @OA\Property(property="remarks", type="string")
+     *             required={"product_variant_id","type","quantity","reason"},
+     *             @OA\Property(property="product_variant_id", type="integer", example=1),
+     *             @OA\Property(property="type", type="string", enum={"add","deduct","set","damage"}, example="add"),
+     *             @OA\Property(property="quantity", type="integer", example=10),
+     *             @OA\Property(property="low_stock_threshold", type="integer", nullable=true, example=10),
+     *             @OA\Property(property="reason", type="string", example="Supplier Restock"),
+     *             @OA\Property(property="remarks", type="string", example="PO #9842 received")
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Inventory stock adjusted successfully"),
-     *     @OA\Response(response=422, description="Validation or insufficient stock error")
+     *     @OA\Response(response=200, description="Stock adjusted successfully"),
+     *     @OA\Response(response=422, description="Validation failed")
      * )
      */
-    public function adjust(AdjustInventoryRequest $request): JsonResponse
+    public function adjust(AdjustStockRequest $request): JsonResponse
     {
-        $inventory = $this->inventoryService->adjustStock(
-            (int) $request->input('product_variant_id'),
-            $request->input('adjustment_type'),
-            (int) $request->input('quantity'),
-            $request->input('remarks'),
-            $request->filled('low_stock_threshold') ? (int) $request->input('low_stock_threshold') : null,
-            $request->user()?->id
-        );
+        $adminId = $request->user()?->id;
+        $result = $this->inventoryService->adjustStock($request->validated(), $adminId);
 
-        return $this->successResponse($inventory, 'Inventory stock adjusted successfully.');
+        return $this->successResponse($result, 'Stock adjusted successfully.');
     }
 
     /**
      * @OA\Post(
      *     path="/api/v1/admin/inventory/reserve",
-     *     summary="Atomic Stock Reservation (Admin / Internal)",
-     *     description="Reserve available stock for checkout/order placement.",
-     *     operationId="adminReserveInventory",
+     *     summary="Reserve Stock Endpoint",
+     *     description="Atomic stock reservation endpoint.",
+     *     operationId="adminReserveStock",
      *     tags={"Admin Inventory Management"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"product_variant_id","quantity"},
-     *             @OA\Property(property="product_variant_id", type="integer"),
-     *             @OA\Property(property="quantity", type="integer", minimum=1),
-     *             @OA\Property(property="reference_type", type="string"),
-     *             @OA\Property(property="reference_id", type="integer"),
-     *             @OA\Property(property="remarks", type="string")
+     *             @OA\Property(property="product_variant_id", type="integer", example=1),
+     *             @OA\Property(property="quantity", type="integer", example=2)
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Stock reserved successfully"),
-     *     @OA\Response(response=422, description="Insufficient stock available")
+     *     @OA\Response(response=200, description="Stock reserved successfully")
      * )
      */
-    public function reserve(ReserveInventoryRequest $request): JsonResponse
+    public function reserve(Request $request): JsonResponse
     {
+        $request->validate([
+            'product_variant_id' => 'required|exists:product_variants,id',
+            'quantity' => 'required|integer|min:1',
+            'reference_type' => 'nullable|string',
+            'reference_id' => 'nullable|integer',
+            'remarks' => 'nullable|string',
+        ]);
+
         $inventory = $this->inventoryService->reserveStock(
-            (int) $request->input('product_variant_id'),
-            (int) $request->input('quantity'),
+            $request->input('product_variant_id'),
+            $request->input('quantity'),
             $request->input('reference_type'),
-            $request->filled('reference_id') ? (int) $request->input('reference_id') : null,
+            $request->input('reference_id'),
             $request->input('remarks')
         );
 
@@ -201,70 +207,147 @@ class InventoryController extends BaseController
     /**
      * @OA\Post(
      *     path="/api/v1/admin/inventory/release",
-     *     summary="Atomic Stock Release (Admin / Internal)",
-     *     description="Release reserved stock back to available pool upon order cancellation or timeout.",
-     *     operationId="adminReleaseInventory",
+     *     summary="Release Reserved Stock",
+     *     description="Atomic stock release endpoint.",
+     *     operationId="adminReleaseStock",
      *     tags={"Admin Inventory Management"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"product_variant_id","quantity"},
-     *             @OA\Property(property="product_variant_id", type="integer"),
-     *             @OA\Property(property="quantity", type="integer", minimum=1),
-     *             @OA\Property(property="reference_type", type="string"),
-     *             @OA\Property(property="reference_id", type="integer"),
-     *             @OA\Property(property="remarks", type="string")
+     *             @OA\Property(property="product_variant_id", type="integer", example=1),
+     *             @OA\Property(property="quantity", type="integer", example=2)
      *         )
      *     ),
      *     @OA\Response(response=200, description="Stock released successfully")
      * )
      */
-    public function release(ReserveInventoryRequest $request): JsonResponse
+    public function release(Request $request): JsonResponse
     {
+        $request->validate([
+            'product_variant_id' => 'required|exists:product_variants,id',
+            'quantity' => 'required|integer|min:1',
+            'reference_type' => 'nullable|string',
+            'reference_id' => 'nullable|integer',
+            'remarks' => 'nullable|string',
+        ]);
+
         $inventory = $this->inventoryService->releaseStock(
-            (int) $request->input('product_variant_id'),
-            (int) $request->input('quantity'),
+            $request->input('product_variant_id'),
+            $request->input('quantity'),
             $request->input('reference_type'),
-            $request->filled('reference_id') ? (int) $request->input('reference_id') : null,
+            $request->input('reference_id'),
             $request->input('remarks')
         );
 
-        return $this->successResponse($inventory, 'Reserved stock released successfully.');
+        return $this->successResponse($inventory, 'Stock released successfully.');
     }
 
     /**
      * @OA\Post(
      *     path="/api/v1/admin/inventory/commit",
-     *     summary="Atomic Stock Commit / Shipment (Admin / Internal)",
-     *     description="Commit reserved stock upon order fulfillment/shipment.",
-     *     operationId="adminCommitInventory",
+     *     summary="Commit Stock Shipment",
+     *     description="Atomic stock commitment upon order shipment.",
+     *     operationId="adminCommitStock",
      *     tags={"Admin Inventory Management"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"product_variant_id","quantity"},
-     *             @OA\Property(property="product_variant_id", type="integer"),
-     *             @OA\Property(property="quantity", type="integer", minimum=1),
-     *             @OA\Property(property="reference_type", type="string"),
-     *             @OA\Property(property="reference_id", type="integer"),
-     *             @OA\Property(property="remarks", type="string")
+     *             @OA\Property(property="product_variant_id", type="integer", example=1),
+     *             @OA\Property(property="quantity", type="integer", example=2)
      *         )
      *     ),
      *     @OA\Response(response=200, description="Stock committed successfully")
      * )
      */
-    public function commit(ReserveInventoryRequest $request): JsonResponse
+    public function commit(Request $request): JsonResponse
     {
+        $request->validate([
+            'product_variant_id' => 'required|exists:product_variants,id',
+            'quantity' => 'required|integer|min:1',
+            'reference_type' => 'nullable|string',
+            'reference_id' => 'nullable|integer',
+            'remarks' => 'nullable|string',
+        ]);
+
         $inventory = $this->inventoryService->commitStock(
-            (int) $request->input('product_variant_id'),
-            (int) $request->input('quantity'),
+            $request->input('product_variant_id'),
+            $request->input('quantity'),
             $request->input('reference_type'),
-            $request->filled('reference_id') ? (int) $request->input('reference_id') : null,
+            $request->input('reference_id'),
             $request->input('remarks')
         );
 
-        return $this->successResponse($inventory, 'Stock committed for shipment successfully.');
+        return $this->successResponse($inventory, 'Stock committed successfully.');
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/inventory/transactions",
+     *     summary="List Inventory Transactions",
+     *     description="Retrieve paginated inventory transaction audit trail logs.",
+     *     operationId="adminListInventoryTransactions",
+     *     tags={"Admin Inventory Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="sku", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="transaction_type", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Response(response=200, description="Inventory transactions retrieved successfully")
+     * )
+     */
+    public function transactions(Request $request): JsonResponse
+    {
+        return $this->history($request);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/inventory/history",
+     *     summary="List Inventory Audit History (Alias)",
+     *     description="Retrieve paginated inventory transaction audit trail logs.",
+     *     operationId="adminListInventoryHistory",
+     *     tags={"Admin Inventory Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="sku", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="transaction_type", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Response(response=200, description="Inventory history retrieved successfully")
+     * )
+     */
+    public function history(Request $request): JsonResponse
+    {
+        $filters = $request->only(['search', 'sku', 'product_variant_id', 'transaction_type']);
+        $perPage = (int) $request->input('per_page', 15);
+
+        $transactions = $this->inventoryService->getHistory($filters, $perPage);
+
+        return $this->paginatedResponse($transactions, 'Inventory history retrieved successfully.');
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/inventory/export",
+     *     summary="Export Inventory to CSV",
+     *     description="Stream CSV download containing current inventory stock levels.",
+     *     operationId="adminExportInventory",
+     *     tags={"Admin Inventory Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="CSV file streamed successfully")
+     * )
+     */
+    public function export(): Response
+    {
+        $csvContent = $this->inventoryService->exportCsv();
+        $filename = 'inventory-export-' . date('Y-m-d-His') . '.csv';
+
+        return response($csvContent, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 }

@@ -76,6 +76,7 @@ export default function ProductsPage() {
             }
         } catch (err) {
             console.error('Failed to fetch products:', err);
+            showNotify(err.response?.data?.message || 'Failed to load products. Please verify API connection.', 'error');
         } finally {
             setLoading(false);
         }
@@ -198,7 +199,7 @@ export default function ProductsPage() {
             const mainMedia = prd.media.find((m) => m.type === 'main') || prd.media[0];
             if (mainMedia?.url) return mainMedia.url;
         }
-        return prd.image || SVG_IMAGE_PLACEHOLDER;
+        return prd.main_image_url || prd.image_url || prd.image || SVG_IMAGE_PLACEHOLDER;
     };
 
     return (

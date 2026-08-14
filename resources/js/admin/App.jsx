@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, NavLink, useLocation, Navigate } from 're
 import {
     LayoutDashboard,
     Package,
+    Boxes,
     Tag,
     Award,
     Sliders,
@@ -23,6 +24,7 @@ import ProductsPage from './pages/ProductsPage';
 import CategoriesPage from './pages/CategoriesPage';
 import BrandsPage from './pages/BrandsPage';
 import AttributesPage from './pages/AttributesPage';
+import InventoryPage from './pages/InventoryPage';
 
 function ProtectedRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
@@ -57,6 +59,7 @@ function AdminLayout() {
         if (location.pathname.includes('/categories')) return 'Category Management';
         if (location.pathname.includes('/brands')) return 'Brand Management';
         if (location.pathname.includes('/attributes')) return 'Attribute & Variant Management';
+        if (location.pathname.includes('/inventory')) return 'Inventory Management';
         return 'Executive Dashboard';
     };
 
@@ -103,6 +106,13 @@ function AdminLayout() {
                     >
                         <Package size={18} />
                         <span>Products</span>
+                    </NavLink>
+                    <NavLink
+                        to="/inventory"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <Boxes size={18} />
+                        <span>Inventory</span>
                     </NavLink>
                     <NavLink
                         to="/categories"
@@ -229,6 +239,7 @@ function AdminLayout() {
                     <Routes>
                         <Route path="/" element={<DashboardPage />} />
                         <Route path="/products" element={<ProductsPage />} />
+                        <Route path="/inventory" element={<InventoryPage />} />
                         <Route path="/categories" element={<CategoriesPage />} />
                         <Route path="/brands" element={<BrandsPage />} />
                         <Route path="/attributes" element={<AttributesPage />} />

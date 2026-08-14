@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Admin\AttributeController;
 use App\Http\Controllers\Api\V1\Admin\AttributeValueController;
 use App\Http\Controllers\Api\V1\Admin\BrandController;
 use App\Http\Controllers\Api\V1\Admin\CategoryController;
+use App\Http\Controllers\Api\V1\Admin\InventoryController;
 use App\Http\Controllers\Api\V1\Admin\PermissionController;
 use App\Http\Controllers\Api\V1\Admin\ProductController;
 use App\Http\Controllers\Api\V1\Admin\RoleController;
@@ -135,6 +136,21 @@ Route::prefix('v1')->group(function () {
             Route::put('/variants/{variant}', [VariantController::class, 'update'])->middleware('permission:products.update');
             Route::patch('/variants/{variant}/status', [VariantController::class, 'toggleStatus'])->middleware('permission:products.update');
             Route::delete('/variants/{variant}', [VariantController::class, 'destroy'])->middleware('permission:products.delete');
+
+            // Inventory Management
+            Route::get('/inventory/dashboard', [InventoryController::class, 'dashboard'])->middleware('permission:inventory.view');
+            Route::get('/inventory/kpis', [InventoryController::class, 'kpis'])->middleware('permission:inventory.view');
+            Route::get('/inventory', [InventoryController::class, 'index'])->middleware('permission:inventory.view');
+            Route::get('/inventory/alerts', [InventoryController::class, 'alerts'])->middleware('permission:inventory.view');
+            Route::get('/inventory/low-stock', [InventoryController::class, 'lowStock'])->middleware('permission:inventory.view');
+            Route::get('/inventory/history', [InventoryController::class, 'history'])->middleware('permission:inventory.view');
+            Route::get('/inventory/transactions', [InventoryController::class, 'transactions'])->middleware('permission:inventory.view');
+            Route::get('/inventory/export', [InventoryController::class, 'export'])->middleware('permission:inventory.view');
+            Route::post('/inventory/adjust', [InventoryController::class, 'adjust'])->middleware('permission:inventory.update');
+            Route::post('/inventory/reserve', [InventoryController::class, 'reserve'])->middleware('permission:inventory.update');
+            Route::post('/inventory/release', [InventoryController::class, 'release'])->middleware('permission:inventory.update');
+            Route::post('/inventory/commit', [InventoryController::class, 'commit'])->middleware('permission:inventory.update');
+            Route::get('/inventory/{variant_id}', [InventoryController::class, 'show'])->middleware('permission:inventory.view');
 
             // Media Management
             Route::post('/media/upload', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'upload'])->middleware('permission:media.create');
