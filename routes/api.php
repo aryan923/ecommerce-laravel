@@ -174,6 +174,21 @@ Route::prefix('v1')->group(function () {
             Route::post('/inventory/release', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'release'])->middleware('permission:inventory.update');
             Route::post('/inventory/commit', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'commit'])->middleware('permission:inventory.update');
 
+            // Customer Management
+            Route::get('/customers/stats', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'stats'])->middleware('permission:customers.view');
+            Route::get('/customers/export', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'export'])->middleware('permission:customers.view');
+            Route::get('/customers', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'index'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'show'])->middleware('permission:customers.view');
+            Route::put('/customers/{id}', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'update'])->middleware('permission:customers.update');
+            Route::patch('/customers/{id}/status', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'updateStatus'])->middleware('permission:customers.update');
+            Route::get('/customers/{id}/orders', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'orders'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/addresses', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'addresses'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/reviews', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'reviews'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/returns', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'returns'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/notes', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'getNotes'])->middleware('permission:customers.view');
+            Route::post('/customers/{id}/notes', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'addNote'])->middleware('permission:customers.update');
+            Route::post('/customers/{id}/reset-password', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'resetPassword'])->middleware('permission:customers.update');
+
             // Coupon Management
             Route::get('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'index']);
             Route::post('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'store']);

@@ -234,22 +234,21 @@ export default function ProductsPage() {
             )}
 
             {/* Page Header */}
-            <div className="page-header-row">
+            <div className="page-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
                 <div>
-                    <h2 className="page-header-title">Product Management</h2>
-                    <p className="page-header-subtitle">Manage store catalog, media assets, multi-currency pricing, and bulk operations</p>
+                    <h2 className="page-header-title" style={{ margin: 0, fontSize: '1.4rem' }}>Product Management</h2>
+                    <p className="page-header-subtitle" style={{ margin: '2px 0 0 0', fontSize: '0.82rem' }}>Manage store catalog, media assets, multi-currency pricing, and bulk operations</p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
                     {/* Currency Switcher Control */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--admin-bg)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)' }}>
-                        <Globe size={16} style={{ color: 'var(--admin-primary)' }} />
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Display:</span>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: 'var(--admin-bg)', padding: '0 10px', height: '34px', borderRadius: '6px', border: '1px solid var(--admin-border)', boxSizing: 'border-box' }}>
+                        <Globe size={14} style={{ color: 'var(--admin-primary)', flexShrink: 0 }} />
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted)' }}>Display:</span>
                         <select
-                            className="form-select"
                             value={displayCurrency}
                             onChange={(e) => setDisplayCurrency(e.target.value)}
-                            style={{ border: 'none', background: 'transparent', padding: '0', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+                            style={{ border: 'none', background: 'transparent', padding: '0', fontSize: '0.8rem', fontWeight: 700, color: 'var(--admin-text)', cursor: 'pointer', outline: 'none' }}
                         >
                             {currenciesList.map((c) => (
                                 <option key={c.code} value={c.code}>
@@ -259,12 +258,12 @@ export default function ProductsPage() {
                         </select>
                     </div>
 
-                    <button className="btn btn-secondary" onClick={() => setIsImportModalOpen(true)}>
-                        <Upload size={16} />
+                    <button className="btn btn-secondary btn-sm" onClick={() => setIsImportModalOpen(true)} style={{ height: '34px', padding: '0 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>
+                        <Upload size={14} />
                         <span>Import CSV</span>
                     </button>
-                    <button className="btn btn-primary" onClick={handleOpenCreateModal}>
-                        <Plus size={16} />
+                    <button className="btn btn-primary btn-sm" onClick={handleOpenCreateModal} style={{ height: '34px', padding: '0 14px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>
+                        <Plus size={14} />
                         <span>Create Product</span>
                     </button>
                 </div>

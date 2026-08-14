@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -126,5 +128,21 @@ class User extends Authenticatable
     public function couponUsages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(CouponUsage::class, 'user_id');
+    }
+
+    /**
+     * Relationship to customer reviews.
+     */
+    public function reviews(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Review::class, 'user_id');
+    }
+
+    /**
+     * Relationship to internal staff notes.
+     */
+    public function customerNotes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CustomerNote::class, 'user_id')->latest();
     }
 }
