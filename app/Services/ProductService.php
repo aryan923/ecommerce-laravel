@@ -88,8 +88,20 @@ class ProductService
 
         $this->syncCategories($product, $categoryIds, $primaryCategoryId);
 
-        if ($variantsData !== null && is_array($variantsData)) {
+        if ($variantsData !== null && is_array($variantsData) && count($variantsData) > 0) {
             $this->syncVariants($product, $variantsData);
+        } else {
+            if ($product->variants()->count() === 0) {
+                ProductVariant::create([
+                    'product_id' => $product->id,
+                    'sku' => $product->sku ?: ProductVariant::generateUniqueSku(),
+                    'price' => $product->price ?? 0,
+                    'sale_price' => $product->sale_price ?? null,
+                    'cost_price' => $product->cost_price ?? null,
+                    'stock_qty' => isset($data['stock_qty']) ? (int) $data['stock_qty'] : 0,
+                    'status' => 'active',
+                ]);
+            }
         }
 
         return $product->load(['brand', 'categories', 'media', 'productImages.media', 'variants.attributeValues']);

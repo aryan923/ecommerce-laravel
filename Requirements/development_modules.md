@@ -14,6 +14,10 @@
 > Each module listed below must follow the **mandatory workflow** defined in `instruction.md`:  
 > `Spec → Plan → Test Cases → Regression → Implementation → Validation → Completion Report`  
 > Never skip stages or generate code before documentation is finalized and approved.
+> 
+> **Critical Architectural Rules:**
+> 1. **Zero API/Service Overwrite Policy**: When developing Admin modules (Modules 22–36) that extend earlier core backend modules (Modules 01–21), NEVER overwrite, replace, or remove pre-existing service methods, controllers, or API routes. All new functionality MUST be added alongside existing code with 100% backward compatibility for storefront checkout, customer orders, and background jobs.
+> 2. **Complete Admin Page Functionality**: Every admin module implementation MUST include all related operational controls (CRUD, search & filters, thresholds, damage/write-off reporting, audit transaction logs, SKU details, and CSV export) so that no functionality of an admin page is left missing.
 
 ---
 

@@ -76,6 +76,7 @@ export default function ProductsPage() {
             }
         } catch (err) {
             console.error('Failed to fetch products:', err);
+            showNotify(err.response?.data?.message || 'Failed to load products. Please verify API connection.', 'error');
         } finally {
             setLoading(false);
         }
