@@ -8,6 +8,7 @@ import {
     Award,
     Sliders,
     ShoppingBag,
+    RotateCcw,
     Users,
     Settings,
     Bell,
@@ -26,6 +27,8 @@ import BrandsPage from './pages/BrandsPage';
 import AttributesPage from './pages/AttributesPage';
 import InventoryPage from './pages/InventoryPage';
 import CustomerListPage from './pages/CustomerListPage';
+import OrderListPage from './pages/OrderListPage';
+import ReturnsPage from './pages/ReturnsPage';
 
 function ProtectedRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
@@ -61,6 +64,8 @@ function AdminLayout() {
         if (location.pathname.includes('/brands')) return 'Brand Management';
         if (location.pathname.includes('/attributes')) return 'Attribute & Variant Management';
         if (location.pathname.includes('/inventory')) return 'Inventory Management';
+        if (location.pathname.includes('/orders')) return 'Order Management';
+        if (location.pathname.includes('/returns')) return 'Return & Refund Management';
         if (location.pathname.includes('/customers')) return 'Customer Management';
         return 'Executive Dashboard';
     };
@@ -143,6 +148,13 @@ function AdminLayout() {
                     >
                         <ShoppingBag size={18} />
                         <span>Orders</span>
+                    </NavLink>
+                    <NavLink
+                        to="/returns"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <RotateCcw size={18} />
+                        <span>Returns & Refunds</span>
                     </NavLink>
                     <NavLink
                         to="/customers"
@@ -245,6 +257,8 @@ function AdminLayout() {
                         <Route path="/categories" element={<CategoriesPage />} />
                         <Route path="/brands" element={<BrandsPage />} />
                         <Route path="/attributes" element={<AttributesPage />} />
+                        <Route path="/orders" element={<OrderListPage />} />
+                        <Route path="/returns" element={<ReturnsPage />} />
                         <Route path="/customers" element={<CustomerListPage />} />
                         <Route path="*" element={<DashboardPage />} />
                     </Routes>

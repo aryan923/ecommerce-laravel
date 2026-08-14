@@ -30,6 +30,11 @@ class Order extends Model
         'billing_address',
         'shipping_method_name',
         'idempotency_key',
+        'admin_notes',
+        'tax_breakdown',
+        'store_snapshot',
+        'customer_snapshot',
+        'currency_snapshot',
     ];
 
     protected $casts = [
@@ -40,6 +45,10 @@ class Order extends Model
         'grand_total' => 'decimal:2',
         'shipping_address' => 'array',
         'billing_address' => 'array',
+        'tax_breakdown' => 'array',
+        'store_snapshot' => 'array',
+        'customer_snapshot' => 'array',
+        'currency_snapshot' => 'array',
     ];
 
     public static function generateOrderNumber(): string
@@ -73,6 +82,11 @@ class Order extends Model
     public function histories(): HasMany
     {
         return $this->hasMany(OrderHistory::class, 'order_id')->orderBy('created_at', 'desc');
+    }
+
+    public function shipments(): HasMany
+    {
+        return $this->hasMany(Shipment::class, 'order_id')->orderBy('created_at', 'desc');
     }
 
     public function returns(): HasMany

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Admin\BrandController;
 use App\Http\Controllers\Api\V1\Admin\CategoryController;
 use App\Http\Controllers\Api\V1\Admin\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\InventoryController;
+use App\Http\Controllers\Api\V1\Admin\OrderAdminController;
 use App\Http\Controllers\Api\V1\Admin\WarehouseController;
 use App\Http\Controllers\Api\V1\Admin\PermissionController;
 use App\Http\Controllers\Api\V1\Admin\ProductController;
@@ -91,6 +92,15 @@ Route::prefix('v1')->group(function () {
             Route::get('/customers/{id}/refunds', [CustomerController::class, 'refunds'])->middleware('permission:customers.view');
             Route::patch('/customers/{id}/status', [CustomerController::class, 'updateStatus'])->middleware('permission:customers.update');
             Route::patch('/customers/{id}/notes', [CustomerController::class, 'updateNotes'])->middleware('permission:customers.update');
+
+            // Admin Order Management
+            Route::get('/orders/stats', [OrderAdminController::class, 'stats'])->middleware('permission:orders.view');
+            Route::get('/orders', [OrderAdminController::class, 'index'])->middleware('permission:orders.view');
+            Route::get('/orders/{id}', [OrderAdminController::class, 'show'])->middleware('permission:orders.view');
+            Route::post('/orders/{id}/status', [OrderAdminController::class, 'updateStatus'])->middleware('permission:orders.update');
+            Route::post('/orders/{id}/shipment', [OrderAdminController::class, 'createShipment'])->middleware('permission:orders.update');
+            Route::post('/orders/{id}/notes', [OrderAdminController::class, 'updateNotes'])->middleware('permission:orders.update');
+
 
             // Role Management
             Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.view');
@@ -243,14 +253,18 @@ Route::prefix('v1')->group(function () {
             Route::post('/payments/{id}/mark-paid', [\App\Http\Controllers\Api\V1\Admin\PaymentAdminController::class, 'markPaid']);
 
             // Admin Return Management
+            Route::get('/returns/stats', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'stats']);
             Route::get('/returns', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'index']);
             Route::get('/returns/{id}', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'show']);
             Route::post('/returns/{id}/status', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'updateStatus']);
             Route::post('/returns/{id}/restock', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'restock']);
 
             // Admin Refund Management
+            Route::get('/refunds/stats', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'stats']);
             Route::get('/refunds', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'index']);
+            Route::get('/refunds/{id}', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'show']);
             Route::post('/refunds/process', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'process']);
+            Route::post('/refunds/{id}/retry', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'retry']);
 
             // Admin Review Management
             Route::get('/reviews', [\App\Http\Controllers\Api\V1\Admin\ReviewAdminController::class, 'index']);
@@ -295,6 +309,12 @@ Route::middleware('auth:sanctum')->prefix('v1/customer')->group(function () {
     Route::delete('/addresses/{id}', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'destroy']);
     Route::patch('/addresses/{id}/default-shipping', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'setDefaultShipping']);
     Route::patch('/addresses/{id}/default-billing', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'setDefaultBilling']);
+
+    // Customer Saved Bank Accounts
+    Route::get('/bank-accounts', [\App\Http\Controllers\Api\V1\Customer\CustomerBankAccountController::class, 'index']);
+    Route::post('/bank-accounts', [\App\Http\Controllers\Api\V1\Customer\CustomerBankAccountController::class, 'store']);
+    Route::patch('/bank-accounts/{id}/default', [\App\Http\Controllers\Api\V1\Customer\CustomerBankAccountController::class, 'setDefault']);
+    Route::delete('/bank-accounts/{id}', [\App\Http\Controllers\Api\V1\Customer\CustomerBankAccountController::class, 'destroy']);
 
     // Protected Customer Order Routes
     Route::get('/orders', [\App\Http\Controllers\Api\V1\Customer\CustomerOrderController::class, 'index']);

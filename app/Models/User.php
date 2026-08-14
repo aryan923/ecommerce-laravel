@@ -146,6 +146,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship to customer saved bank accounts.
+     */
+    public function bankAccounts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CustomerBankAccount::class, 'user_id');
+    }
+
+    /**
      * Relationship to refunds associated with customer orders.
      */
     public function refunds(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
