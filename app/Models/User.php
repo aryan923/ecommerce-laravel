@@ -29,6 +29,7 @@ class User extends Authenticatable
         'status',
         'role',
         'terms_accepted',
+        'admin_notes',
         'email_verified_at',
         'mobile_verified_at',
     ];
@@ -99,7 +100,7 @@ class User extends Authenticatable
     /**
      * Relationship to Orders.
      */
-    public function orders(): HasMany
+    public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Order::class, 'user_id');
     }
@@ -107,7 +108,7 @@ class User extends Authenticatable
     /**
      * Relationship to Wishlist.
      */
-    public function wishlistItems(): HasMany
+    public function wishlistItems(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Wishlist::class, 'user_id');
     }
@@ -126,5 +127,29 @@ class User extends Authenticatable
     public function couponUsages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(CouponUsage::class, 'user_id');
+    }
+
+    /**
+     * Relationship to product reviews submitted by customer.
+     */
+    public function reviews(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Review::class, 'user_id');
+    }
+
+    /**
+     * Relationship to return requests submitted by customer.
+     */
+    public function returnRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ReturnRequest::class, 'user_id');
+    }
+
+    /**
+     * Relationship to refunds associated with customer orders.
+     */
+    public function refunds(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(Refund::class, Order::class, 'user_id', 'order_id');
     }
 }

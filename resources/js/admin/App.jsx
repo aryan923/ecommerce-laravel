@@ -25,6 +25,7 @@ import CategoriesPage from './pages/CategoriesPage';
 import BrandsPage from './pages/BrandsPage';
 import AttributesPage from './pages/AttributesPage';
 import InventoryPage from './pages/InventoryPage';
+import CustomerListPage from './pages/CustomerListPage';
 
 function ProtectedRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
@@ -60,6 +61,7 @@ function AdminLayout() {
         if (location.pathname.includes('/brands')) return 'Brand Management';
         if (location.pathname.includes('/attributes')) return 'Attribute & Variant Management';
         if (location.pathname.includes('/inventory')) return 'Inventory Management';
+        if (location.pathname.includes('/customers')) return 'Customer Management';
         return 'Executive Dashboard';
     };
 
@@ -243,6 +245,7 @@ function AdminLayout() {
                         <Route path="/categories" element={<CategoriesPage />} />
                         <Route path="/brands" element={<BrandsPage />} />
                         <Route path="/attributes" element={<AttributesPage />} />
+                        <Route path="/customers" element={<CustomerListPage />} />
                         <Route path="*" element={<DashboardPage />} />
                     </Routes>
                 </main>

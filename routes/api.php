@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Admin\AttributeController;
 use App\Http\Controllers\Api\V1\Admin\AttributeValueController;
 use App\Http\Controllers\Api\V1\Admin\BrandController;
 use App\Http\Controllers\Api\V1\Admin\CategoryController;
+use App\Http\Controllers\Api\V1\Admin\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\InventoryController;
 use App\Http\Controllers\Api\V1\Admin\WarehouseController;
 use App\Http\Controllers\Api\V1\Admin\PermissionController;
@@ -78,6 +79,18 @@ Route::prefix('v1')->group(function () {
             Route::put('/users/{user}', [AdminUserController::class, 'update'])->middleware('permission:staff.update');
             Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->middleware('permission:staff.update');
             Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->middleware('permission:staff.delete');
+
+            // Admin Customer Management
+            Route::get('/customers/stats', [CustomerController::class, 'stats'])->middleware('permission:customers.view');
+            Route::get('/customers', [CustomerController::class, 'index'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}', [CustomerController::class, 'show'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/orders', [CustomerController::class, 'orders'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/addresses', [CustomerController::class, 'addresses'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/reviews', [CustomerController::class, 'reviews'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/returns', [CustomerController::class, 'returns'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/refunds', [CustomerController::class, 'refunds'])->middleware('permission:customers.view');
+            Route::patch('/customers/{id}/status', [CustomerController::class, 'updateStatus'])->middleware('permission:customers.update');
+            Route::patch('/customers/{id}/notes', [CustomerController::class, 'updateNotes'])->middleware('permission:customers.update');
 
             // Role Management
             Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.view');
