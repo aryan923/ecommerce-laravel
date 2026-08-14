@@ -1053,44 +1053,73 @@ export default function ProductFormModal({
                                     </div>
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                                        <div
-                                            style={{
-                                                width: '120px',
-                                                height: '120px',
-                                                borderRadius: '10px',
-                                                border: '2px dashed var(--admin-border)',
-                                                backgroundColor: 'var(--admin-bg)',
-                                                overflow: 'hidden',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                position: 'relative'
-                                            }}
-                                        >
-                                            {formData.main_image?.url ? (
-                                                <img src={formData.main_image.url} alt="Main product cover" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            ) : (
-                                                <div style={{ textAlign: 'center', color: 'var(--admin-muted)' }}>
-                                                    <ImageIcon size={32} />
-                                                    <span style={{ display: 'block', fontSize: '0.7rem', marginTop: '4px' }}>No Image</span>
-                                                </div>
-                                            )}
-                                        </div>
+                                        {(() => {
+                                            const mainSrc = typeof formData.main_image === 'object'
+                                                ? (formData.main_image?.url || (formData.main_image?.file_path ? `/storage/${formData.main_image.file_path}` : ''))
+                                                : (typeof formData.main_image === 'string' ? formData.main_image : '');
+                                            return (
+                                                <>
+                                                    <div
+                                                        style={{
+                                                            width: '130px',
+                                                            height: '130px',
+                                                            borderRadius: '12px',
+                                                            border: mainSrc ? '2px solid var(--admin-primary)' : '2px dashed var(--admin-border)',
+                                                            backgroundColor: 'var(--admin-bg)',
+                                                            overflow: 'hidden',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            position: 'relative',
+                                                            boxShadow: mainSrc ? 'var(--shadow-sm)' : 'none'
+                                                        }}
+                                                    >
+                                                        {mainSrc ? (
+                                                            <>
+                                                                <img src={mainSrc} alt="Main product cover" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                <span style={{ position: 'absolute', bottom: '6px', left: '6px', backgroundColor: 'rgba(15,23,42,0.85)', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700 }}>
+                                                                    COVER
+                                                                </span>
+                                                            </>
+                                                        ) : (
+                                                            <div style={{ textAlign: 'center', color: 'var(--admin-muted)' }}>
+                                                                <ImageIcon size={34} style={{ color: 'var(--admin-subtle)' }} />
+                                                                <span style={{ display: 'block', fontSize: '0.72rem', marginTop: '4px', fontWeight: 600 }}>No Cover Photo</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <button
-                                                type="button"
-                                                className="btn btn-secondary"
-                                                onClick={() => handleOpenMediaPicker('main')}
-                                                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                                            >
-                                                <ImageIcon size={16} />
-                                                <span>Select Main Image from Media Library</span>
-                                            </button>
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
-                                                Recommended aspect ratio 1:1 square (Min resolution: 800x800 px)
-                                            </span>
-                                        </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-secondary"
+                                                                onClick={() => handleOpenMediaPicker('main')}
+                                                                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                            >
+                                                                <ImageIcon size={16} />
+                                                                <span>{mainSrc ? 'Change Cover Photo' : 'Select Main Cover Photo'}</span>
+                                                            </button>
+
+                                                            {mainSrc && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-secondary"
+                                                                    style={{ color: 'var(--admin-danger)' }}
+                                                                    onClick={() => setFormData((prev) => ({ ...prev, main_image: null }))}
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                    <span>Remove</span>
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        <span style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+                                                            Primary cover image featured on product listings & storefront catalog (Min 800×800 px).
+                                                        </span>
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
 
@@ -1114,19 +1143,26 @@ export default function ProductFormModal({
                                     </div>
 
                                     {formData.gallery.length > 0 ? (
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '12px' }}>
-                                            {formData.gallery.map((img, idx) => (
-                                                <div key={idx} style={{ position: 'relative', height: '100px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--admin-border)' }}>
-                                                    <img src={img.url || img.file_path} alt="Gallery item" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveGalleryPhoto(idx)}
-                                                        style={{ position: 'absolute', top: '4px', right: '4px', backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '4px', padding: '3px', cursor: 'pointer', color: 'var(--admin-danger)', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
-                                                    >
-                                                        <Trash2 size={12} />
-                                                    </button>
-                                                </div>
-                                            ))}
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '12px' }}>
+                                            {formData.gallery.map((img, idx) => {
+                                                const src = typeof img === 'object' ? (img.url || (img.file_path ? `/storage/${img.file_path}` : '')) : img;
+                                                return (
+                                                    <div key={idx} style={{ position: 'relative', height: '110px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)' }}>
+                                                        <img src={src} alt="Gallery item" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                        <span style={{ position: 'absolute', bottom: '4px', left: '4px', backgroundColor: 'rgba(15,23,42,0.75)', color: '#ffffff', fontSize: '0.65rem', padding: '1px 6px', borderRadius: '3px', fontWeight: 600 }}>
+                                                            #{idx + 1}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveGalleryPhoto(idx)}
+                                                            style={{ position: 'absolute', top: '4px', right: '4px', backgroundColor: 'rgba(255,255,255,0.92)', border: 'none', borderRadius: '4px', padding: '3px', cursor: 'pointer', color: 'var(--admin-danger)', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
+                                                            title="Remove gallery photo"
+                                                        >
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     ) : (
                                         <div style={{ padding: '30px', border: '2px dashed var(--admin-border)', borderRadius: '10px', textAlign: 'center', color: 'var(--admin-muted)', fontSize: '0.85rem' }}>

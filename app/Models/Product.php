@@ -64,6 +64,9 @@ class Product extends Model
     protected $appends = [
         'effective_price',
         'is_on_sale',
+        'main_image_url',
+        'gallery_image_urls',
+        'image_url',
     ];
 
     protected static function boot()
@@ -165,6 +168,42 @@ class Product extends Model
     public function media(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
         return $this->morphMany(Media::class, 'imageable', 'model_type', 'model_id');
+    }
+
+    /**
+     * Get main image URL attribute.
+     */
+    public function getMainImageUrlAttribute(): ?string
+    {
+        if ($this->relationLoaded('media') && $this->media->isNotEmpty()) {
+            $main = $this->media->firstWhere('type', 'main') ?? $this->media->first();
+            if ($main && !empty($main->url)) return $main->url;
+        }
+
+        $mainMedia = $this->media()->where('type', 'main')->first() ?? $this->media()->first();
+        if ($mainMedia && !empty($mainMedia->url)) return $mainMedia->url;
+
+        return null;
+    }
+
+    /**
+     * Get gallery image URLs array attribute.
+     */
+    public function getGalleryImageUrlsAttribute(): array
+    {
+        if ($this->relationLoaded('media') && $this->media->isNotEmpty()) {
+            return $this->media->where('type', 'gallery')->pluck('url')->filter()->values()->toArray();
+        }
+
+        return $this->media()->where('type', 'gallery')->pluck('url')->filter()->values()->toArray();
+    }
+
+    /**
+     * Get primary image URL attribute.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->main_image_url;
     }
 
     /**
