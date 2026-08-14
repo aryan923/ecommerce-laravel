@@ -45,18 +45,24 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
         if (isOpen) {
             setError('');
             if (mode === 'edit' && initialData) {
+                const thumbImgObj = initialData.category_images?.find((ci) => ci.type === 'thumbnail')?.media || initialData.media?.find((m) => m.pivot?.type === 'thumbnail') || null;
+                const bannerImgObj = initialData.category_images?.find((ci) => ci.type === 'banner')?.media || initialData.media?.find((m) => m.pivot?.type === 'banner') || null;
+
+                const thumbImg = thumbImgObj?.url || initialData.image_url || initialData.image || '';
+                const bannerImg = bannerImgObj?.url || initialData.banner_url || initialData.banner || '';
+
                 setFormData({
                     name: initialData.name || '',
                     slug: initialData.slug || '',
                     parent_id: initialData.parent_id || '',
                     sort_order: initialData.sort_order || 0,
                     status: initialData.status || 'active',
-                    image_url: initialData.image || initialData.image_url || '',
-                    banner_url: initialData.banner || initialData.banner_url || '',
+                    image_url: thumbImg,
+                    banner_url: bannerImg,
                     seo_title: initialData.seo_title || '',
                     seo_description: initialData.seo_description || '',
-                    image_media: null,
-                    banner_media: null,
+                    image_media: thumbImgObj,
+                    banner_media: bannerImgObj,
                 });
             } else {
                 setFormData({
@@ -154,191 +160,209 @@ export default function CategoryFormModal({ isOpen, mode = 'create', initialData
 
     return (
         <div className="modal-overlay">
-            <div className="modal-card" style={{ maxWidth: '640px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <div
+                className="modal-card"
+                style={{
+                    maxWidth: '680px',
+                    width: '95%',
+                    maxHeight: '90vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    padding: 0,
+                    borderRadius: '16px',
+                    boxShadow: '0 24px 64px -12px rgba(0,0,0,0.3)',
+                }}
+            >
+                {/* Header */}
+                <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--admin-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'var(--admin-card-bg)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Tag size={22} style={{ color: 'var(--admin-primary)' }} />
-                        <h3 className="card-title">{mode === 'edit' ? 'Edit Category' : 'Create New Category'}</h3>
+                        <h3 className="card-title" style={{ margin: 0 }}>{mode === 'edit' ? 'Edit Category' : 'Create New Category'}</h3>
                     </div>
                     <button className="btn btn-secondary btn-sm" onClick={onClose}>
                         <X size={16} />
                     </button>
                 </div>
 
-                {error && (
-                    <div style={{ padding: '10px 14px', backgroundColor: 'var(--admin-danger-light)', color: 'var(--admin-danger)', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <AlertCircle size={16} />
-                        <span>{error}</span>
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-                        <div style={{ gridColumn: 'span 2' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Category Name *
-                            </label>
-                            <input
-                                type="text"
-                                name="name"
-                                className="form-control"
-                                placeholder="e.g. Consumer Electronics"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
-                            />
+                {/* Body */}
+                <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+                    {error && (
+                        <div className="alert alert-danger" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                            <AlertCircle size={16} />
+                            <span>{error}</span>
                         </div>
+                    )}
 
-                        <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Slug (Auto-generated if empty)
-                            </label>
-                            <input
-                                type="text"
-                                name="slug"
-                                className="form-control"
-                                placeholder="consumer-electronics"
-                                value={formData.slug}
-                                onChange={handleChange}
-                            />
-                        </div>
+                    <form id="category-form" onSubmit={handleSubmit}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
+                                    Category Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    className="form-control"
+                                    placeholder="e.g. Consumer Electronics"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
 
-                        <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Parent Category
-                            </label>
-                            <select name="parent_id" className="form-select" value={formData.parent_id} onChange={handleChange}>
-                                <option value="">None (Top-Level Root Category)</option>
-                                {categories.filter(c => c.id !== initialData?.id).map((c) => (
-                                    <option key={c.id} value={c.id}>{c.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
+                                    Slug (Auto-generated if empty)
+                                </label>
+                                <input
+                                    type="text"
+                                    name="slug"
+                                    className="form-control"
+                                    placeholder="consumer-electronics"
+                                    value={formData.slug}
+                                    onChange={handleChange}
+                                />
+                            </div>
 
-                        <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Sort Order
-                            </label>
-                            <input
-                                type="number"
-                                name="sort_order"
-                                className="form-control"
-                                value={formData.sort_order}
-                                onChange={handleChange}
-                            />
-                        </div>
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
+                                    Parent Category
+                                </label>
+                                <select name="parent_id" className="form-select" value={formData.parent_id} onChange={handleChange}>
+                                    <option value="">None (Top-Level Root Category)</option>
+                                    {categories.filter(c => c.id !== initialData?.id).map((c) => (
+                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                        <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Status *
-                            </label>
-                            <select name="status" className="form-select" value={formData.status} onChange={handleChange}>
-                                <option value="active">Active (Visible)</option>
-                                <option value="inactive">Inactive (Hidden)</option>
-                            </select>
-                        </div>
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
+                                    Sort Order
+                                </label>
+                                <input
+                                    type="number"
+                                    name="sort_order"
+                                    className="form-control"
+                                    value={formData.sort_order}
+                                    onChange={handleChange}
+                                />
+                            </div>
 
-                        {/* Category Image Thumbnail Picker */}
-                        <div style={{ gridColumn: 'span 2' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Category Image Thumbnail
-                            </label>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                                <div style={{ width: '64px', height: '64px', borderRadius: '8px', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    {formData.image_url ? (
-                                        <img src={formData.image_url} alt="Thumbnail preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <ImageIcon size={24} style={{ color: 'var(--admin-subtle)' }} />
-                                    )}
-                                </div>
-                                <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary btn-sm"
-                                            onClick={() => handleOpenMediaPicker('image_url')}
-                                        >
-                                            <ImageIcon size={14} />
-                                            <span>{formData.image_url ? 'Change Image' : 'Select from Media Library'}</span>
-                                        </button>
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
+                                    Status *
+                                </label>
+                                <select name="status" className="form-select" value={formData.status} onChange={handleChange}>
+                                    <option value="active">Active (Visible)</option>
+                                    <option value="inactive">Inactive (Hidden)</option>
+                                </select>
+                            </div>
+
+                            {/* Category Image Thumbnail Picker */}
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
+                                    Category Image Thumbnail
+                                </label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                                    <div style={{ width: '64px', height: '64px', borderRadius: '8px', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        {formData.image_url ? (
+                                            <img src={formData.image_url} alt="Thumbnail preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <ImageIcon size={24} style={{ color: 'var(--admin-subtle)' }} />
+                                        )}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button
+                                                type="button"
+                                                className="btn btn-secondary btn-sm"
+                                                onClick={() => handleOpenMediaPicker('image_url')}
+                                            >
+                                                <ImageIcon size={14} />
+                                                <span>{formData.image_url ? 'Change Image' : 'Select from Media Library'}</span>
+                                            </button>
+                                            {formData.image_url && (
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-secondary btn-sm"
+                                                    style={{ color: 'var(--admin-danger)' }}
+                                                    onClick={() => setFormData((prev) => ({ ...prev, image_url: '', image_media: null }))}
+                                                    title="Remove Thumbnail"
+                                                >
+                                                    <Trash2 size={14} />
+                                                    <span>Remove</span>
+                                                </button>
+                                            )}
+                                        </div>
                                         {formData.image_url && (
+                                            <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', wordBreak: 'break-all' }}>
+                                                Selected: {formData.image_url.split('/').pop()}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Category Banner Image Picker */}
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
+                                    Category Banner Image
+                                </label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                                    <div style={{ width: '120px', height: '64px', borderRadius: '8px', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        {formData.banner_url ? (
+                                            <img src={formData.banner_url} alt="Banner preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <ImageIcon size={24} style={{ color: 'var(--admin-subtle)' }} />
+                                        )}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
                                             <button
                                                 type="button"
                                                 className="btn btn-secondary btn-sm"
-                                                style={{ color: 'var(--admin-danger)' }}
-                                                onClick={() => setFormData((prev) => ({ ...prev, image_url: '', image_media: null }))}
-                                                title="Remove Thumbnail"
+                                                onClick={() => handleOpenMediaPicker('banner_url')}
                                             >
-                                                <Trash2 size={14} />
-                                                <span>Remove</span>
+                                                <ImageIcon size={14} />
+                                                <span>{formData.banner_url ? 'Change Banner' : 'Select from Media Library'}</span>
                                             </button>
-                                        )}
-                                    </div>
-                                    {formData.image_url && (
-                                        <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', wordBreak: 'break-all' }}>
-                                            Selected: {formData.image_url.split('/').pop()}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Category Banner Image Picker */}
-                        <div style={{ gridColumn: 'span 2' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                Category Banner Image
-                            </label>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                                <div style={{ width: '120px', height: '64px', borderRadius: '8px', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    {formData.banner_url ? (
-                                        <img src={formData.banner_url} alt="Banner preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <ImageIcon size={24} style={{ color: 'var(--admin-subtle)' }} />
-                                    )}
-                                </div>
-                                <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary btn-sm"
-                                            onClick={() => handleOpenMediaPicker('banner_url')}
-                                        >
-                                            <ImageIcon size={14} />
-                                            <span>{formData.banner_url ? 'Change Banner' : 'Select from Media Library'}</span>
-                                        </button>
+                                            {formData.banner_url && (
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-secondary btn-sm"
+                                                    style={{ color: 'var(--admin-danger)' }}
+                                                    onClick={() => setFormData((prev) => ({ ...prev, banner_url: '', banner_media: null }))}
+                                                    title="Remove Banner"
+                                                >
+                                                    <Trash2 size={14} />
+                                                    <span>Remove</span>
+                                                </button>
+                                            )}
+                                        </div>
                                         {formData.banner_url && (
-                                            <button
-                                                type="button"
-                                                className="btn btn-secondary btn-sm"
-                                                style={{ color: 'var(--admin-danger)' }}
-                                                onClick={() => setFormData((prev) => ({ ...prev, banner_url: '', banner_media: null }))}
-                                                title="Remove Banner"
-                                            >
-                                                <Trash2 size={14} />
-                                                <span>Remove</span>
-                                            </button>
+                                            <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', wordBreak: 'break-all' }}>
+                                                Selected: {formData.banner_url.split('/').pop()}
+                                            </span>
                                         )}
                                     </div>
-                                    {formData.banner_url && (
-                                        <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', wordBreak: 'break-all' }}>
-                                            Selected: {formData.banner_url.split('/').pop()}
-                                        </span>
-                                    )}
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
+                </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>
-                            Cancel
-                        </button>
-                        <button type="submit" className="btn btn-primary" disabled={submitting}>
-                            <Check size={16} />
-                            <span>{submitting ? 'Saving...' : mode === 'edit' ? 'Update Category' : 'Create Category'}</span>
-                        </button>
-                    </div>
-                </form>
+                {/* Footer */}
+                <div style={{ padding: '16px 24px', borderTop: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-card-bg)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>
+                        Cancel
+                    </button>
+                    <button type="submit" form="category-form" className="btn btn-primary" disabled={submitting}>
+                        <Check size={16} />
+                        <span>{submitting ? 'Saving...' : mode === 'edit' ? 'Update Category' : 'Create Category'}</span>
+                    </button>
+                </div>
 
                 {/* Centralized Media Library Picker Modal */}
                 <MediaLibraryModal

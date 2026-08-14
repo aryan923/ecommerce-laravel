@@ -18,7 +18,7 @@ class ProductService
      */
     public function list(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Product::with(['brand', 'categories', 'taxClass', 'shippingClass', 'media', 'variants.attributeValues']);
+        $query = Product::with(['brand', 'categories', 'taxClass', 'shippingClass', 'media', 'productImages.media', 'variants.attributeValues']);
 
         if (!empty($filters['search']) && is_string($filters['search'])) {
             $search = trim($filters['search']);
@@ -104,7 +104,7 @@ class ProductService
             }
         }
 
-        return $product->load(['brand', 'categories', 'variants.attributeValues']);
+        return $product->load(['brand', 'categories', 'media', 'productImages.media', 'variants.attributeValues']);
     }
 
     /**
@@ -128,7 +128,7 @@ class ProductService
             $this->syncVariants($product, $variantsData);
         }
 
-        return $product->load(['brand', 'categories', 'variants.attributeValues']);
+        return $product->load(['brand', 'categories', 'media', 'productImages.media', 'variants.attributeValues']);
     }
 
     /**
@@ -264,13 +264,46 @@ class ProductService
     protected function syncVariants(Product $product, array $variantsData): void
     {
         $keptVariantIds = [];
+        $usedSkusInBatch = [];
 
+        // 1. Validation phase: check for duplicate SKUs in batch or database
         foreach ($variantsData as $vData) {
-            $variantId = $vData['id'] ?? null;
+            $variantId = isset($vData['id']) && is_numeric($vData['id']) ? (int) $vData['id'] : null;
+            $sku = !empty($vData['sku']) ? trim($vData['sku']) : null;
+
+            if ($sku) {
+                $upperSku = strtoupper($sku);
+
+                // Check duplicate within current form submission list
+                if (in_array($upperSku, $usedSkusInBatch)) {
+                    throw ValidationException::withMessages([
+                        'variants' => ["The SKU '{$sku}' is used multiple times in your variants list. Variant SKUs must be unique."],
+                    ]);
+                }
+                $usedSkusInBatch[] = $upperSku;
+
+                // Check duplicate against existing variant records in database
+                $exists = \App\Models\ProductVariant::where('sku', $sku)
+                    ->where('id', '!=', $variantId)
+                    ->exists();
+
+                if ($exists) {
+                    throw ValidationException::withMessages([
+                        'variants' => ["The variant SKU '{$sku}' is already taken by another product. Variant SKUs must be unique."],
+                    ]);
+                }
+            }
+        }
+
+        // 2. Execution phase: create or update variants
+        foreach ($variantsData as $vData) {
+            $variantId = isset($vData['id']) && is_numeric($vData['id']) ? (int) $vData['id'] : null;
             $attributeValueIds = $vData['attribute_value_ids'] ?? [];
 
+            $sku = !empty($vData['sku']) ? trim($vData['sku']) : \App\Models\ProductVariant::generateUniqueSku('VAR');
+
             $payload = [
-                'sku' => !empty($vData['sku']) ? $vData['sku'] : \App\Models\ProductVariant::generateUniqueSku('VAR'),
+                'sku' => $sku,
                 'price' => isset($vData['price']) && is_numeric($vData['price']) ? (float) $vData['price'] : $product->price,
                 'sale_price' => isset($vData['sale_price']) && is_numeric($vData['sale_price']) ? (float) $vData['sale_price'] : null,
                 'cost_price' => isset($vData['cost_price']) && is_numeric($vData['cost_price']) ? (float) $vData['cost_price'] : null,

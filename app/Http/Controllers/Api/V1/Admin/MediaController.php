@@ -166,7 +166,12 @@ class MediaController extends BaseController
     public function detach(Request $request): JsonResponse
     {
         $request->validate(['media_id' => 'required|exists:media,id']);
-        $media = $this->mediaService->detach((int) $request->input('media_id'));
+        $media = $this->mediaService->detach(
+            (int) $request->input('media_id'),
+            $request->input('model_type'),
+            $request->input('model_id') ? (int) $request->input('model_id') : null,
+            $request->input('type')
+        );
 
         return $this->successResponse($media, 'Media detached successfully.');
     }

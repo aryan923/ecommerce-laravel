@@ -24,7 +24,7 @@ class CategoryService
             return $query->orderBy('sort_order', 'asc')->get();
         }
 
-        $query = Category::with('parent');
+        $query = Category::with(['parent', 'media', 'categoryImages.media']);
 
         if (!empty($filters['search']) && is_string($filters['search'])) {
             $search = trim($filters['search']);
@@ -53,7 +53,7 @@ class CategoryService
      */
     public function create(array $data): Category
     {
-        return Category::create($data)->load('parent');
+        return Category::create($data)->load(['parent', 'media', 'categoryImages.media']);
     }
 
     /**
@@ -75,7 +75,7 @@ class CategoryService
 
         $category->update($data);
 
-        return $category->load(['parent', 'children']);
+        return $category->load(['parent', 'children', 'media', 'categoryImages.media']);
     }
 
     /**

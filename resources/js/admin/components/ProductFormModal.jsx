@@ -102,9 +102,14 @@ export default function ProductFormModal({
                 const catIds = initialData.categories ? initialData.categories.map((c) => c.id) : [];
                 const primCat = initialData.categories ? initialData.categories.find((c) => c.pivot?.is_primary)?.id : '';
 
-                // Extract media
-                const mainMedia = initialData.media?.find((m) => m.type === 'main') || null;
-                const galleryMedia = initialData.media?.filter((m) => m.type === 'gallery') || [];
+                // Extract media cleanly from product_images or media pivot
+                const mainMedia = initialData.product_images
+                    ? initialData.product_images.find((pi) => pi.type === 'main')?.media || null
+                    : (initialData.media?.find((m) => m.pivot?.type === 'main' || m.type === 'main') || null);
+
+                const galleryMedia = initialData.product_images
+                    ? initialData.product_images.filter((pi) => pi.type === 'gallery').map((pi) => pi.media).filter(Boolean)
+                    : (initialData.media?.filter((m) => (m.pivot ? m.pivot.type === 'gallery' : m.type === 'gallery')) || []);
 
                 setFormData({
                     name: initialData.name || '',
@@ -564,13 +569,17 @@ export default function ProductFormModal({
                 }
 
                 // Detach removed images if in edit mode
-                if (mode === 'edit' && initialData?.media) {
+                if (mode === 'edit' && initialData) {
+                    const mediaList = initialData.product_images
+                        ? initialData.product_images.map((pi) => ({ id: pi.media_id, type: pi.type }))
+                        : ((initialData.media || []).map((m) => ({ id: m.id, type: m.pivot?.type || m.type })));
+
                     const currentMainId = formData.main_image?.id || null;
                     const currentGalleryIds = (formData.gallery || [])
                         .map((g) => (typeof g === 'object' ? g?.id : null))
                         .filter(Boolean);
 
-                    const removedItems = initialData.media.filter((m) => {
+                    const removedItems = mediaList.filter((m) => {
                         if (m.type === 'main' && currentMainId && m.id !== currentMainId) return true;
                         if (m.type === 'gallery' && !currentGalleryIds.includes(m.id)) return true;
                         return false;
@@ -578,7 +587,12 @@ export default function ProductFormModal({
 
                     for (const rm of removedItems) {
                         try {
-                            await axios.post('/api/v1/admin/media/detach', { media_id: rm.id });
+                            await axios.post('/api/v1/admin/media/detach', {
+                                media_id: rm.id,
+                                model_type: 'product',
+                                model_id: productId,
+                                type: rm.type,
+                            });
                         } catch (dErr) {
                             console.error('Failed to detach media:', dErr);
                         }

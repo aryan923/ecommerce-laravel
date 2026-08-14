@@ -14,7 +14,7 @@ class BrandService
      */
     public function list(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Brand::query();
+        $query = Brand::with(['media', 'brandImages.media']);
 
         if (!empty($filters['search']) && is_string($filters['search'])) {
             $search = trim($filters['search']);
@@ -39,7 +39,8 @@ class BrandService
      */
     public function create(array $data): Brand
     {
-        return Brand::create($data);
+        $brand = Brand::create($data);
+        return $brand->load(['media', 'brandImages.media']);
     }
 
     /**
@@ -49,7 +50,7 @@ class BrandService
     {
         $brand->update($data);
 
-        return $brand;
+        return $brand->load(['media', 'brandImages.media']);
     }
 
     /**

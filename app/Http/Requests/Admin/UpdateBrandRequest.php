@@ -19,7 +19,6 @@ class UpdateBrandRequest extends FormRequest
         return [
             'name' => ['sometimes', 'string', 'max:150'],
             'slug' => ['sometimes', 'string', 'max:160', Rule::unique('brands', 'slug')->ignore($brandId)],
-            'logo' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'website' => ['nullable', 'url', 'max:255'],
             'status' => ['sometimes', 'in:active,inactive'],

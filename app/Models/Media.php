@@ -45,18 +45,40 @@ class Media extends Model
         parent::boot();
 
         static::deleting(function (Media $media) {
-            if ($media->file_path && Storage::disk($media->disk)->exists($media->file_path)) {
-                Storage::disk($media->disk)->delete($media->file_path);
+            if ($media->file_path) {
+                $otherUsesCount = static::where('file_path', $media->file_path)
+                    ->where('id', '!=', $media->id)
+                    ->count();
+
+                if ($otherUsesCount === 0 && Storage::disk($media->disk)->exists($media->file_path)) {
+                    Storage::disk($media->disk)->delete($media->file_path);
+                }
             }
         });
     }
 
     /**
-     * Get the parent imageable model (Product, Category, Brand, Banner, etc.).
+     * Relationship to ProductImage models.
      */
-    public function imageable(): MorphTo
+    public function productImages(): HasMany
     {
-        return $this->morphTo(__FUNCTION__, 'model_type', 'model_id');
+        return $this->hasMany(ProductImage::class, 'media_id');
+    }
+
+    /**
+     * Relationship to CategoryImage models.
+     */
+    public function categoryImages(): HasMany
+    {
+        return $this->hasMany(CategoryImage::class, 'media_id');
+    }
+
+    /**
+     * Relationship to BrandImage models.
+     */
+    public function brandImages(): HasMany
+    {
+        return $this->hasMany(BrandImage::class, 'media_id');
     }
 
     /**
