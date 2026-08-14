@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
     Boxes,
     Package,
     AlertTriangle,
     XCircle,
-    CheckCircle,
+    CheckCircle2,
     Download,
     Search,
     Filter,
@@ -17,7 +17,14 @@ import {
     UploadCloud,
     TrendingUp,
     Clock,
-    X
+    X,
+    Copy,
+    Check,
+    RefreshCw,
+    ChevronLeft,
+    ChevronRight,
+    MapPin,
+    ShieldAlert
 } from 'lucide-react';
 import StockAdjustmentModal from '../components/StockAdjustmentModal';
 import InventoryHistoryModal from '../components/InventoryHistoryModal';
@@ -42,7 +49,9 @@ export default function InventoryPage() {
     });
     const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [notification, setNotification] = useState(null);
+    const [copiedId, setCopiedId] = useState(null);
 
     // Multi-Currency State
     const [displayCurrency, setDisplayCurrency] = useState('INR');
@@ -95,14 +104,14 @@ export default function InventoryPage() {
         }
     };
 
-    const fetchInventory = async () => {
+    const fetchInventory = useCallback(async (targetPage = page) => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
             if (search) params.append('search', search);
             if (stockStatus) params.append('stock_status', stockStatus);
             if (warehouseFilter) params.append('warehouse_id', warehouseFilter);
-            params.append('page', page);
+            params.append('page', targetPage);
             params.append('per_page', 12);
 
             const res = await axios.get(`/api/v1/admin/inventory?${params.toString()}`);
@@ -112,7 +121,7 @@ export default function InventoryPage() {
                 const meta = res.data.meta || (typeof rawData === 'object' && !Array.isArray(rawData) ? rawData : {});
                 setInventory(items);
                 setPagination({
-                    current_page: meta.current_page || 1,
+                    current_page: meta.current_page || targetPage,
                     last_page: meta.last_page || 1,
                     total: meta.total ?? items.length,
                 });
@@ -122,18 +131,25 @@ export default function InventoryPage() {
             showNotify('Failed to fetch inventory catalog.', 'error');
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
-    };
+    }, [search, stockStatus, warehouseFilter, page]);
 
     useEffect(() => {
         fetchKpis();
-        fetchInventory();
-    }, [page, stockStatus, warehouseFilter]);
+        fetchInventory(page);
+    }, [page, stockStatus, warehouseFilter, fetchInventory]);
+
+    const handleRefresh = () => {
+        setRefreshing(true);
+        fetchKpis();
+        fetchInventory(page);
+    };
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
         setPage(1);
-        fetchInventory();
+        fetchInventory(1);
     };
 
     const handleResetFilters = () => {
@@ -146,6 +162,13 @@ export default function InventoryPage() {
     const showNotify = (msg, type = 'success') => {
         setNotification({ msg, type });
         setTimeout(() => setNotification(null), 4000);
+    };
+
+    const handleCopy = (text, key) => {
+        if (!text) return;
+        navigator.clipboard.writeText(text);
+        setCopiedId(key);
+        setTimeout(() => setCopiedId(null), 2000);
     };
 
     const handleOpenAdjustment = (item) => {
@@ -172,45 +195,59 @@ export default function InventoryPage() {
         }
     };
 
+    const hasActiveFilters = Boolean(search || stockStatus || warehouseFilter);
+
     return (
         <div>
             {/* Notification Toast */}
             {notification && (
                 <div style={{
                     position: 'fixed',
-                    top: '20px',
-                    right: '20px',
-                    zIndex: 1100,
+                    top: '24px',
+                    right: '24px',
+                    zIndex: 1200,
                     padding: '12px 20px',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
                     backgroundColor: notification.type === 'error' ? 'var(--admin-danger)' : 'var(--admin-success)',
                     color: '#fff',
-                    boxShadow: 'var(--shadow-lg)'
+                    boxShadow: 'var(--shadow-lg)',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    animation: 'slideInRight 0.2s ease-out'
                 }}>
-                    {notification.type === 'error' ? <AlertTriangle size={18} /> : <CheckCircle size={18} />}
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{notification.msg}</span>
+                    {notification.type === 'error' ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
+                    <span>{notification.msg}</span>
                 </div>
             )}
 
-            {/* Page Header Row */}
-            <div className="page-header-row" style={{ flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+            {/* Page Header */}
+            <div className="page-header-row">
                 <div>
-                    <h2 className="page-header-title">Multi-Warehouse Inventory Control</h2>
-                    <p className="page-header-subtitle">Real-time multi-location stock tracking, COGS valuation, inter-warehouse transfers & audit logging</p>
+                    <h2 className="page-header-title">Inventory & Stock Control</h2>
+                    <p className="page-header-subtitle">Multi-warehouse stock levels, reorder threshold alerts, COGS valuation, and audit trail logs</p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                     {/* Currency Switcher */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', borderRadius: '8px', padding: '4px 10px' }}>
-                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted)' }}>Currency:</span>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        backgroundColor: 'var(--admin-card-bg)',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--admin-border)',
+                        boxShadow: 'var(--shadow-sm)'
+                    }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)' }}>Currency:</span>
                         <select
                             className="form-select"
-                            style={{ padding: '2px 24px 2px 8px', fontSize: '0.82rem', border: 'none', backgroundColor: 'transparent', fontWeight: 700 }}
                             value={displayCurrency}
                             onChange={(e) => setDisplayCurrency(e.target.value)}
+                            style={{ border: 'none', background: 'transparent', padding: '2px 14px 2px 2px', fontSize: '0.78rem', fontWeight: 800, color: 'var(--admin-text)', cursor: 'pointer' }}
                         >
                             {currenciesList.map((c) => (
                                 <option key={c.code} value={c.code}>
@@ -220,266 +257,379 @@ export default function InventoryPage() {
                         </select>
                     </div>
 
-                    <button className="btn btn-secondary" onClick={() => setIsHistoryModalOpen(true)}>
-                        <History size={16} />
-                        <span>Transaction Audit Logs</span>
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={handleRefresh}
+                        disabled={refreshing}
+                        title="Reload inventory records"
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 10px', borderRadius: '8px' }}
+                    >
+                        <RefreshCw size={13} className={refreshing ? 'animate-spin' : ''} />
                     </button>
 
-                    <button className="btn btn-secondary" onClick={() => setIsImportModalOpen(true)}>
-                        <UploadCloud size={16} />
-                        <span>Bulk Import CSV</span>
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => setIsHistoryModalOpen(true)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px', borderRadius: '8px' }}
+                    >
+                        <History size={14} />
+                        <span>Audit Logs</span>
                     </button>
 
-                    <button className="btn btn-secondary" onClick={() => setIsWarehouseModalOpen(true)}>
-                        <Building2 size={16} />
-                        <span>Manage Warehouses</span>
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => setIsImportModalOpen(true)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px', borderRadius: '8px' }}
+                    >
+                        <UploadCloud size={14} />
+                        <span>Import</span>
                     </button>
 
-                    <button className="btn btn-primary" onClick={handleExportCsv}>
-                        <Download size={16} />
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => setIsWarehouseModalOpen(true)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px', borderRadius: '8px' }}
+                    >
+                        <Building2 size={14} />
+                        <span>Warehouses ({warehouses.length})</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handleExportCsv}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', fontWeight: 700 }}
+                    >
+                        <Download size={14} />
                         <span>Export CSV</span>
                     </button>
                 </div>
             </div>
 
-            {/* Executive KPI Cards */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                gap: '12px',
-                marginBottom: '20px'
-            }}>
-                <div className="kpi-card" style={{
-                    padding: '12px 14px',
-                    borderRadius: '10px',
+            {/* 4 Executive KPI Cards Matrix (Standard 4 Cards Per Row) */}
+            <div className="stat-cards-grid-4">
+                {/* Available Stock Units */}
+                <div style={{
+                    padding: '16px 18px',
+                    borderRadius: '12px',
                     backgroundColor: 'var(--admin-card-bg)',
                     border: '1px solid var(--admin-border)',
+                    boxShadow: 'var(--shadow-sm)',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    minWidth: 0
+                    justifyContent: 'space-between'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Total SKUs</span>
-                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--admin-primary)', flexShrink: 0 }}>
-                            <Boxes size={14} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                            Available Stock Units
+                        </span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Package size={16} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--admin-text)' }}>
-                        {kpis.total_skus}
+                    <div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                            {kpis.total_stock_units.toLocaleString()}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            Across <strong>{kpis.total_skus}</strong> SKUs • {kpis.reserved_stock_units || 0} reserved
+                        </div>
                     </div>
                 </div>
 
-                <div className="kpi-card" style={{
-                    padding: '12px 14px',
-                    borderRadius: '10px',
-                    backgroundColor: 'var(--admin-card-bg)',
-                    border: '1px solid var(--admin-border)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    minWidth: 0
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Available Units</span>
-                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--admin-success)', flexShrink: 0 }}>
-                            <Package size={14} />
-                        </div>
-                    </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--admin-text)' }}>
-                        {kpis.total_stock_units}
-                    </div>
-                </div>
-
+                {/* Stock Health Alerts (Low & Out) */}
                 <div
-                    className="kpi-card"
                     onClick={() => { setStockStatus(stockStatus === 'low_stock' ? '' : 'low_stock'); setPage(1); }}
                     style={{
-                        padding: '12px 14px',
-                        borderRadius: '10px',
+                        padding: '16px 18px',
+                        borderRadius: '12px',
                         backgroundColor: 'var(--admin-card-bg)',
-                        border: `1.5px solid ${stockStatus === 'low_stock' ? 'var(--admin-warning)' : 'var(--admin-border)'}`,
+                        border: stockStatus === 'low_stock' ? '2px solid #f59e0b' : '1px solid var(--admin-border)',
+                        boxShadow: 'var(--shadow-sm)',
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        minWidth: 0
+                        transition: 'transform 0.15s ease'
                     }}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Low Stock</span>
-                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: 'var(--admin-warning)', flexShrink: 0 }}>
-                            <AlertTriangle size={14} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: kpis.low_stock_count + kpis.out_of_stock_count > 0 ? '#f59e0b' : 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                            Stock Health Alerts
+                        </span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <AlertTriangle size={16} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: kpis.low_stock_count > 0 ? 'var(--admin-warning)' : 'var(--admin-text)' }}>
-                        {kpis.low_stock_count}
+                    <div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: kpis.low_stock_count + kpis.out_of_stock_count > 0 ? '#f59e0b' : 'var(--admin-text)' }}>
+                            {kpis.low_stock_count + kpis.out_of_stock_count}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            <strong style={{ color: '#f59e0b' }}>{kpis.low_stock_count}</strong> low • <strong style={{ color: '#ef4444' }}>{kpis.out_of_stock_count}</strong> out
+                        </div>
                     </div>
                 </div>
 
-                <div
-                    className="kpi-card"
-                    onClick={() => { setStockStatus(stockStatus === 'out_of_stock' ? '' : 'out_of_stock'); setPage(1); }}
-                    style={{
-                        padding: '12px 14px',
-                        borderRadius: '10px',
-                        backgroundColor: 'var(--admin-card-bg)',
-                        border: `1.5px solid ${stockStatus === 'out_of_stock' ? 'var(--admin-danger)' : 'var(--admin-border)'}`,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        minWidth: 0
-                    }}
-                >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Out of Stock</span>
-                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--admin-danger)', flexShrink: 0 }}>
-                            <XCircle size={14} />
-                        </div>
-                    </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: kpis.out_of_stock_count > 0 ? 'var(--admin-danger)' : 'var(--admin-text)' }}>
-                        {kpis.out_of_stock_count}
-                    </div>
-                </div>
-
-                <div className="kpi-card" style={{
-                    padding: '12px 14px',
-                    borderRadius: '10px',
+                {/* Inventory Cost Asset Valuation */}
+                <div style={{
+                    padding: '16px 18px',
+                    borderRadius: '12px',
                     backgroundColor: 'var(--admin-card-bg)',
                     border: '1px solid var(--admin-border)',
+                    boxShadow: 'var(--shadow-sm)',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    minWidth: 0
+                    justifyContent: 'space-between'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Cost Asset Value</span>
-                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--admin-primary)', flexShrink: 0 }}>
-                            <DollarSign size={14} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                            Cost Asset Value (COGS)
+                        </span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(99, 102, 241, 0.12)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <DollarSign size={16} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--admin-text)' }}>
-                        {formatCurrency(kpis.total_inventory_cost_value, displayCurrency, true)}
+                    <div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                            {formatCurrency(kpis.total_inventory_cost_value, displayCurrency, true)}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            Procurement value in stock
+                        </div>
                     </div>
                 </div>
 
-                <div className="kpi-card" style={{
-                    padding: '12px 14px',
-                    borderRadius: '10px',
+                {/* Retail Valuation & Margin */}
+                <div style={{
+                    padding: '16px 18px',
+                    borderRadius: '12px',
                     backgroundColor: 'var(--admin-card-bg)',
                     border: '1px solid var(--admin-border)',
+                    boxShadow: 'var(--shadow-sm)',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    minWidth: 0
+                    justifyContent: 'space-between'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Retail Valuation</span>
-                        <div style={{ padding: '4px', borderRadius: '6px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--admin-success)', flexShrink: 0 }}>
-                            <TrendingUp size={14} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                            Retail Valuation
+                        </span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TrendingUp size={16} />
                         </div>
                     </div>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--admin-text)' }}>
-                        {formatCurrency(kpis.total_inventory_retail_value, displayCurrency, true)}
+                    <div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981' }}>
+                            {formatCurrency(kpis.total_inventory_retail_value, displayCurrency, true)}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            Estimated retail gross potential
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Filters Toolbar */}
-            <div className="dashboard-card" style={{ marginBottom: '20px', padding: '16px 20px' }}>
-                <form onSubmit={handleSearchSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
-                    <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
-                        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search by SKU, Product, Location..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            style={{ paddingLeft: '36px', paddingRight: search ? '32px' : '12px' }}
-                        />
-                        {search && (
-                            <button
-                                type="button"
-                                onClick={() => { setSearch(''); setPage(1); fetchInventory(); }}
-                                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-muted)' }}
-                            >
-                                <X size={14} />
-                            </button>
-                        )}
-                    </div>
-
-                    <select
-                        className="form-select"
-                        style={{ width: 'auto' }}
-                        value={warehouseFilter}
-                        onChange={(e) => {
-                            setWarehouseFilter(e.target.value);
-                            setPage(1);
-                        }}
+            {/* Integrated Table Card with Tabs & Toolbar */}
+            <div className="dashboard-card" style={{ padding: 0, overflow: 'hidden' }}>
+                {/* Quick Segmented Stock Status Tabs */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    overflowX: 'auto',
+                    padding: '12px 16px 8px 16px',
+                    borderBottom: '1px solid var(--admin-border)',
+                    backgroundColor: 'var(--admin-card-bg)',
+                    scrollbarWidth: 'none'
+                }}>
+                    <button
+                        type="button"
+                        className={`order-tab-btn ${stockStatus === '' ? 'active' : ''}`}
+                        onClick={() => { setStockStatus(''); setPage(1); }}
                     >
-                        <option value="">All Warehouses</option>
-                        {warehouses.map((wh) => (
-                            <option key={wh.id} value={wh.id}>
-                                {wh.name} ({wh.code}) {wh.is_default ? '[Default]' : ''}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        className="form-select"
-                        style={{ width: 'auto' }}
-                        value={stockStatus}
-                        onChange={(e) => {
-                            setStockStatus(e.target.value);
-                            setPage(1);
-                        }}
-                    >
-                        <option value="">All Stock Statuses</option>
-                        <option value="in_stock">In Stock (&gt; Threshold)</option>
-                        <option value="low_stock">Low Stock Alerts (≤ Threshold)</option>
-                        <option value="out_of_stock">Out of Stock (= 0)</option>
-                    </select>
-
-                    <button type="submit" className="btn btn-primary">
-                        <Filter size={16} />
-                        <span>Filter</span>
+                        <span>All Inventory</span>
+                        <span className="order-tab-badge">{kpis.total_skus}</span>
                     </button>
 
-                    {(search || stockStatus || warehouseFilter) && (
-                        <button type="button" className="btn btn-secondary" onClick={handleResetFilters} title="Reset filters">
-                            <RotateCcw size={14} />
-                        </button>
-                    )}
-                </form>
-            </div>
+                    <button
+                        type="button"
+                        className={`order-tab-btn ${stockStatus === 'in_stock' ? 'active' : ''}`}
+                        onClick={() => { setStockStatus('in_stock'); setPage(1); }}
+                    >
+                        <span className="order-status-dot" style={{ backgroundColor: '#10b981' }} />
+                        <span>In Stock</span>
+                    </button>
 
-            {/* Inventory Data Table */}
-            <div className="dashboard-card">
+                    <button
+                        type="button"
+                        className={`order-tab-btn ${stockStatus === 'low_stock' ? 'active' : ''}`}
+                        onClick={() => { setStockStatus('low_stock'); setPage(1); }}
+                    >
+                        <span className="order-status-dot pulse" style={{ backgroundColor: '#f59e0b' }} />
+                        <span>Low Stock</span>
+                        <span className="order-tab-badge" style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+                            {kpis.low_stock_count}
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={`order-tab-btn ${stockStatus === 'out_of_stock' ? 'active' : ''}`}
+                        onClick={() => { setStockStatus('out_of_stock'); setPage(1); }}
+                    >
+                        <span className="order-status-dot" style={{ backgroundColor: '#ef4444' }} />
+                        <span>Out of Stock</span>
+                        <span className="order-tab-badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444' }}>
+                            {kpis.out_of_stock_count}
+                        </span>
+                    </button>
+                </div>
+
+                {/* Filter Controls Row */}
+                <div style={{
+                    padding: '12px 16px',
+                    borderBottom: '1px solid var(--admin-border)',
+                    backgroundColor: 'var(--admin-card-bg)'
+                }}>
+                    <form onSubmit={handleSearchSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                        {/* Search Input */}
+                        <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '380px' }}>
+                            <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search SKU, Product Name, Bin..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                style={{ paddingLeft: '36px', paddingRight: search ? '30px' : '10px', height: '36px', borderRadius: '8px' }}
+                            />
+                            {search && (
+                                <button
+                                    type="button"
+                                    onClick={() => { setSearch(''); setPage(1); fetchInventory(1); }}
+                                    style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-muted)' }}
+                                >
+                                    <X size={13} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Warehouse Filter */}
+                        <select
+                            className="form-select"
+                            style={{ width: 'auto', minWidth: '150px', height: '36px', borderRadius: '8px', fontSize: '0.8rem' }}
+                            value={warehouseFilter}
+                            onChange={(e) => { setWarehouseFilter(e.target.value); setPage(1); }}
+                        >
+                            <option value="">All Warehouses</option>
+                            {warehouses.map((w) => (
+                                <option key={w.id} value={w.id}>
+                                    {w.name} {w.is_default ? '(Default)' : ''}
+                                </option>
+                            ))}
+                        </select>
+
+                        <button type="submit" className="btn btn-secondary" style={{ height: '36px', padding: '0 14px', borderRadius: '8px', fontWeight: 600 }}>
+                            <Filter size={14} />
+                            <span>Filter</span>
+                        </button>
+
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={handleResetFilters}
+                                title="Reset filters"
+                                style={{ height: '36px', padding: '0 10px', borderRadius: '8px' }}
+                            >
+                                <RotateCcw size={13} />
+                                <span>Reset</span>
+                            </button>
+                        )}
+                    </form>
+                </div>
+
+                {/* Active Filter Chips */}
+                {hasActiveFilters && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '12px', padding: '0 16px 12px 16px' }}>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', fontWeight: 600 }}>Active Filters:</span>
+
+                        {search && (
+                            <span className="order-filter-chip">
+                                <span>Search: "{search}"</span>
+                                <button type="button" className="order-filter-chip-remove" onClick={() => { setSearch(''); setPage(1); }}>
+                                    <X size={12} />
+                                </button>
+                            </span>
+                        )}
+
+                        {warehouseFilter && (
+                            <span className="order-filter-chip">
+                                <span>Warehouse: {warehouses.find(w => String(w.id) === String(warehouseFilter))?.name || warehouseFilter}</span>
+                                <button type="button" className="order-filter-chip-remove" onClick={() => { setWarehouseFilter(''); setPage(1); }}>
+                                    <X size={12} />
+                                </button>
+                            </span>
+                        )}
+
+                        {stockStatus && (
+                            <span className="order-filter-chip">
+                                <span>Level: {stockStatus.replace(/_/g, ' ').toUpperCase()}</span>
+                                <button type="button" className="order-filter-chip-remove" onClick={() => { setStockStatus(''); setPage(1); }}>
+                                    <X size={12} />
+                                </button>
+                            </span>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={handleResetFilters}
+                            style={{ background: 'none', border: 'none', color: 'var(--admin-primary)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', marginLeft: '4px' }}
+                        >
+                            Clear All
+                        </button>
+                    </div>
+                )}
+
                 <div className="table-responsive">
                     <table className="admin-table">
                         <thead>
-                            <tr>
-                                <th>SKU & Product</th>
-                                <th>Warehouse Location</th>
-                                <th>Available Stock</th>
-                                <th>Cost / Retail Price</th>
-                                <th>Threshold / Reorder Qty</th>
-                                <th>Status</th>
-                                <th style={{ textAlign: 'right' }}>Action</th>
+                            <tr style={{
+                                backgroundColor: 'var(--admin-card-hover)',
+                                borderBottom: '1px solid var(--admin-border)',
+                                color: 'var(--admin-muted)',
+                                textAlign: 'left',
+                                fontSize: '0.72rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.04em'
+                            }}>
+                                <th style={{ padding: '14px 20px' }}>SKU & Product Name</th>
+                                <th style={{ padding: '14px 16px' }}>Warehouse Location</th>
+                                <th style={{ padding: '14px 16px' }}>Available Stock</th>
+                                <th style={{ padding: '14px 16px' }}>Valuation ({displayCurrency})</th>
+                                <th style={{ padding: '14px 16px', textAlign: 'center' }}>Safety Limit</th>
+                                <th style={{ padding: '14px 16px', textAlign: 'center' }}>Stock Status</th>
+                                <th style={{ padding: '14px 20px', textAlign: 'right' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--admin-muted)' }}>
-                                        Loading inventory catalog...
+                                    <td colSpan="7" style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--admin-muted)' }}>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                                            <RefreshCw size={18} className="animate-spin" style={{ color: 'var(--admin-primary)' }} />
+                                            <span>Loading inventory stock levels...</span>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : inventory.length > 0 ? (
                                 inventory.map((item) => {
-                                    const productName = item.variant?.product?.name || 'N/A';
+                                    const productName = item.variant?.product?.name || item.product_name || 'Product Item';
                                     const brandName = item.variant?.product?.brand?.name;
                                     const available = item.available_qty ?? 0;
                                     const threshold = item.low_stock_threshold ?? 10;
@@ -490,76 +640,116 @@ export default function InventoryPage() {
                                     const locationCode = item.location_code;
 
                                     return (
-                                        <tr key={item.id}>
-                                            <td>
-                                                <div style={{ fontWeight: 700, color: 'var(--admin-text)', fontSize: '0.9rem' }}>
-                                                    {item.sku}
+                                        <tr
+                                            key={item.id}
+                                            style={{
+                                                borderBottom: '1px solid var(--admin-border)',
+                                                transition: 'background-color 0.15s ease'
+                                            }}
+                                            className="admin-table-row"
+                                        >
+                                            {/* SKU & Product */}
+                                            <td style={{ padding: '14px 20px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <span style={{ fontWeight: 800, color: 'var(--admin-primary)', fontFamily: 'monospace', fontSize: '0.88rem' }}>
+                                                        {item.sku}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleCopy(item.sku, `sku_${item.id}`)}
+                                                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '1px', color: 'var(--admin-muted)' }}
+                                                        title="Copy SKU"
+                                                    >
+                                                        {copiedId === `sku_${item.id}` ? <Check size={11} style={{ color: '#10b981' }} /> : <Copy size={11} />}
+                                                    </button>
                                                 </div>
-                                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--admin-text)', marginTop: '2px' }}>
+
+                                                <div style={{ fontWeight: 700, color: 'var(--admin-text)', fontSize: '0.9rem', marginTop: '2px' }}>
                                                     {productName}
                                                 </div>
+
                                                 {brandName && (
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
+                                                    <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '1px' }}>
                                                         Brand: {brandName}
                                                     </div>
                                                 )}
                                             </td>
-                                            <td>
-                                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--admin-text)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+
+                                            {/* Warehouse & Location */}
+                                            <td style={{ padding: '14px 16px' }}>
+                                                <div style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--admin-text)', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                                     <Building2 size={13} style={{ color: 'var(--admin-primary)' }} />
                                                     <span>{warehouseName}</span>
                                                 </div>
-                                                {locationCode ? (
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
-                                                        Loc: <strong>{locationCode}</strong>
-                                                    </div>
-                                                ) : (
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
-                                                        Unassigned Location
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: isOut ? 'var(--admin-danger)' : (isLow ? 'var(--admin-warning)' : 'var(--admin-text)') }}>
-                                                    {available} units
-                                                </div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
-                                                    Res: {item.reserved_qty ?? 0} | Dmg: {item.damaged_qty ?? 0}
+                                                <div style={{ fontSize: '0.74rem', color: locationCode ? 'var(--admin-muted)' : 'var(--admin-subtle)', marginTop: '2px' }}>
+                                                    Bin: <strong>{locationCode || 'General Staging'}</strong>
                                                 </div>
                                             </td>
-                                            <td>
-                                                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--admin-text)' }}>
+
+                                            {/* Available Stock */}
+                                            <td style={{ padding: '14px 16px' }}>
+                                                <div style={{
+                                                    fontSize: '1.15rem',
+                                                    fontWeight: 800,
+                                                    color: isOut ? '#ef4444' : (isLow ? '#f59e0b' : '#10b981')
+                                                }}>
+                                                    {available.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>units</span>
+                                                </div>
+                                                <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                                                    Res: {item.reserved_qty ?? 0} • Dmg: {item.damaged_qty ?? 0}
+                                                </div>
+                                            </td>
+
+                                            {/* Valuation */}
+                                            <td style={{ padding: '14px 16px' }}>
+                                                <div style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--admin-text)' }}>
                                                     Cost: {formatCurrency(item.cost_price ?? 0, displayCurrency, true)}
                                                 </div>
-                                                <div style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
+                                                <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', marginTop: '1px' }}>
                                                     Retail: {formatCurrency(item.variant?.price ?? 0, displayCurrency, true)}
                                                 </div>
                                             </td>
-                                            <td>
-                                                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--admin-text)' }}>
-                                                    Limit: <strong>{threshold}</strong>
+
+                                            {/* Safety Limit & Reorder */}
+                                            <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--admin-text)' }}>
+                                                    Min: {threshold}
                                                 </div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
-                                                    Reorder: <strong>{reorder}</strong>
+                                                <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)' }}>
+                                                    Batch: +{reorder}
                                                 </div>
                                             </td>
-                                            <td>
+
+                                            {/* Status Badge */}
+                                            <td style={{ padding: '14px 16px', textAlign: 'center' }}>
                                                 {isOut ? (
-                                                    <span className="badge badge-cancelled">Out of Stock</span>
+                                                    <span className="order-status-badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+                                                        <span className="order-status-dot" style={{ backgroundColor: '#ef4444' }} />
+                                                        <span>Out of Stock</span>
+                                                    </span>
                                                 ) : isLow ? (
-                                                    <span className="badge badge-pending">Low Stock</span>
+                                                    <span className="order-status-badge" style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+                                                        <span className="order-status-dot pulse" style={{ backgroundColor: '#f59e0b' }} />
+                                                        <span>Low Stock</span>
+                                                    </span>
                                                 ) : (
-                                                    <span className="badge badge-completed">In Stock</span>
+                                                    <span className="order-status-badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                                                        <span className="order-status-dot" style={{ backgroundColor: '#10b981' }} />
+                                                        <span>In Stock</span>
+                                                    </span>
                                                 )}
                                             </td>
-                                            <td style={{ textAlign: 'right' }}>
-                                                {/* Single Primary Action per Row */}
+
+                                            {/* Action Button */}
+                                            <td style={{ padding: '14px 20px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                                                 <button
+                                                    type="button"
                                                     className="btn btn-primary btn-sm"
                                                     onClick={() => handleOpenAdjustment(item)}
-                                                    title="Adjust Stock Quantity, Transfer, or Cost"
+                                                    title="Adjust Stock, Transfer Warehouses, or Record Scrap"
+                                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '8px', fontWeight: 700 }}
                                                 >
-                                                    <SlidersHorizontal size={14} />
+                                                    <SlidersHorizontal size={13} />
                                                     <span>Adjust Stock</span>
                                                 </button>
                                             </td>
@@ -568,8 +758,13 @@ export default function InventoryPage() {
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: 'var(--admin-muted)' }}>
-                                        No inventory items found matching your search filters.
+                                    <td colSpan="7" style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--admin-muted)' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--admin-text)', marginBottom: '4px' }}>
+                                            No inventory items found
+                                        </div>
+                                        <div style={{ fontSize: '0.84rem' }}>
+                                            Try modifying your search criteria or resetting the warehouse filter.
+                                        </div>
                                     </td>
                                 </tr>
                             )}
@@ -579,24 +774,40 @@ export default function InventoryPage() {
 
                 {/* Pagination Controls */}
                 {pagination.last_page > 1 && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--admin-border)' }}>
-                        <span className="text-muted" style={{ fontSize: '0.85rem' }}>
-                            Showing page {pagination.current_page} of {pagination.last_page} ({pagination.total} total SKUs)
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '12px',
+                        padding: '14px 20px',
+                        borderTop: '1px solid var(--admin-border)',
+                        backgroundColor: 'var(--admin-card-bg)',
+                        fontSize: '0.85rem'
+                    }}>
+                        <span style={{ color: 'var(--admin-muted)' }}>
+                            Showing page <strong>{pagination.current_page}</strong> of <strong>{pagination.last_page}</strong> ({pagination.total} total inventory records)
                         </span>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button
+                                type="button"
                                 className="btn btn-secondary btn-sm"
-                                disabled={pagination.current_page === 1}
-                                onClick={() => setPage(page - 1)}
+                                disabled={pagination.current_page <= 1}
+                                onClick={() => setPage(pagination.current_page - 1)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px', borderRadius: '8px' }}
                             >
-                                Previous
+                                <ChevronLeft size={14} />
+                                <span>Previous</span>
                             </button>
                             <button
+                                type="button"
                                 className="btn btn-secondary btn-sm"
-                                disabled={pagination.current_page === pagination.last_page}
-                                onClick={() => setPage(page + 1)}
+                                disabled={pagination.current_page >= pagination.last_page}
+                                onClick={() => setPage(pagination.current_page + 1)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px', borderRadius: '8px' }}
                             >
-                                Next
+                                <span>Next</span>
+                                <ChevronRight size={14} />
                             </button>
                         </div>
                     </div>
@@ -612,7 +823,7 @@ export default function InventoryPage() {
                 onSuccess={(msg) => {
                     showNotify(msg);
                     fetchKpis();
-                    fetchInventory();
+                    fetchInventory(page);
                 }}
             />
 
@@ -631,7 +842,7 @@ export default function InventoryPage() {
                     showNotify(msg);
                     fetchWarehouses();
                     fetchKpis();
-                    fetchInventory();
+                    fetchInventory(page);
                 }}
             />
 
@@ -643,7 +854,7 @@ export default function InventoryPage() {
                 onSuccess={(msg) => {
                     showNotify(msg);
                     fetchKpis();
-                    fetchInventory();
+                    fetchInventory(page);
                 }}
             />
         </div>

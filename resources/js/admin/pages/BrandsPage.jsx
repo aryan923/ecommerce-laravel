@@ -107,35 +107,115 @@ export default function BrandsPage() {
                     <p className="page-header-subtitle">Manage store manufacturer brands, logos, status, and SEO parameters</p>
                 </div>
                 <div>
-                    <button className="btn btn-primary" onClick={handleOpenCreate}>
+                    <button className="btn btn-primary" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', fontWeight: 700 }}>
                         <Plus size={16} />
                         <span>Create Brand</span>
                     </button>
                 </div>
             </div>
 
-            {/* Filter Bar */}
-            <div className="dashboard-card" style={{ marginBottom: '24px', padding: '16px 20px' }}>
-                <form onSubmit={handleSearchSubmit} className="filters-toolbar-form" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <div style={{ position: 'relative', flex: 1, minWidth: '220px', maxWidth: '360px' }}>
-                        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search brand by name or slug..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            style={{ paddingLeft: '36px' }}
-                        />
+            {/* 4 Brand KPI Cards (Standard 4 Cards Per Row) */}
+            <div className="stat-cards-grid-4">
+                <div style={{ padding: '16px 18px', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>Total Brands</span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(99, 102, 241, 0.12)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Award size={16} />
+                        </div>
                     </div>
-                    <button type="submit" className="btn btn-secondary">
-                        <span>Search</span>
-                    </button>
-                </form>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                        {brands.length}
+                    </div>
+                </div>
+
+                <div style={{ padding: '16px 18px', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>Active Brands</span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CheckCircle size={16} />
+                        </div>
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981' }}>
+                        {brands.filter(b => b.status === 'active').length}
+                    </div>
+                </div>
+
+                <div style={{ padding: '16px 18px', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>Inactive Brands</span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(148, 163, 184, 0.12)', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Award size={16} />
+                        </div>
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#94a3b8' }}>
+                        {brands.filter(b => b.status === 'inactive').length}
+                    </div>
+                </div>
+
+                <div style={{ padding: '16px 18px', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>Featured Brands</span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Award size={16} />
+                        </div>
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f59e0b' }}>
+                        {brands.filter(b => b.is_featured || b.featured).length}
+                    </div>
+                </div>
             </div>
 
-            {/* Brands Grid / Table */}
-            <div className="dashboard-card">
+            {/* Integrated Brands Table Card */}
+            <div className="dashboard-card" style={{ padding: 0, overflow: 'hidden' }}>
+                {/* Table Header Toolbar */}
+                <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid var(--admin-border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                    backgroundColor: 'var(--admin-card-bg)'
+                }}>
+                    <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1, minWidth: '260px' }}>
+                        <div style={{ position: 'relative', flex: 1, maxWidth: '420px' }}>
+                            <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search brand name, slug..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                style={{ paddingLeft: '36px', height: '38px', borderRadius: '10px' }}
+                            />
+                        </div>
+                        <button type="submit" className="btn btn-secondary" style={{ height: '38px', borderRadius: '10px', padding: '0 16px', fontWeight: 600 }}>
+                            <span>Filter</span>
+                        </button>
+                        {search && (
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={() => {
+                                    setSearch('');
+                                    fetchBrands();
+                                }}
+                                style={{ height: '38px', borderRadius: '10px', padding: '0 12px' }}
+                                title="Clear Search"
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
+                    </form>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--admin-muted)' }}>
+                            Showing <strong>{brands.length}</strong> manufacturer brands
+                        </span>
+                    </div>
+                </div>
+
                 <div className="table-responsive">
                     <table className="admin-table">
                         <thead>

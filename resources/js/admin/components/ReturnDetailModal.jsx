@@ -184,10 +184,10 @@ export default function ReturnDetailModal({
             <div
                 className="customer-modal-container"
                 onClick={(e) => e.stopPropagation()}
-                style={{ maxWidth: '960px', width: '96vw', maxHeight: '94vh', overflowY: 'auto' }}
+                style={{ maxWidth: '980px', width: '96vw', height: '88vh', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
             >
                 {/* Header Banner */}
-                <div className="customer-modal-header" style={{ borderBottom: '1px solid var(--admin-border)', padding: '16px 20px' }}>
+                <div className="customer-modal-header" style={{ borderBottom: '1px solid var(--admin-border)', padding: '16px 20px', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{
                             width: '40px',

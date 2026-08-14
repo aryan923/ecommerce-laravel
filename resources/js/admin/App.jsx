@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route, NavLink, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     Package,
@@ -14,11 +14,17 @@ import {
     Bell,
     LogOut,
     ChevronRight,
-    Store
+    ChevronDown,
+    ExternalLink,
+    Store,
+    Sun,
+    Moon,
+    Menu,
+    X,
+    Search
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-import { Sun, Moon, Menu, X } from 'lucide-react';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProductsPage from './pages/ProductsPage';
@@ -50,13 +56,49 @@ function ProtectedRoute({ children }) {
 
 function AdminLayout() {
     const location = useLocation();
+    const navigate = useNavigate();
     const { user, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
-    const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
+    const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [globalSearchQuery, setGlobalSearchQuery] = useState('');
+    const userMenuRef = useRef(null);
+    const searchInputRef = useRef(null);
 
-    React.useEffect(() => {
+    // Auto-close mobile drawer and dropdown on route change
+    useEffect(() => {
         setIsMobileNavOpen(false);
+        setIsUserMenuOpen(false);
     }, [location.pathname]);
+
+    // Click outside listener for Admin User Dropdown Menu
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+                setIsUserMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Global keyboard shortcut (Ctrl + K / Cmd + K) to focus search
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                searchInputRef.current?.focus();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    const handleGlobalSearch = (e) => {
+        e.preventDefault();
+        if (!globalSearchQuery.trim()) return;
+        navigate(`/products?search=${encodeURIComponent(globalSearchQuery.trim())}`);
+    };
 
     const getPageTitle = () => {
         if (location.pathname.includes('/products')) return 'Product Management';
@@ -80,11 +122,15 @@ function AdminLayout() {
 
             {/* Sidebar */}
             <aside className={`admin-sidebar ${isMobileNavOpen ? 'mobile-open' : ''}`}>
+                {/* Brand / Logo Header */}
                 <div className="sidebar-brand">
                     <div className="sidebar-brand-logo">
-                        <Store size={20} />
+                        <Store size={18} />
                     </div>
-                    <span className="sidebar-brand-title">Admin Console</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <span className="sidebar-brand-title">APC Commerce</span>
+                        <span className="sidebar-brand-subtitle">Console v2.8</span>
+                    </div>
                     {isMobileNavOpen && (
                         <button
                             type="button"
@@ -97,108 +143,140 @@ function AdminLayout() {
                     )}
                 </div>
 
+                {/* Grouped Sidebar Navigation */}
                 <nav className="sidebar-nav">
-                    <div className="nav-section-label">Core Modules</div>
+                    {/* SECTION 1: OVERVIEW */}
+                    <div className="nav-section-label">
+                        <span>Overview</span>
+                    </div>
+
                     <NavLink
                         to="/"
                         end
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <LayoutDashboard size={18} />
-                        <span>Dashboard</span>
+                        <div className="nav-item-content">
+                            <LayoutDashboard size={17} />
+                            <span>Executive Dashboard</span>
+                        </div>
                     </NavLink>
+
+                    {/* SECTION 2: STORE CATALOG & STOCK */}
+                    <div className="nav-section-label" style={{ marginTop: '10px' }}>
+                        <span>Catalog & Stock</span>
+                    </div>
+
                     <NavLink
                         to="/products"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <Package size={18} />
-                        <span>Products</span>
+                        <div className="nav-item-content">
+                            <Package size={17} />
+                            <span>Products & SKUs</span>
+                        </div>
                     </NavLink>
+
                     <NavLink
                         to="/inventory"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <Boxes size={18} />
-                        <span>Inventory</span>
+                        <div className="nav-item-content">
+                            <Boxes size={17} />
+                            <span>Inventory Control</span>
+                        </div>
                     </NavLink>
+
                     <NavLink
                         to="/categories"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <Tag size={18} />
-                        <span>Categories</span>
+                        <div className="nav-item-content">
+                            <Tag size={17} />
+                            <span>Categories</span>
+                        </div>
                     </NavLink>
+
                     <NavLink
                         to="/brands"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <Award size={18} />
-                        <span>Brands</span>
+                        <div className="nav-item-content">
+                            <Award size={17} />
+                            <span>Brands</span>
+                        </div>
                     </NavLink>
+
                     <NavLink
                         to="/attributes"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <Sliders size={18} />
-                        <span>Attributes</span>
+                        <div className="nav-item-content">
+                            <Sliders size={17} />
+                            <span>Attributes & Variants</span>
+                        </div>
                     </NavLink>
+
+                    {/* SECTION 3: SALES & FULFILLMENT */}
+                    <div className="nav-section-label" style={{ marginTop: '10px' }}>
+                        <span>Sales & Orders</span>
+                    </div>
+
                     <NavLink
                         to="/orders"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <ShoppingBag size={18} />
-                        <span>Orders</span>
+                        <div className="nav-item-content">
+                            <ShoppingBag size={17} />
+                            <span>Orders & Shipping</span>
+                        </div>
                     </NavLink>
+
                     <NavLink
                         to="/returns"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <RotateCcw size={18} />
-                        <span>Returns & Refunds</span>
+                        <div className="nav-item-content">
+                            <RotateCcw size={17} />
+                            <span>Returns & Refunds</span>
+                        </div>
                     </NavLink>
+
+                    {/* SECTION 4: CUSTOMERS & CRM */}
+                    <div className="nav-section-label" style={{ marginTop: '10px' }}>
+                        <span>Customers & CRM</span>
+                    </div>
+
                     <NavLink
                         to="/customers"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <Users size={18} />
-                        <span>Customers</span>
+                        <div className="nav-item-content">
+                            <Users size={17} />
+                            <span>Customer Accounts</span>
+                        </div>
                     </NavLink>
 
-                    <div className="nav-section-label" style={{ marginTop: '16px' }}>System</div>
+                    {/* SECTION 5: SETTINGS */}
+                    <div className="nav-section-label" style={{ marginTop: '10px' }}>
+                        <span>System Config</span>
+                    </div>
+
                     <NavLink
                         to="/settings"
                         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                     >
-                        <Settings size={18} />
-                        <span>Settings</span>
+                        <div className="nav-item-content">
+                            <Settings size={17} />
+                            <span>Store Settings</span>
+                        </div>
                     </NavLink>
                 </nav>
-
-                <div className="sidebar-footer">
-                    <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={toggleTheme}
-                        title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                    >
-                        {theme === 'dark' ? <Sun size={16} style={{ color: '#f59e0b' }} /> : <Moon size={16} style={{ color: '#6366f1' }} />}
-                        <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-                    </button>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div className="user-avatar">{user?.name ? user.name.charAt(0).toUpperCase() : 'A'}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--admin-text)' }}>{user?.name || 'Admin User'}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email || 'admin@example.com'}</div>
-                        </div>
-                    </div>
-                </div>
             </aside>
 
             {/* Main Content Area */}
             <div className="admin-main">
                 <header className="admin-header">
+                    {/* Left: Hamburger & Page Identifier */}
                     <div className="header-title-area">
                         <button
                             type="button"
@@ -209,43 +287,157 @@ function AdminLayout() {
                         >
                             {isMobileNavOpen ? <X size={18} /> : <Menu size={18} />}
                         </button>
-                        <span className="header-breadcrumb-prefix" style={{ color: 'var(--admin-muted)', fontSize: '0.9rem' }}>Admin</span>
-                        <ChevronRight className="header-breadcrumb-icon" size={14} style={{ color: 'var(--admin-subtle)' }} />
-                        <h1 className="header-page-title">{getPageTitle()}</h1>
+
+                        {location.pathname !== '/' && location.pathname !== '' && (
+                            <h1 className="header-page-title">{getPageTitle()}</h1>
+                        )}
                     </div>
 
+                    {/* Center: Global Search & Command Bar taking up whitespace */}
+                    <form className="header-search-center" onSubmit={handleGlobalSearch}>
+                        <div className="header-search-input-wrap">
+                            <Search size={15} style={{ color: 'var(--admin-muted)', flexShrink: 0 }} />
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                className="header-search-input"
+                                placeholder="Search products, orders, inventory, customers..."
+                                value={globalSearchQuery}
+                                onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                            />
+                            <span className="header-search-badge">Ctrl K</span>
+                        </div>
+                    </form>
+
+                    {/* Right: Theme Toggle, Notifications & Admin User Dropdown */}
                     <div className="header-actions-area">
+                        {/* Theme Toggle Button */}
                         <button
                             type="button"
                             className="btn btn-secondary btn-sm"
                             onClick={toggleTheme}
                             title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-                            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '36px',
+                                height: '36px',
+                                padding: 0,
+                                borderRadius: '8px'
+                            }}
                         >
                             {theme === 'dark' ? <Sun size={16} style={{ color: '#f59e0b' }} /> : <Moon size={16} style={{ color: '#6366f1' }} />}
-                            <span className="header-btn-label" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{theme === 'dark' ? 'Light' : 'Dark'}</span>
                         </button>
 
-                        <button className="btn btn-secondary btn-sm" title="Notifications">
-                            <Bell size={16} />
-                        </button>
-
-                        <div className="header-user-badge">
-                            <div className="user-avatar" style={{ width: '22px', height: '22px', fontSize: '0.7rem' }}>
-                                {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
-                            </div>
-                            <span className="header-user-name" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user?.name || 'Admin'}</span>
-                        </div>
-
+                        {/* Notification Bell with Badge */}
                         <button
+                            type="button"
                             className="btn btn-secondary btn-sm"
-                            onClick={logout}
-                            title="Sign Out"
-                            style={{ color: 'var(--admin-danger)' }}
+                            title="System Notifications"
+                            style={{
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '36px',
+                                height: '36px',
+                                padding: 0,
+                                borderRadius: '8px'
+                            }}
                         >
-                            <LogOut size={16} />
-                            <span className="header-btn-label">Logout</span>
+                            <Bell size={16} />
+                            <span style={{
+                                position: 'absolute',
+                                top: '4px',
+                                right: '4px',
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                backgroundColor: 'var(--admin-danger)',
+                                border: '2px solid var(--admin-card-bg)'
+                            }} />
                         </button>
+
+                        {/* Interactive Admin User Profile Dropdown Menu */}
+                        <div className="user-menu-dropdown-container" ref={userMenuRef}>
+                            <div
+                                className={`user-menu-trigger-btn ${isUserMenuOpen ? 'active' : ''}`}
+                                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                title="Admin User Menu"
+                            >
+                                <div className="user-avatar">
+                                    {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                                </div>
+                                <div className="user-menu-trigger-info">
+                                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                                        {user?.name || 'Administrator'}
+                                    </span>
+                                    <span style={{ fontSize: '0.68rem', color: 'var(--admin-muted)', fontWeight: 600 }}>
+                                        Super Admin
+                                    </span>
+                                </div>
+                                <ChevronDown
+                                    size={14}
+                                    style={{
+                                        color: 'var(--admin-muted)',
+                                        transition: 'transform 0.2s ease',
+                                        transform: isUserMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                                    }}
+                                />
+                            </div>
+
+                            {/* Dropdown Popup Menu */}
+                            {isUserMenuOpen && (
+                                <div className="user-menu-dropdown">
+                                    {/* User Details Header */}
+                                    <div className="user-menu-header">
+                                        <div className="user-avatar" style={{ width: '36px', height: '36px', fontSize: '0.9rem' }}>
+                                            {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                                        </div>
+                                        <div style={{ minWidth: 0 }}>
+                                            <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--admin-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {user?.name || 'Administrator'}
+                                            </div>
+                                            <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {user?.email || 'admin@example.com'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Menu Actions */}
+                                    <div className="user-menu-body">
+                                        <NavLink
+                                            to="/settings"
+                                            className="user-menu-item"
+                                            onClick={() => setIsUserMenuOpen(false)}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Settings size={15} />
+                                                <span>Store Settings</span>
+                                            </div>
+                                        </NavLink>
+
+                                        <div className="user-menu-divider" />
+
+                                        {/* Logout Button (Exclusively inside Admin menu) */}
+                                        <button
+                                            type="button"
+                                            className="user-menu-item danger"
+                                            onClick={() => {
+                                                setIsUserMenuOpen(false);
+                                                logout();
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <LogOut size={15} />
+                                                <span>Sign Out</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </header>
 

@@ -190,274 +190,246 @@ export default function ReturnsPage() {
     };
 
     return (
-        <div className="admin-page" style={{ padding: '20px' }}>
+        <div>
             {/* Top Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+            <div className="page-header-row">
                 <div>
-                    <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: 'var(--admin-text)' }}>
-                        Return & Refund Management
-                    </h2>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
-                        Customer return requests, warehouse quality checks, and dual-channel refunds
-                    </div>
+                    <h2 className="page-header-title">Return & Refund Management</h2>
+                    <p className="page-header-subtitle">Customer return requests, warehouse quality checks, and dual-channel refunds</p>
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px' }}>
                     <button
                         type="button"
-                        className={`btn ${activeTab === 'returns' ? 'btn-primary' : 'btn-secondary'}`}
+                        className={`btn ${activeTab === 'returns' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
                         onClick={() => setActiveTab('returns')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', fontWeight: 700 }}
                     >
-                        <RotateCcw size={16} />
+                        <RotateCcw size={14} />
                         <span>Return Requests</span>
                     </button>
                     <button
                         type="button"
-                        className={`btn ${activeTab === 'refunds' ? 'btn-primary' : 'btn-secondary'}`}
+                        className={`btn ${activeTab === 'refunds' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
                         onClick={() => setActiveTab('refunds')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', fontWeight: 700 }}
                     >
-                        <DollarSign size={16} />
+                        <DollarSign size={14} />
                         <span>Refund History</span>
                     </button>
                 </div>
             </div>
 
-            {/* KPI Cards Grid */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: '16px',
-                marginBottom: '24px'
-            }}>
+            {/* KPI Cards Grid (Standard 4 Cards Per Row) */}
+            <div className="stat-cards-grid-4">
                 {/* Total Returns */}
                 <div style={{
+                    padding: '16px 18px',
+                    borderRadius: '12px',
                     backgroundColor: 'var(--admin-card-bg)',
                     border: '1px solid var(--admin-border)',
-                    borderRadius: '12px',
-                    padding: '16px',
+                    boxShadow: 'var(--shadow-sm)',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px'
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
                 }}>
-                    <div style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(99, 102, 241, 0.12)',
-                        color: '#6366f1',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <RotateCcw size={22} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                            Total Returns
+                        </span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(99, 102, 241, 0.12)', color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <RotateCcw size={16} />
+                        </div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                            Total Returns
-                        </div>
-                        <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--admin-text)' }}>
                             {stats?.total_returns ?? '0'}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            All recorded requests
                         </div>
                     </div>
                 </div>
 
                 {/* Pending Review */}
                 <div style={{
+                    padding: '16px 18px',
+                    borderRadius: '12px',
                     backgroundColor: 'var(--admin-card-bg)',
                     border: '1px solid var(--admin-border)',
-                    borderRadius: '12px',
-                    padding: '16px',
+                    boxShadow: 'var(--shadow-sm)',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px'
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
                 }}>
-                    <div style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(245, 158, 11, 0.12)',
-                        color: '#f59e0b',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <Clock size={22} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                            Pending Review
+                        </span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Clock size={16} />
+                        </div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                            Pending Review
-                        </div>
-                        <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#f59e0b' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f59e0b' }}>
                             {stats?.pending_review_returns ?? '0'}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            Awaiting approval
                         </div>
                     </div>
                 </div>
 
                 {/* Logistics & QC */}
                 <div style={{
+                    padding: '16px 18px',
+                    borderRadius: '12px',
                     backgroundColor: 'var(--admin-card-bg)',
                     border: '1px solid var(--admin-border)',
-                    borderRadius: '12px',
-                    padding: '16px',
+                    boxShadow: 'var(--shadow-sm)',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px'
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
                 }}>
-                    <div style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(139, 92, 246, 0.12)',
-                        color: '#8b5cf6',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <Truck size={22} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                            In Logistics / QC
+                        </span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Truck size={16} />
+                        </div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                            In Logistics / QC
-                        </div>
-                        <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#8b5cf6' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#8b5cf6' }}>
                             {(stats?.pickup_scheduled_returns || 0) + (stats?.received_returns || 0) + (stats?.quality_check_returns || 0)}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            Pickup & warehouse inspection
                         </div>
                     </div>
                 </div>
 
                 {/* Total Refund Volume */}
                 <div style={{
+                    padding: '16px 18px',
+                    borderRadius: '12px',
                     backgroundColor: 'var(--admin-card-bg)',
                     border: '1px solid var(--admin-border)',
-                    borderRadius: '12px',
-                    padding: '16px',
+                    boxShadow: 'var(--shadow-sm)',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px'
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
                 }}>
-                    <div style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(16, 185, 129, 0.12)',
-                        color: '#10b981',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <DollarSign size={22} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>
+                            Total Refund Volume
+                        </span>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <DollarSign size={16} />
+                        </div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                            Total Refund Volume
-                        </div>
-                        <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#10b981' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981' }}>
                             ₹ {stats?.total_refunded_amount ? parseFloat(stats.total_refunded_amount).toFixed(2) : '0.00'}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            Processed payouts & credit
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Filter Toolbar */}
-            <div style={{
-                backgroundColor: 'var(--admin-card-bg)',
-                border: '1px solid var(--admin-border)',
-                borderRadius: '12px',
-                padding: '16px',
-                marginBottom: '20px'
-            }}>
-                <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <div style={{ position: 'relative', flex: '1', minWidth: '220px' }}>
-                        <Search size={16} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--admin-muted)' }} />
+            {/* Integrated Table Card with Toolbar */}
+            <div className="dashboard-card" style={{ padding: 0, overflow: 'hidden' }}>
+                {/* Filter Toolbar Header */}
+                <div style={{
+                    padding: '12px 16px',
+                    borderBottom: '1px solid var(--admin-border)',
+                    backgroundColor: 'var(--admin-card-bg)'
+                }}>
+                    <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <div style={{ position: 'relative', flex: '1', minWidth: '220px', maxWidth: '360px' }}>
+                            <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder={activeTab === 'returns' ? "Search Return #, Order #, Customer..." : "Search Refund #, Gateway Ref, Order #..."}
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                style={{ paddingLeft: '36px', height: '36px', borderRadius: '8px' }}
+                            />
+                        </div>
+
+                        {activeTab === 'returns' ? (
+                            <select
+                                className="form-select"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                style={{ width: 'auto', minWidth: '150px', height: '36px', borderRadius: '8px', fontSize: '0.8rem' }}
+                            >
+                                <option value="">All Return Statuses</option>
+                                <option value="requested">Requested</option>
+                                <option value="under_review">Under Review</option>
+                                <option value="approved">Approved</option>
+                                <option value="pickup_scheduled">Pickup Scheduled</option>
+                                <option value="received">Received</option>
+                                <option value="quality_check">Quality Check</option>
+                                <option value="approved_for_refund">Approved for Refund</option>
+                                <option value="refunded">Refunded</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        ) : (
+                            <select
+                                className="form-select"
+                                value={channelFilter}
+                                onChange={(e) => setChannelFilter(e.target.value)}
+                                style={{ width: 'auto', minWidth: '150px', height: '36px', borderRadius: '8px', fontSize: '0.8rem' }}
+                            >
+                                <option value="">All Refund Channels</option>
+                                <option value="original_gateway">Original Gateway</option>
+                                <option value="bank_transfer">Bank Transfer (IMPS/NEFT)</option>
+                                <option value="store_credit">Store Credit</option>
+                                <option value="manual_cash">Manual / Cash</option>
+                            </select>
+                        )}
+
                         <input
-                            type="text"
+                            type="date"
                             className="form-control"
-                            placeholder={activeTab === 'returns' ? "Search Return #, Order #, Customer..." : "Search Refund #, Gateway Ref, Order #..."}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            style={{ paddingLeft: '32px' }}
+                            placeholder="From Date"
+                            value={dateFrom}
+                            onChange={(e) => setDateFrom(e.target.value)}
+                            style={{ width: 'auto', height: '36px', borderRadius: '8px', fontSize: '0.8rem' }}
                         />
-                    </div>
 
-                    {activeTab === 'returns' ? (
-                        <select
+                        <input
+                            type="date"
                             className="form-control"
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            style={{ width: 'auto', minWidth: '150px' }}
-                        >
-                            <option value="">All Return Statuses</option>
-                            <option value="requested">Requested</option>
-                            <option value="under_review">Under Review</option>
-                            <option value="approved">Approved</option>
-                            <option value="pickup_scheduled">Pickup Scheduled</option>
-                            <option value="received">Received</option>
-                            <option value="quality_check">Quality Check</option>
-                            <option value="approved_for_refund">Approved for Refund</option>
-                            <option value="refunded">Refunded</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                    ) : (
-                        <select
-                            className="form-control"
-                            value={channelFilter}
-                            onChange={(e) => setChannelFilter(e.target.value)}
-                            style={{ width: 'auto', minWidth: '150px' }}
-                        >
-                            <option value="">All Refund Channels</option>
-                            <option value="original_gateway">Original Gateway</option>
-                            <option value="bank_transfer">Bank Transfer (IMPS/NEFT)</option>
-                            <option value="store_credit">Store Credit</option>
-                            <option value="manual_cash">Manual / Cash</option>
-                        </select>
-                    )}
+                            placeholder="To Date"
+                            value={dateTo}
+                            onChange={(e) => setDateTo(e.target.value)}
+                            style={{ width: 'auto', height: '36px', borderRadius: '8px', fontSize: '0.8rem' }}
+                        />
 
-                    <input
-                        type="date"
-                        className="form-control"
-                        placeholder="From Date"
-                        value={dateFrom}
-                        onChange={(e) => setDateFrom(e.target.value)}
-                        style={{ width: 'auto' }}
-                    />
-
-                    <input
-                        type="date"
-                        className="form-control"
-                        placeholder="To Date"
-                        value={dateTo}
-                        onChange={(e) => setDateTo(e.target.value)}
-                        style={{ width: 'auto' }}
-                    />
-
-                    <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Filter size={15} />
-                        <span>Filter</span>
-                    </button>
-
-                    {(search || statusFilter || channelFilter || dateFrom || dateTo) && (
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={handleResetFilters}
-                            title="Reset all filters"
-                        >
-                            <X size={15} />
-                            <span>Reset</span>
+                        <button type="submit" className="btn btn-secondary" style={{ height: '36px', padding: '0 14px', borderRadius: '8px', fontWeight: 600 }}>
+                            <Filter size={14} />
+                            <span>Filter</span>
                         </button>
-                    )}
-                </form>
-            </div>
 
-            {/* Data Grid Section */}
-            <div style={{
-                backgroundColor: 'var(--admin-card-bg)',
-                border: '1px solid var(--admin-border)',
-                borderRadius: '12px',
-                overflow: 'hidden'
-            }}>
+                        {(search || statusFilter || channelFilter || dateFrom || dateTo) && (
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={handleResetFilters}
+                                title="Reset all filters"
+                                style={{ height: '36px', padding: '0 10px', borderRadius: '8px' }}
+                            >
+                                <X size={13} />
+                                <span>Reset</span>
+                            </button>
+                        )}
+                    </form>
+                </div>
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--admin-muted)' }}>
                         Loading data records...

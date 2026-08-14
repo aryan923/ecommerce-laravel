@@ -14,11 +14,19 @@ import {
     Printer,
     Save,
     AlertTriangle,
-    CheckCircle,
+    CheckCircle2,
     Copy,
     Check,
     Send,
-    ExternalLink
+    ExternalLink,
+    Package,
+    Boxes,
+    Calendar,
+    DollarSign,
+    RefreshCw,
+    XCircle,
+    ChevronRight,
+    Tag
 } from 'lucide-react';
 import { loadCurrenciesFromApi, formatCurrency } from '../utils/currency';
 
@@ -42,9 +50,6 @@ export default function OrderDetailModal({
     const [awbNumber, setAwbNumber] = useState('');
     const [trackingNumber, setTrackingNumber] = useState('');
     const [savingShipment, setSavingShipment] = useState(false);
-
-    // Print Packing Slip Modal View
-    const [isPrintMode, setIsPrintMode] = useState(false);
 
     const [notification, setNotification] = useState(null);
     const [copiedField, setCopiedField] = useState(null);
@@ -87,16 +92,17 @@ export default function OrderDetailModal({
     };
 
     const handleSaveStatus = async (newStatus) => {
+        if (newStatus === status) return;
         setSavingStatus(true);
         try {
             const res = await axios.post(`/api/v1/admin/orders/${orderId}/status`, {
                 status: newStatus,
-                comment: statusComment || null
+                comment: statusComment || `Order status updated to ${newStatus}`
             });
             if (res.data?.success) {
                 setStatus(newStatus);
                 setStatusComment('');
-                showNotify(`Order status updated to ${newStatus.toUpperCase()}.`);
+                showNotify(`Order status updated to ${newStatus.replace(/_/g, ' ').toUpperCase()}.`);
                 fetchOrderDetails();
                 if (onStatusChange) onStatusChange();
             }
@@ -162,7 +168,6 @@ export default function OrderDetailModal({
     const items = order.items || [];
     const customer = order.user || {};
     const shippingAddr = order.shipping_address || {};
-    const billingAddr = order.billing_address || {};
     const payment = (order.payments && order.payments.length > 0) ? order.payments[0] : null;
     const shipment = (order.shipments && order.shipments.length > 0) ? order.shipments[0] : null;
     const histories = order.histories || [];
@@ -171,8 +176,34 @@ export default function OrderDetailModal({
     const customerEmail = order.guest_email || customer.email || 'N/A';
     const customerPhone = customer.mobile || shippingAddr.phone || shippingAddr.mobile || 'N/A';
 
+    // Milestone Steps Definition
+    const milestones = [
+        { key: 'placed', label: 'Order Placed' },
+        { key: 'paid', label: 'Payment Confirmed' },
+        { key: 'processing', label: 'Processing / Packaged' },
+        { key: 'shipped', label: 'Shipped / In Transit' },
+        { key: 'delivered', label: 'Delivered' }
+    ];
+
+    const getMilestoneIndex = (st) => {
+        switch (st) {
+            case 'pending_payment': return 0;
+            case 'paid':
+            case 'confirmed': return 1;
+            case 'processing': return 2;
+            case 'shipped': return 3;
+            case 'delivered': return 4;
+            case 'cancelled':
+            case 'failed': return -1;
+            default: return 0;
+        }
+    };
+
+    const currentStepIdx = getMilestoneIndex(order.status);
+    const isCancelled = order.status === 'cancelled' || order.status === 'failed';
+
     return (
-        <div className="customer-modal-backdrop">
+        <div className="customer-modal-backdrop" onClick={onClose} style={{ zIndex: 1050 }}>
             {/* Toast Notification */}
             {notification && (
                 <div style={{
@@ -192,84 +223,96 @@ export default function OrderDetailModal({
                     gap: '10px',
                     animation: 'slideInRight 0.2s ease-out'
                 }}>
-                    {notification.type === 'error' ? <AlertTriangle size={18} /> : <CheckCircle size={18} />}
+                    {notification.type === 'error' ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
                     <span>{notification.msg}</span>
                 </div>
             )}
 
-            <div className="customer-modal-container" style={{ maxWidth: isPrintMode ? '800px' : '980px' }}>
+            <div
+                className="customer-modal-container"
+                onClick={(e) => e.stopPropagation()}
+                style={{ maxWidth: '1040px', width: '96vw', height: '88vh', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+            >
                 {/* Header Banner */}
-                <div className="customer-modal-header" style={{
-                    padding: '18px 24px',
+                <div style={{
+                    padding: '16px 24px',
                     borderBottom: '1px solid var(--admin-border)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     flexWrap: 'wrap',
                     gap: '14px',
-                    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%)'
+                    backgroundColor: 'var(--admin-card-bg)',
+                    flexShrink: 0
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                         <div style={{
-                            width: '42px',
-                            height: '42px',
+                            width: '44px',
+                            height: '44px',
                             borderRadius: '12px',
-                            background: 'linear-gradient(135deg, var(--admin-primary), #a855f7)',
-                            color: '#fff',
+                            backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                            color: 'var(--admin-primary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontWeight: 800,
-                            fontSize: '1.1rem',
-                            flexShrink: 0,
-                            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                            flexShrink: 0
                         }}>
-                            <ShoppingBag size={20} />
+                            <ShoppingBag size={22} />
                         </div>
 
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--admin-text)', letterSpacing: '-0.01em' }}>
+                                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--admin-text)', letterSpacing: '-0.02em' }}>
                                     Order #{order.order_number || 'ORD-0000'}
                                 </h3>
-                                <span className={`badge ${status === 'delivered' ? 'badge-completed' : (status === 'cancelled' ? 'badge-cancelled' : 'badge-pending')}`} style={{ fontSize: '0.74rem', padding: '4px 10px', borderRadius: '20px' }}>
-                                    {status ? status.toUpperCase() : 'PENDING'}
-                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => handleCopy(order.order_number, 'order_num')}
+                                    title="Copy Order #"
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: 'var(--admin-muted)' }}
+                                >
+                                    {copiedField === 'order_num' ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
+                                </button>
                             </div>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                                Placed on {order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A'}
+                            <span style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                                <Calendar size={12} />
+                                <span>Placed on {order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A'}</span>
                             </span>
                         </div>
                     </div>
 
-                    <div className="customer-modal-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        {/* Print Packing Slip */}
                         <button
                             type="button"
                             className="btn btn-secondary btn-sm"
                             onClick={() => window.print()}
-                            title="Print Packing Slip & Invoice"
-                            style={{ borderRadius: '8px' }}
+                            title="Print Customer Packing Slip & Invoice"
+                            style={{ display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px' }}
                         >
                             <Printer size={15} />
-                            <span>Print Packing Slip</span>
+                            <span>Print Slip</span>
                         </button>
 
-                        {!showShipmentForm && (
+                        {/* Attach Shipment Button */}
+                        {!showShipmentForm && order.status !== 'delivered' && order.status !== 'cancelled' && (
                             <button
                                 type="button"
                                 className="btn btn-primary btn-sm"
                                 onClick={() => setShowShipmentForm(true)}
-                                style={{ borderRadius: '8px' }}
+                                style={{ display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px' }}
                             >
                                 <Truck size={15} />
                                 <span>Create Shipment</span>
                             </button>
                         )}
 
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        {/* Status Transition Select */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <select
                                 className="form-select"
-                                style={{ fontSize: '0.82rem', padding: '4px 12px', borderRadius: '8px', fontWeight: 700, width: 'auto' }}
+                                style={{ fontSize: '0.82rem', padding: '6px 12px', borderRadius: '8px', fontWeight: 700, width: 'auto' }}
                                 value={status}
                                 disabled={savingStatus}
                                 onChange={(e) => handleSaveStatus(e.target.value)}
@@ -285,81 +328,145 @@ export default function OrderDetailModal({
                             </select>
                         </div>
 
-                        <button type="button" className="btn btn-secondary btn-sm" onClick={onClose} style={{ padding: '8px', borderRadius: '8px', marginLeft: '4px' }}>
+                        {/* Close Modal Button */}
+                        <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={onClose}
+                            style={{ padding: '6px', borderRadius: '8px' }}
+                        >
                             <X size={18} />
                         </button>
                     </div>
                 </div>
 
-                {/* Body Content */}
-                <div className="customer-modal-body" style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+                {/* Modal Body Content */}
+                <div className="customer-modal-body" style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '24px' }}>
                     {loading ? (
-                        <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--admin-muted)' }}>
-                            <div className="spinner" style={{ margin: '0 auto 12px auto' }} />
-                            <span>Loading order details...</span>
+                        <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--admin-muted)' }}>
+                            <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 12px auto', color: 'var(--admin-primary)' }} />
+                            <div>Loading complete 360 order details...</div>
                         </div>
                     ) : (
                         <div>
-                            {/* Shipment Creation Drawer */}
+                            {/* Order Milestone Progress Tracker */}
+                            {!isCancelled ? (
+                                <div style={{
+                                    backgroundColor: 'var(--admin-card-hover)',
+                                    border: '1px solid var(--admin-border)',
+                                    borderRadius: '12px',
+                                    padding: '18px 20px',
+                                    marginBottom: '24px'
+                                }}>
+                                    <div className="order-milestone-track">
+                                        <div className="order-milestone-line">
+                                            <div
+                                                className="order-milestone-line-progress"
+                                                style={{ width: `${(currentStepIdx / (milestones.length - 1)) * 100}%` }}
+                                            />
+                                        </div>
+
+                                        {milestones.map((m, idx) => {
+                                            const isDone = idx < currentStepIdx;
+                                            const isCurr = idx === currentStepIdx;
+
+                                            return (
+                                                <div key={m.key} className="order-milestone-step">
+                                                    <div className={`order-milestone-circle ${isDone ? 'completed' : (isCurr ? 'current' : '')}`}>
+                                                        {isDone ? <Check size={16} /> : (idx + 1)}
+                                                    </div>
+                                                    <div className={`order-milestone-label ${isCurr || isDone ? 'active' : ''}`}>
+                                                        {m.label}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div style={{
+                                    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                                    borderRadius: '12px',
+                                    padding: '14px 18px',
+                                    marginBottom: '24px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    color: '#ef4444'
+                                }}>
+                                    <XCircle size={20} />
+                                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>
+                                        This order has been {order.status?.toUpperCase()}. No further fulfillment actions are pending.
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Shipment Creation Drawer Form */}
                             {showShipmentForm && (
                                 <form onSubmit={handleCreateShipment} style={{
-                                    backgroundColor: 'var(--admin-bg)',
+                                    backgroundColor: 'rgba(99, 102, 241, 0.06)',
                                     borderRadius: '12px',
-                                    border: '1px solid var(--admin-primary)',
-                                    padding: '16px 20px',
-                                    marginBottom: '20px'
+                                    border: '1.5px solid var(--admin-primary)',
+                                    padding: '18px 20px',
+                                    marginBottom: '24px'
                                 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                                        <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--admin-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <Truck size={16} style={{ color: 'var(--admin-primary)' }} />
-                                            <span>Attach Courier Shipment & Tracking Info</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--admin-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Truck size={18} style={{ color: 'var(--admin-primary)' }} />
+                                            <span>Attach Courier Shipment & Generate Tracking</span>
                                         </div>
                                         <button type="button" onClick={() => setShowShipmentForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-muted)' }}>
                                             <X size={16} />
                                         </button>
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '14px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '16px' }}>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', marginBottom: '4px' }}>Courier Partner *</label>
+                                            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', marginBottom: '6px' }}>
+                                                Courier Partner Name *
+                                            </label>
                                             <input
                                                 type="text"
                                                 className="form-control"
-                                                placeholder="e.g. BlueDart, FedEx, Delhivery"
+                                                placeholder="e.g. BlueDart, FedEx, Delhivery, DTDC"
                                                 value={courierName}
                                                 onChange={(e) => setCourierName(e.target.value)}
                                                 required
-                                                style={{ fontSize: '0.85rem' }}
                                             />
                                         </div>
 
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', marginBottom: '4px' }}>AWB Number</label>
+                                            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', marginBottom: '6px' }}>
+                                                AWB Airway Bill #
+                                            </label>
                                             <input
                                                 type="text"
                                                 className="form-control"
                                                 placeholder="e.g. AWB-987654321"
                                                 value={awbNumber}
                                                 onChange={(e) => setAwbNumber(e.target.value)}
-                                                style={{ fontSize: '0.85rem' }}
                                             />
                                         </div>
 
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', marginBottom: '4px' }}>Tracking Reference #</label>
+                                            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', marginBottom: '6px' }}>
+                                                Tracking Reference Number
+                                            </label>
                                             <input
                                                 type="text"
                                                 className="form-control"
-                                                placeholder="Auto-generated if empty"
+                                                placeholder="Auto-generated if left empty"
                                                 value={trackingNumber}
                                                 onChange={(e) => setTrackingNumber(e.target.value)}
-                                                style={{ fontSize: '0.85rem' }}
                                             />
                                         </div>
                                     </div>
 
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowShipmentForm(false)}>Cancel</button>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowShipmentForm(false)}>
+                                            Cancel
+                                        </button>
                                         <button type="submit" className="btn btn-primary btn-sm" disabled={savingShipment}>
                                             <Send size={14} />
                                             <span>{savingShipment ? 'Saving Shipment...' : 'Save & Mark Shipped'}</span>
@@ -368,26 +475,42 @@ export default function OrderDetailModal({
                                 </form>
                             )}
 
-                            {/* Customer & Address Cards */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-                                {/* Customer Card */}
-                                <div style={{ backgroundColor: 'var(--admin-bg)', borderRadius: '12px', border: '1px solid var(--admin-border)', padding: '16px' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {/* 3-Column Info Cards Grid */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                                gap: '16px',
+                                marginBottom: '24px'
+                            }}>
+                                {/* Customer Account Card */}
+                                <div style={{
+                                    backgroundColor: 'var(--admin-card-bg)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--admin-border)',
+                                    padding: '18px'
+                                }}>
+                                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <User size={14} />
-                                        <span>Customer Account Details</span>
+                                        <span>Customer Information</span>
                                     </div>
-                                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--admin-text)' }}>
+                                    <div style={{ fontWeight: 800, fontSize: '1.02rem', color: 'var(--admin-text)', marginBottom: '6px' }}>
                                         {customerName}
                                     </div>
-                                    <div style={{ fontSize: '0.82rem', color: 'var(--admin-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Mail size={13} />
-                                        <span>{customerEmail}</span>
-                                        <button type="button" onClick={() => handleCopy(customerEmail, 'c_email')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: 'var(--admin-muted)' }}>
-                                            {copiedField === 'c_email' ? <Check size={12} style={{ color: 'var(--admin-success)' }} /> : <Copy size={12} />}
+                                    <div style={{ fontSize: '0.84rem', color: 'var(--admin-muted)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <Mail size={13} />
+                                            <span>{customerEmail}</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCopy(customerEmail, 'cust_email')}
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: 'var(--admin-muted)' }}
+                                        >
+                                            {copiedField === 'cust_email' ? <Check size={12} style={{ color: '#10b981' }} /> : <Copy size={12} />}
                                         </button>
                                     </div>
                                     {customerPhone !== 'N/A' && (
-                                        <div style={{ fontSize: '0.82rem', color: 'var(--admin-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <div style={{ fontSize: '0.84rem', color: 'var(--admin-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <Phone size={13} />
                                             <span>{customerPhone}</span>
                                         </div>
@@ -395,13 +518,18 @@ export default function OrderDetailModal({
                                 </div>
 
                                 {/* Shipping Address Card */}
-                                <div style={{ backgroundColor: 'var(--admin-bg)', borderRadius: '12px', border: '1px solid var(--admin-border)', padding: '16px' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{
+                                    backgroundColor: 'var(--admin-card-bg)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--admin-border)',
+                                    padding: '18px'
+                                }}>
+                                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <MapPin size={14} />
                                         <span>Shipping Delivery Address</span>
                                     </div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--admin-text)', lineHeight: '1.5' }}>
-                                        <div style={{ fontWeight: 700 }}>{shippingAddr.name || customerName}</div>
+                                    <div style={{ fontSize: '0.86rem', color: 'var(--admin-text)', lineHeight: '1.5' }}>
+                                        <div style={{ fontWeight: 700, marginBottom: '2px' }}>{shippingAddr.name || customerName}</div>
                                         <div>{shippingAddr.address_line1 || shippingAddr.line_1 || 'Address Line 1'}</div>
                                         {(shippingAddr.address_line2 || shippingAddr.line_2) && <div>{shippingAddr.address_line2 || shippingAddr.line_2}</div>}
                                         <div>{shippingAddr.city}, {shippingAddr.state_code || shippingAddr.state} — {shippingAddr.postal_code}</div>
@@ -409,25 +537,34 @@ export default function OrderDetailModal({
                                     </div>
                                 </div>
 
-                                {/* Payment & Shipment Card */}
-                                <div style={{ backgroundColor: 'var(--admin-bg)', borderRadius: '12px', border: '1px solid var(--admin-border)', padding: '16px' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {/* Payment & Fulfillment Summary */}
+                                <div style={{
+                                    backgroundColor: 'var(--admin-card-bg)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--admin-border)',
+                                    padding: '18px'
+                                }}>
+                                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <CreditCard size={14} />
-                                        <span>Payment & Tracking Summary</span>
+                                        <span>Payment & Courier Tracking</span>
                                     </div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--admin-text)' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                            <span style={{ color: 'var(--admin-muted)' }}>Payment Method:</span>
-                                            <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>{order.payment_method || 'COD'}</span>
+                                    <div style={{ fontSize: '0.86rem', color: 'var(--admin-text)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                            <span style={{ color: 'var(--admin-muted)' }}>Payment Mode:</span>
+                                            <span style={{ fontWeight: 800, textTransform: 'uppercase', color: 'var(--admin-text)' }}>
+                                                {order.payment_method || 'COD'}
+                                            </span>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                                             <span style={{ color: 'var(--admin-muted)' }}>Gateway Transaction:</span>
-                                            <span style={{ fontWeight: 600 }}>{payment?.transaction_id || 'N/A'}</span>
+                                            <span style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.82rem' }}>
+                                                {payment?.transaction_id || payment?.payment_id || 'N/A'}
+                                            </span>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ color: 'var(--admin-muted)' }}>Shipment Courier:</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ color: 'var(--admin-muted)' }}>Courier Tracking:</span>
                                             <span style={{ fontWeight: 700, color: shipment ? 'var(--admin-primary)' : 'var(--admin-muted)' }}>
-                                                {shipment ? `${shipment.courier_name} (${shipment.tracking_number})` : 'Not Shipped Yet'}
+                                                {shipment ? `${shipment.courier_name} (${shipment.tracking_number || shipment.awb_number})` : 'Awaiting Shipment'}
                                             </span>
                                         </div>
                                     </div>
@@ -435,19 +572,43 @@ export default function OrderDetailModal({
                             </div>
 
                             {/* Itemized Order Products Table */}
-                            <div className="dashboard-card" style={{ padding: 0, overflow: 'hidden', marginBottom: '20px' }}>
-                                <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--admin-border)', fontWeight: 700, fontSize: '0.9rem', color: 'var(--admin-text)' }}>
-                                    Order Items & Frozen Price Snapshots
+                            <div style={{
+                                backgroundColor: 'var(--admin-card-bg)',
+                                borderRadius: '12px',
+                                border: '1px solid var(--admin-border)',
+                                overflow: 'hidden',
+                                marginBottom: '24px'
+                            }}>
+                                <div style={{
+                                    padding: '16px 20px',
+                                    borderBottom: '1px solid var(--admin-border)',
+                                    fontWeight: 800,
+                                    fontSize: '0.92rem',
+                                    color: 'var(--admin-text)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}>
+                                    <Package size={16} />
+                                    <span>Purchased Products & Frozen Price Snapshots</span>
                                 </div>
-                                <div className="table-responsive">
-                                    <table className="admin-table" style={{ width: '100%', margin: 0 }}>
+
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.86rem' }}>
                                         <thead>
-                                            <tr>
-                                                <th style={{ paddingLeft: '18px' }}>Product & SKU</th>
-                                                <th>Unit Price</th>
-                                                <th>Qty</th>
-                                                <th>Tax</th>
-                                                <th style={{ textAlign: 'right', paddingRight: '18px' }}>Total</th>
+                                            <tr style={{
+                                                backgroundColor: 'var(--admin-card-hover)',
+                                                borderBottom: '1px solid var(--admin-border)',
+                                                color: 'var(--admin-muted)',
+                                                textAlign: 'left',
+                                                fontSize: '0.75rem',
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                <th style={{ padding: '12px 20px' }}>Product Description</th>
+                                                <th style={{ padding: '12px 16px', textAlign: 'right' }}>Unit Price</th>
+                                                <th style={{ padding: '12px 16px', textAlign: 'center' }}>Quantity</th>
+                                                <th style={{ padding: '12px 16px', textAlign: 'right' }}>Tax / GST</th>
+                                                <th style={{ padding: '12px 20px', textAlign: 'right' }}>Line Total</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -458,62 +619,110 @@ export default function OrderDetailModal({
                                                     const imgUrl = item.snapshot_data?.image || item.product?.featured_image || null;
 
                                                     return (
-                                                        <tr key={item.id}>
-                                                            <td style={{ paddingLeft: '18px' }}>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                        <tr key={item.id} style={{ borderBottom: '1px solid var(--admin-border)' }}>
+                                                            <td style={{ padding: '14px 20px' }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                                     {imgUrl ? (
-                                                                        <img src={imgUrl} alt={pName} style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover' }} />
+                                                                        <img
+                                                                            src={imgUrl}
+                                                                            alt={pName}
+                                                                            style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--admin-border)' }}
+                                                                        />
                                                                     ) : (
-                                                                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: 'var(--admin-card-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--admin-muted)', fontWeight: 700, fontSize: '0.8rem' }}>
+                                                                        <div style={{
+                                                                            width: '40px',
+                                                                            height: '40px',
+                                                                            borderRadius: '8px',
+                                                                            backgroundColor: 'var(--admin-card-hover)',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            color: 'var(--admin-muted)',
+                                                                            fontWeight: 800,
+                                                                            fontSize: '0.75rem',
+                                                                            border: '1px solid var(--admin-border)'
+                                                                        }}>
                                                                             SKU
                                                                         </div>
                                                                     )}
                                                                     <div>
-                                                                        <div style={{ fontWeight: 700, color: 'var(--admin-text)', fontSize: '0.88rem' }}>
+                                                                        <div style={{ fontWeight: 700, color: 'var(--admin-text)', fontSize: '0.9rem' }}>
                                                                             {pName}
                                                                         </div>
-                                                                        <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
+                                                                        <div style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', fontFamily: 'monospace' }}>
                                                                             SKU: {sku}
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </td>
-                                                            <td style={{ fontWeight: 600 }}>{formatCurrency(item.unit_price || 0, order.currency || 'INR', true)}</td>
-                                                            <td style={{ fontWeight: 700 }}>x{item.quantity}</td>
-                                                            <td style={{ fontSize: '0.82rem', color: 'var(--admin-muted)' }}>{formatCurrency(item.tax_amount || 0, order.currency || 'INR', true)}</td>
-                                                            <td style={{ fontWeight: 800, textAlign: 'right', paddingRight: '18px' }}>{formatCurrency(item.total_amount || 0, order.currency || 'INR', true)}</td>
+                                                            <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 600 }}>
+                                                                {formatCurrency(item.unit_price || 0, order.currency || 'INR', true)}
+                                                            </td>
+                                                            <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                                                                <span style={{ padding: '2px 8px', borderRadius: '6px', backgroundColor: 'var(--admin-card-hover)', fontWeight: 800 }}>
+                                                                    x{item.quantity}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '14px 16px', textAlign: 'right', fontSize: '0.82rem', color: 'var(--admin-muted)' }}>
+                                                                {formatCurrency(item.tax_amount || 0, order.currency || 'INR', true)}
+                                                            </td>
+                                                            <td style={{ padding: '14px 20px', textAlign: 'right', fontWeight: 800, color: 'var(--admin-text)' }}>
+                                                                {formatCurrency(item.total_amount || 0, order.currency || 'INR', true)}
+                                                            </td>
                                                         </tr>
                                                     );
                                                 })
                                             ) : (
-                                                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '32px' }}>No items recorded.</td></tr>
+                                                <tr>
+                                                    <td colSpan="5" style={{ textAlign: 'center', padding: '32px', color: 'var(--admin-muted)' }}>
+                                                        No itemized records found.
+                                                    </td>
+                                                </tr>
                                             )}
                                         </tbody>
                                     </table>
                                 </div>
 
-                                {/* Order Pricing Totals */}
-                                <div style={{ padding: '16px 20px', backgroundColor: 'var(--admin-bg)', borderTop: '1px solid var(--admin-border)', display: 'flex', justifyContent: 'flex-end' }}>
-                                    <div style={{ minWidth: '240px', fontSize: '0.88rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', color: 'var(--admin-muted)' }}>
-                                            <span>Subtotal:</span>
-                                            <span>{formatCurrency(order.subtotal || 0, order.currency || 'INR', true)}</span>
+                                {/* Order Pricing Totals Breakdown */}
+                                <div style={{
+                                    padding: '18px 24px',
+                                    backgroundColor: 'var(--admin-card-hover)',
+                                    borderTop: '1px solid var(--admin-border)',
+                                    display: 'flex',
+                                    justifyContent: 'flex-end'
+                                }}>
+                                    <div style={{ minWidth: '280px', fontSize: '0.88rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: 'var(--admin-muted)' }}>
+                                            <span>Items Subtotal:</span>
+                                            <span style={{ fontWeight: 600 }}>{formatCurrency(order.subtotal || 0, order.currency || 'INR', true)}</span>
                                         </div>
+
                                         {Number(order.discount_total) > 0 && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', color: 'var(--admin-success)' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: '#10b981' }}>
                                                 <span>Coupon Discount:</span>
-                                                <span>-{formatCurrency(order.discount_total || 0, order.currency || 'INR', true)}</span>
+                                                <span style={{ fontWeight: 700 }}>-{formatCurrency(order.discount_total || 0, order.currency || 'INR', true)}</span>
                                             </div>
                                         )}
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', color: 'var(--admin-muted)' }}>
+
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: 'var(--admin-muted)' }}>
                                             <span>Taxes & GST:</span>
-                                            <span>{formatCurrency(order.tax_total || 0, order.currency || 'INR', true)}</span>
+                                            <span style={{ fontWeight: 600 }}>{formatCurrency(order.tax_total || 0, order.currency || 'INR', true)}</span>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: 'var(--admin-muted)' }}>
-                                            <span>Shipping Fee:</span>
-                                            <span>{formatCurrency(order.shipping_total || 0, order.currency || 'INR', true)}</span>
+
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', color: 'var(--admin-muted)' }}>
+                                            <span>Shipping Charges:</span>
+                                            <span style={{ fontWeight: 600 }}>{formatCurrency(order.shipping_total || 0, order.currency || 'INR', true)}</span>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid var(--admin-border)', fontSize: '1.1rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            paddingTop: '10px',
+                                            borderTop: '1.5px solid var(--admin-border)',
+                                            fontSize: '1.15rem',
+                                            fontWeight: 800,
+                                            color: 'var(--admin-text)'
+                                        }}>
                                             <span>Grand Total:</span>
                                             <span style={{ color: 'var(--admin-primary)' }}>{formatCurrency(order.grand_total || 0, order.currency || 'INR', true)}</span>
                                         </div>
@@ -522,54 +731,82 @@ export default function OrderDetailModal({
                             </div>
 
                             {/* Audit Timeline & Notes Grid */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
-                                {/* Timeline */}
-                                <div style={{ backgroundColor: 'var(--admin-bg)', borderRadius: '12px', border: '1px solid var(--admin-border)', padding: '16px' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+                                {/* Timeline History */}
+                                <div style={{
+                                    backgroundColor: 'var(--admin-card-bg)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--admin-border)',
+                                    padding: '18px'
+                                }}>
+                                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <Clock size={14} />
-                                        <span>Order Audit Timeline</span>
+                                        <span>Order Audit Timeline & Logs</span>
                                     </div>
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '200px', overflowY: 'auto' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '220px', overflowY: 'auto', paddingRight: '4px' }}>
                                         {histories.length > 0 ? (
                                             histories.map((h) => (
-                                                <div key={h.id} style={{ display: 'flex', gap: '10px', fontSize: '0.82rem' }}>
-                                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--admin-primary)', marginTop: '5px', flexShrink: 0 }} />
+                                                <div key={h.id} style={{ display: 'flex', gap: '10px', fontSize: '0.84rem' }}>
+                                                    <div style={{
+                                                        width: '8px',
+                                                        height: '8px',
+                                                        borderRadius: '50%',
+                                                        backgroundColor: 'var(--admin-primary)',
+                                                        marginTop: '6px',
+                                                        flexShrink: 0
+                                                    }} />
                                                     <div>
                                                         <div style={{ fontWeight: 700, color: 'var(--admin-text)' }}>
-                                                            {h.status ? h.status.toUpperCase() : 'EVENT'}
+                                                            {h.status ? h.status.replace(/_/g, ' ').toUpperCase() : 'EVENT'}
                                                         </div>
                                                         <div style={{ color: 'var(--admin-muted)', fontSize: '0.78rem' }}>{h.comment}</div>
                                                         <div style={{ fontSize: '0.72rem', color: 'var(--admin-subtle)', marginTop: '2px' }}>
-                                                            {h.created_at ? new Date(h.created_at).toLocaleString() : ''} {h.user?.name ? `by ${h.user.name}` : ''}
+                                                            {h.created_at ? new Date(h.created_at).toLocaleString() : ''} {h.user?.name ? `• by ${h.user.name}` : ''}
                                                         </div>
                                                     </div>
                                                 </div>
                                             ))
                                         ) : (
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--admin-muted)' }}>No audit history recorded.</div>
+                                            <div style={{ fontSize: '0.82rem', color: 'var(--admin-muted)' }}>No audit events recorded yet.</div>
                                         )}
                                     </div>
                                 </div>
 
-                                {/* Internal Staff Notes */}
-                                <form onSubmit={handleSaveNotes} style={{ backgroundColor: 'var(--admin-bg)', borderRadius: '12px', border: '1px solid var(--admin-border)', padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                {/* Internal Staff Reference Notes */}
+                                <form
+                                    onSubmit={handleSaveNotes}
+                                    style={{
+                                        backgroundColor: 'var(--admin-card-bg)',
+                                        borderRadius: '12px',
+                                        border: '1px solid var(--admin-border)',
+                                        padding: '18px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between'
+                                    }}
+                                >
                                     <div>
-                                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <FileText size={14} />
                                             <span>Internal Staff Reference Notes</span>
                                         </div>
                                         <textarea
                                             className="form-control"
-                                            rows="3"
-                                            placeholder="Add staff reference notes, packaging instructions, or customer call logs..."
+                                            rows="4"
+                                            placeholder="Add private warehouse notes, packaging instructions, or customer call logs..."
                                             value={adminNotes}
                                             onChange={(e) => setAdminNotes(e.target.value)}
-                                            style={{ fontSize: '0.85rem', borderRadius: '8px' }}
+                                            style={{ fontSize: '0.85rem', borderRadius: '8px', resize: 'vertical' }}
                                         />
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-                                        <button type="submit" className="btn btn-primary btn-sm" disabled={savingNotes} style={{ borderRadius: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary btn-sm"
+                                            disabled={savingNotes}
+                                            style={{ borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                        >
                                             <Save size={14} />
                                             <span>{savingNotes ? 'Saving...' : 'Save Staff Notes'}</span>
                                         </button>
@@ -580,9 +817,18 @@ export default function OrderDetailModal({
                     )}
                 </div>
 
-                {/* Footer */}
-                <div style={{ padding: '14px 24px', borderTop: '1px solid var(--admin-border)', display: 'flex', justifyContent: 'flex-end', backgroundColor: 'var(--admin-card-bg)' }}>
-                    <button className="btn btn-secondary" onClick={onClose}>Close Order</button>
+                {/* Footer Controls */}
+                <div style={{
+                    padding: '14px 24px',
+                    borderTop: '1px solid var(--admin-border)',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    backgroundColor: 'var(--admin-card-bg)',
+                    flexShrink: 0
+                }}>
+                    <button type="button" className="btn btn-secondary" onClick={onClose}>
+                        Close
+                    </button>
                 </div>
             </div>
         </div>

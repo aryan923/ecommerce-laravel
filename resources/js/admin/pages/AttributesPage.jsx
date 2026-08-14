@@ -135,8 +135,8 @@ export default function AttributesPage() {
                 </div>
             </div>
 
-            {/* Attributes Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
+            {/* Attributes Grid (Standard 4 Cards Per Row) */}
+            <div className="stat-cards-grid-4">
                 {loading ? (
                     <div className="dashboard-card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '32px' }}>
                         Loading attributes...
