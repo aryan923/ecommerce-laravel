@@ -1,9 +1,9 @@
-# Feature Specification: Product Management Module (/admin/products) & Database Seeder Cleanup
+# Feature Specification: Product Management Module (/admin/products) & Frontend Auth Import Fix
 
-**Module Name:** Product Management & Database Seeder Cleanup  
+**Module Name:** Product Management & Admin Authentication  
 **Module ID:** 23  
 **Specification File:** `specifications/feature.admin-products.spec.md`  
-**Version:** 7.0  
+**Version:** 8.0  
 **Status:** Approved / Pending Implementation  
 **Base SRS References:** `Requirements/admin_panel.md`, `Requirements/development_modules.md`  
 
@@ -11,17 +11,15 @@
 
 ## 1. Module Overview
 
-The Product Management and Database Seeder modules provide catalog management, RBAC system seeding, and **Clean Seeder Architecture (RBAC Only)**.
+The Product Management and Admin Authentication modules provide catalog management, RBAC authentication, and **Clean Frontend Hook Imports**.
 
 ---
 
-## 2. Seeder Cleanup Specifications
+## 2. Admin Login Page Specifications
 
-- **Database Seeders**:
-  - Retain `DatabaseSeeder.php` and `RbacSeeder.php`.
-  - Remove all non-RBAC seeders (`AddressSeeder`, `AttributeSeeder`, `BrandSeeder`, `CartSeeder`, `CategorySeeder`, `CouponSeeder`, `CurrencySeeder`, `InventorySeeder`, `MediaSeeder`, `NotificationSeeder`, `OrderSeeder`, `PaymentSeeder`, `ProductSeeder`, `ProductVariantSeeder`, `ReturnRefundSeeder`, `ReviewSeeder`, `ShipmentSeeder`, `ShippingSeeder`, `SuperAdminSeeder`, `TaxSeeder`, `UserSeeder`, `WishlistSeeder`).
-- **Store Populate Command**:
-  - Remove `PopulateStoreDataApiCommand.php` command.
+- **AuthContext Hook Import**:
+  - Add explicit `import { useAuth } from '../context/AuthContext';` to `resources/js/admin/pages/LoginPage.jsx`.
+  - Resolves `Uncaught ReferenceError: useAuth is not defined` crash on login page load.
 
 ---
 
@@ -30,4 +28,4 @@ The Product Management and Database Seeder modules provide catalog management, R
 - **FR-PRD-001**: Support Simple, Variable, and Digital products.
 - **FR-PRD-002**: Multi-currency display switcher (`INR`, `USD`, `EUR`, `GBP`).
 - **FR-PRD-003**: Polymorphic Media attachment integration.
-- **FR-PRD-004**: Clean Seeder Architecture calling solely `RbacSeeder::class` in `DatabaseSeeder.php`.
+- **FR-PRD-004**: Explicit import of `useAuth` hook in `LoginPage.jsx`.

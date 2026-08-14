@@ -1,6 +1,6 @@
-# Implementation Plan: Database Seeder Cleanup & Command Removal
+# Implementation Plan: Frontend Auth Hook Import Fix
 
-**Module Name:** Database Seeder Module  
+**Module Name:** Admin Auth Module  
 **Module ID:** 23  
 **Plan File:** `plans/plan.admin-products.md`  
 **Specification File:** `specifications/feature.admin-products.spec.md`  
@@ -10,6 +10,5 @@
 
 ## 1. Task Breakdown Checklist
 
-- [x] **Task 1: Update `DatabaseSeeder.php` to Call Only `RbacSeeder::class`**
-- [x] **Task 2: Delete Obsolete Seeder Files & `PopulateStoreDataApiCommand.php`**
-- [x] **Task 3: Production Asset Build & Verification** (`cmd /c npm run build`)
+- [x] **Task 1: Add `useAuth` Import in `LoginPage.jsx`** (Import `useAuth` from `../context/AuthContext`)
+- [x] **Task 2: Production Asset Build & Verification** (`cmd /c npm run build`)

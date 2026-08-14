@@ -1,6 +1,6 @@
-# Regression Strategy: Database Seeder Cleanup & Command Removal
+# Regression Strategy: Frontend Auth Hook Import Fix
 
-**Module Name:** Database Seeder Module  
+**Module Name:** Admin Auth Module  
 **Module ID:** 23  
 **Regression File:** `plans/regression.admin-products.md`  
 
@@ -8,5 +8,5 @@
 
 ## 1. Regression Coverage
 
-- Verify RBAC System Seeding (`php artisan db:seed`).
+- Verify Admin Authentication & Login Page.
 - Verify Vite asset build (`cmd /c npm run build`).

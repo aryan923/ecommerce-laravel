@@ -1,14 +1,14 @@
-# Test Cases: Database Seeder Cleanup & Command Removal
+# Test Cases: Frontend Auth Hook Import Fix
 
-**Module Name:** Database Seeder Module  
+**Module Name:** Admin Auth Module  
 **Module ID:** 23  
 **Test File:** `plans/test-cases.admin-products.md`  
 
 ---
 
-## 1. Seeder Test Scenarios
+## 1. Auth Import Test Scenarios
 
-### TC-SEED-001: RBAC Seeder Execution & Clean Fresh Database Seeding
-- **Preconditions**: Run fresh database migration and seeder.
-- **Input**: Run `php artisan db:seed`.
-- **Expected Result**: Seeder executes cleanly, creating system permissions, roles (`super_admin`, `store_manager`, `order_manager`, `product_manager`), and Super Admin user (`admin@example.com`), without generating dummy products, categories, or orders.
+### TC-AUTH-001: Admin Login Page Load & Authentication Execution
+- **Preconditions**: Open browser at `/admin/login`.
+- **Input**: Inspect browser console.
+- **Expected Result**: Page renders cleanly without `ReferenceError: useAuth is not defined` console errors, and admin login executes properly.
