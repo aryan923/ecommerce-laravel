@@ -1,0 +1,3 @@
+[   12930ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/css/app.css:0
+[   13018ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/@vite/client:0
+[   13018ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://[::1]:5173/resources/js/app.js:0

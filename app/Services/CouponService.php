@@ -7,10 +7,51 @@ use App\Models\CouponUsage;
 use App\Models\Order;
 use App\Models\Product;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 
 class CouponService
 {
+    /**
+     * Get paginated admin coupon listing with filters and sorting.
+     */
+    public function getAdminCouponsList(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    {
+        $query = Coupon::query()->withCount('usages');
+
+        if (!empty($filters['search'])) {
+            $search = trim($filters['search']);
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+
+        $sortBy = $filters['sort_by'] ?? 'id';
+        $sortOrder = strtolower($filters['sort_order'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+
+        $allowedSorts = ['id', 'code', 'name', 'created_at', 'start_date', 'end_date', 'uses_count'];
+        if (in_array($sortBy, $allowedSorts)) {
+            if ($sortBy === 'uses_count') {
+                $query->orderBy('usages_count', $sortOrder);
+            } else {
+                $query->orderBy($sortBy, $sortOrder);
+            }
+        } else {
+            $query->orderBy('id', 'desc');
+        }
+
+        return $query->paginate($perPage);
+    }
+
     /**
      * Validate a coupon code and calculate applicable discount.
      *
@@ -205,30 +246,69 @@ class CouponService
     }
 
     /**
+     * Delete/archive a coupon.
+     */
+    public function deleteCoupon(Coupon $coupon): bool
+    {
+        return $coupon->update(['status' => 'archived']);
+    }
+
+    /**
      * Generate coupon performance & usage report.
      */
     public function getReport(Coupon $coupon): array
     {
-        $usages = $coupon->usages();
+        $usages = CouponUsage::where('coupon_id', $coupon->id)
+            ->with(['user:id,first_name,last_name,email'])
+            ->orderBy('used_at', 'desc')
+            ->get();
+
         $totalUses = $usages->count();
         $totalDiscount = (float) $usages->sum('discount_amount');
+
+        $orderIds = $usages->pluck('order_id')->filter()->unique();
+        $totalRevenue = 0.00;
+        if ($orderIds->isNotEmpty()) {
+            $totalRevenue = (float) Order::whereIn('id', $orderIds)->sum('grand_total');
+        }
 
         $remainingUsage = null;
         if ($coupon->usage_limit !== null) {
             $remainingUsage = max(0, $coupon->usage_limit - $totalUses);
         }
 
+        $recentUsages = $usages->take(10)->map(function ($usage) {
+            $userName = 'Guest/Deleted User';
+            if ($usage->user) {
+                $name = trim(($usage->user->first_name ?? '') . ' ' . ($usage->user->last_name ?? ''));
+                $userName = $name !== '' ? $name : ($usage->user->email ?? 'User');
+            }
+
+            return [
+                'id' => $usage->id,
+                'order_id' => $usage->order_id,
+                'user_id' => $usage->user_id,
+                'customer_name' => $userName,
+                'discount_amount' => (float) $usage->discount_amount,
+                'used_at' => $usage->used_at ? $usage->used_at->toIso8601String() : null,
+            ];
+        })->values();
+
         return [
-            'coupon_id' => $coupon->id,
-            'code' => $coupon->code,
-            'name' => $coupon->name,
-            'status' => $coupon->status,
-            'usage_limit' => $coupon->usage_limit,
-            'total_uses' => $totalUses,
-            'remaining_usage' => $remainingUsage,
-            'total_discount' => round($totalDiscount, 2),
-            'orders_generated' => $totalUses, // Linked to usages
-            'revenue_generated' => 0.00, // Calculated upon order completion
+            'coupon' => [
+                'id' => $coupon->id,
+                'code' => $coupon->code,
+                'name' => $coupon->name,
+                'status' => $coupon->status,
+            ],
+            'metrics' => [
+                'total_uses' => $totalUses,
+                'total_discount_amount' => round($totalDiscount, 2),
+                'orders_count' => $orderIds->count(),
+                'total_revenue_generated' => round($totalRevenue, 2),
+                'remaining_uses' => $remainingUsage,
+            ],
+            'recent_usages' => $recentUsages,
         ];
     }
 
@@ -237,13 +317,17 @@ class CouponService
      */
     public function recordUsage(Coupon $coupon, ?int $userId, ?int $orderId, float $discountAmount): CouponUsage
     {
-        return CouponUsage::create([
+        $usage = CouponUsage::create([
             'coupon_id' => $coupon->id,
             'user_id' => $userId,
             'order_id' => $orderId,
             'discount_amount' => $discountAmount,
             'used_at' => Carbon::now(),
         ]);
+
+        $coupon->increment('uses_count');
+
+        return $usage;
     }
 
     /**

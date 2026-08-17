@@ -1,0 +1,364 @@
+- generic [active] [ref=f23e1]:
+  - banner [ref=f23e2]:
+    - navigation [ref=f23e3]:
+      - link "INFOIGA" [ref=f23e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f23e14]:
+        - link "HOME" [ref=f23e15] [cursor=pointer]:
+          - /url: /
+        - link "ABOUT" [ref=f23e16] [cursor=pointer]:
+          - /url: /about
+        - link "SOLUTIONS" [ref=f23e17] [cursor=pointer]:
+          - /url: /solutions
+        - link "CASE STUDIES" [ref=f23e18] [cursor=pointer]:
+          - /url: /case-studies
+        - link "BLOG" [ref=f23e19] [cursor=pointer]:
+          - /url: /blog
+      - generic [ref=f23e20]:
+        - link "LOGIN" [ref=f23e21] [cursor=pointer]:
+          - /url: /login
+        - link "CONTACT US" [ref=f23e22] [cursor=pointer]:
+          - /url: /contact
+  - main [ref=f23e23]:
+    - generic [ref=f23e24]:
+      - generic [ref=f23e25]:
+        - generic [ref=f23e26]:
+          - generic [ref=f23e27]: "SYSTEM STATUS: ACTIVE // UPDATED LIVE"
+          - heading "We Build Beautiful, Fast Websites That Grow Your Business" [level=1] [ref=f23e30]
+          - paragraph [ref=f23e31]: We create stunning, interactive websites that explain what you do at a glance. By combining clean design with high-performance coding, we turn casual visitors into loyal customers.
+          - generic [ref=f23e32]:
+            - link "Launch ROI Estimator" [ref=f23e33] [cursor=pointer]:
+              - /url: /contact
+            - link "Explore Ecosystem Map →" [ref=f23e34] [cursor=pointer]:
+              - /url: /solutions
+        - generic [ref=f23e35]:
+          - generic [ref=f23e36]:
+            - generic [ref=f23e37]: infoiga-analytics.app
+            - generic [ref=f23e42]: // LIVE PREVIEW
+          - img "Interactive Web UI Preview on Laptop" [ref=f23e44]
+          - generic [ref=f23e45]:
+            - generic [ref=f23e46]:
+              - text: Total Visitors
+              - generic [ref=f23e47]: 2,481,209
+            - generic [ref=f23e48]:
+              - text: Loading Speed
+              - generic [ref=f23e49]: 420ms
+            - generic [ref=f23e50]:
+              - text: Goal Conversions
+              - generic [ref=f23e51]: 54,821
+      - generic [ref=f23e52]:
+        - generic [ref=f23e53]:
+          - heading "Interactive Visual Design" [level=2] [ref=f23e54]
+          - paragraph [ref=f23e55]: We replace boring walls of text with clean, interactive diagrams. We make it easy for your target audience to understand your product or service instantly.
+        - generic [ref=f23e56]:
+          - generic [ref=f23e57]:
+            - heading "Instant Page Loading" [level=3] [ref=f23e61]
+            - paragraph [ref=f23e62]: Our advanced Laravel 10 backend structures coupled with Nginx caching mechanisms achieve lightning-fast sub-500ms load speeds, keeping visitors engaged.
+          - generic [ref=f23e63]:
+            - heading "Visual Storytelling" [level=3] [ref=f23e67]
+            - paragraph [ref=f23e68]: We design interactive charts and diagrams that show your success, explaining complex features in a simple, engaging way.
+          - generic [ref=f23e69]:
+            - heading "Safe & Secure Code" [level=3] [ref=f23e73]
+            - paragraph [ref=f23e74]: Using professional Docker containers, we guarantee your site runs smoothly and remains secure 24/7 without crashes.
+      - generic [ref=f23e75]:
+        - generic [ref=f23e76]:
+          - generic [ref=f23e77]: // WHAT WE EXCEL AT
+          - heading "Specialized Digital Services" [level=2] [ref=f23e79]
+          - paragraph [ref=f23e80]: End-to-end digital solutions designed to elevate your brand, drive conversions, and optimize user experience across all digital touchpoints.
+        - generic [ref=f23e81]:
+          - generic [ref=f23e82]:
+            - generic [ref=f23e83]:
+              - generic [ref=f23e87]:
+                - text: FRONTEND & BACKEND
+                - heading "Website Development" [level=3] [ref=f23e88]
+                - paragraph [ref=f23e89]: Custom, ultra-fast websites engineered with Laravel 10, Tailwind CSS, and Nginx. Optimized for maximum responsiveness and search engine visibility.
+              - list [ref=f23e90]:
+                - listitem [ref=f23e91]:
+                  - generic [ref=f23e93]: Custom Laravel & Framework Architecture
+                - listitem [ref=f23e94]:
+                  - generic [ref=f23e96]: Sub-500ms Lightning Fast Load Speeds
+                - listitem [ref=f23e97]:
+                  - generic [ref=f23e99]: 100% Mobile Responsive Layouts
+            - button "Enquire For Web Dev →" [ref=f23e100]
+          - generic [ref=f23e101]:
+            - generic [ref=f23e102]:
+              - generic [ref=f23e106]:
+                - text: IOS & ANDROID
+                - heading "App Development" [level=3] [ref=f23e107]
+                - paragraph [ref=f23e108]: High-performance native & cross-platform mobile applications that provide intuitive user experiences, real-time push notifications, and robust API integration.
+              - list [ref=f23e109]:
+                - listitem [ref=f23e110]:
+                  - generic [ref=f23e112]: Cross-Platform Flutter / React Native
+                - listitem [ref=f23e113]:
+                  - generic [ref=f23e115]: Secure RESTful API Backend Connections
+                - listitem [ref=f23e116]:
+                  - generic [ref=f23e118]: App Store & Play Store Publishing
+            - button "Enquire For App Dev →" [ref=f23e119]
+          - generic [ref=f23e120]:
+            - generic [ref=f23e121]:
+              - generic [ref=f23e125]:
+                - text: CREATIVE INTERFACES
+                - heading "UI/UX Design" [level=3] [ref=f23e126]
+                - paragraph [ref=f23e127]: User-first wireframing, high-fidelity prototypes, and cyber-organic visual design systems focused on maximizing visitor retention and conversion rates.
+              - list [ref=f23e128]:
+                - listitem [ref=f23e129]:
+                  - generic [ref=f23e131]: Figma Wireframes & Interactive Mockups
+                - listitem [ref=f23e132]:
+                  - generic [ref=f23e134]: Conversion-Driven User Journeys
+                - listitem [ref=f23e135]:
+                  - generic [ref=f23e137]: Modern Dark & Cyber Design Tokens
+            - button "Enquire For UI/UX →" [ref=f23e138]
+          - generic [ref=f23e139]:
+            - generic [ref=f23e140]:
+              - generic [ref=f23e144]:
+                - text: ONLINE STORES
+                - heading "E-Commerce Development" [level=3] [ref=f23e145]
+                - paragraph [ref=f23e146]: Scalable online storefronts with seamless checkout flows, automated inventory management, Stripe/PayPal payment gateways, and order tracking.
+              - list [ref=f23e147]:
+                - listitem [ref=f23e148]:
+                  - generic [ref=f23e150]: Secure Payment Gateway Integration
+                - listitem [ref=f23e151]:
+                  - generic [ref=f23e153]: Automated Order & Inventory System
+                - listitem [ref=f23e154]:
+                  - generic [ref=f23e156]: Optimized One-Page Checkout Flow
+            - button "Enquire For E-Commerce →" [ref=f23e157]
+          - generic [ref=f23e158]:
+            - generic [ref=f23e159]:
+              - generic [ref=f23e163]:
+                - text: BRAND IDENTITY
+                - heading "Logo & Graphic Design" [level=3] [ref=f23e164]
+                - paragraph [ref=f23e165]: Distinctive brand logos, vector artwork, social media graphics, and full visual brand identity packages that stand out in crowded markets.
+              - list [ref=f23e166]:
+                - listitem [ref=f23e167]:
+                  - generic [ref=f23e169]: Vector Logo Design & Guidelines
+                - listitem [ref=f23e170]:
+                  - generic [ref=f23e172]: Social Media & Marketing Graphics
+                - listitem [ref=f23e173]:
+                  - generic [ref=f23e175]: Full Brand Identity Style Guides
+            - button "Enquire For Logo/Branding →" [ref=f23e176]
+          - generic [ref=f23e177]:
+            - generic [ref=f23e178]:
+              - generic [ref=f23e182]:
+                - text: ORGANIC GROWTH
+                - heading "SEO & Digital Marketing" [level=3] [ref=f23e183]
+                - paragraph [ref=f23e184]: Data-driven Search Engine Optimization, technical site audits, keyword strategy, and conversion rate optimization to drive organic traffic.
+              - list [ref=f23e185]:
+                - listitem [ref=f23e186]:
+                  - generic [ref=f23e188]: Technical & On-Page SEO Audits
+                - listitem [ref=f23e189]:
+                  - generic [ref=f23e191]: High-Intent Keyword Targeting
+                - listitem [ref=f23e192]:
+                  - generic [ref=f23e194]: Monthly Performance & Rank Analytics
+            - button "Enquire For SEO →" [ref=f23e195]
+          - generic [ref=f23e196]:
+            - generic [ref=f23e197]:
+              - generic [ref=f23e198]: 24/7 REASSURANCE & PERFORMANCE
+              - heading "Website Maintenance & Managed Support" [level=3] [ref=f23e201]
+              - paragraph [ref=f23e202]: Keep your digital assets running flawlessly. We provide continuous server monitoring, security updates, daily automated backups, speed tuning, and emergency technical support.
+              - generic [ref=f23e203]:
+                - generic [ref=f23e204]: Continuous Uptime Monitoring
+                - generic [ref=f23e207]: Automated Cloud Backups
+                - generic [ref=f23e210]: Security Patching & Speed Audits
+            - button "Enquire For Maintenance →" [ref=f23e214]
+      - generic [ref=f23e215]:
+        - generic [ref=f23e216]:
+          - generic [ref=f23e217]: // TECH STACK ECOSYSTEM
+          - heading "Technologies We Master" [level=2] [ref=f23e219]
+          - paragraph [ref=f23e220]: We leverage modern, battle-tested frameworks, cloud infrastructure, AI models, and databases to build high-performance, future-proof digital applications.
+        - generic [ref=f23e221]:
+          - generic [ref=f23e222]:
+            - generic [ref=f23e223]: // FRONTEND ECOSYSTEM
+            - generic [ref=f23e228]:
+              - heading "Frontend Development" [level=3] [ref=f23e229]
+              - paragraph [ref=f23e230]: Responsive, pixel-perfect user interfaces built with modern utility CSS frameworks, reactive JavaScript components, and instant bundlers.
+            - generic [ref=f23e231]:
+              - generic [ref=f23e232]: CORE TECHNOLOGIES
+              - generic [ref=f23e233]:
+                - generic [ref=f23e234]: HTML5 / CSS3
+                - generic [ref=f23e235]: Tailwind CSS
+                - generic [ref=f23e236]: JavaScript (ES6+)
+                - generic [ref=f23e237]: React.js
+                - generic [ref=f23e238]: Vue.js
+                - generic [ref=f23e239]: Vite Bundler
+          - generic [ref=f23e240]:
+            - generic [ref=f23e241]: // BACKEND & CMS
+            - generic [ref=f23e246]:
+              - heading "Backend & CMS Platforms" [level=3] [ref=f23e247]
+              - paragraph [ref=f23e248]: Secure, high-concurrency server architectures, RESTful APIs, and customizable content management systems for scale.
+            - generic [ref=f23e249]:
+              - generic [ref=f23e250]: CORE TECHNOLOGIES
+              - generic [ref=f23e251]:
+                - generic [ref=f23e252]: PHP 8.2+
+                - generic [ref=f23e253]: Laravel 10
+                - generic [ref=f23e254]: Node.js
+                - generic [ref=f23e255]: Express.js
+                - generic [ref=f23e256]: WordPress
+                - generic [ref=f23e257]: Shopify
+          - generic [ref=f23e258]:
+            - generic [ref=f23e259]: // DATA PERSIENCE
+            - generic [ref=f23e264]:
+              - heading "Database & Caching" [level=3] [ref=f23e265]
+              - paragraph [ref=f23e266]: High-performance relational database structures, memory-speed caching layers, and optimized indexing for zero-latency queries.
+            - generic [ref=f23e267]:
+              - generic [ref=f23e268]: CORE TECHNOLOGIES
+              - generic [ref=f23e269]:
+                - generic [ref=f23e270]: MySQL 8.0
+                - generic [ref=f23e271]: PostgreSQL
+                - generic [ref=f23e272]: Redis Cache
+                - generic [ref=f23e273]: Eloquent ORM
+                - generic [ref=f23e274]: Automated DB Backups
+          - generic [ref=f23e275]:
+            - generic [ref=f23e276]: // CLOUD & AI INTELLIGENCE
+            - generic [ref=f23e281]:
+              - heading "AI & Cloud Infrastructure" [level=3] [ref=f23e282]
+              - paragraph [ref=f23e283]: Intelligent AI integrations, scalable cloud hosting, containerized microservices, and Nginx web server configurations.
+            - generic [ref=f23e284]:
+              - generic [ref=f23e285]: CORE TECHNOLOGIES
+              - generic [ref=f23e286]:
+                - generic [ref=f23e287]: OpenAI API
+                - generic [ref=f23e288]: Docker Containers
+                - generic [ref=f23e289]: AWS (Amazon Web Services)
+                - generic [ref=f23e290]: Google Cloud (GCP)
+                - generic [ref=f23e291]: Nginx Alpine
+    - generic [ref=f23e294]:
+      - generic [ref=f23e295]:
+        - generic [ref=f23e296]: // COLLABORATIVE STRATEGY
+        - generic [ref=f23e299]:
+          - heading "Let's Build Something Extraordinary Together" [level=2] [ref=f23e300]
+          - paragraph [ref=f23e301]: Our engineering and design teams work directly with you on a clear strategy map. Share your project requirements with us and we'll craft a custom roadmap within 24 hours.
+        - generic [ref=f23e302]:
+          - generic [ref=f23e307]:
+            - generic [ref=f23e308]: 24-Hour Proposal Turnaround
+            - text: Receive a detailed timeline & itemized quote fast.
+          - generic [ref=f23e313]:
+            - generic [ref=f23e314]: Strict NDA & IP Protection
+            - text: Your ideas and project data are 100% confidential.
+          - generic [ref=f23e319]:
+            - generic [ref=f23e320]: "Direct Line: admin@infoiga.com"
+            - text: Instant developer & architect response.
+      - generic [ref=f23e322]:
+        - generic [ref=f23e323]:
+          - generic [ref=f23e324]:
+            - heading "Request a Quick Service Quote" [level=3] [ref=f23e325]
+            - paragraph [ref=f23e326]: Select a service to pre-fill your inquiry requirements.
+          - generic [ref=f23e327]: // INSTANT INQUIRY
+        - generic [ref=f23e328]:
+          - generic [ref=f23e329]:
+            - generic [ref=f23e330]:
+              - generic [ref=f23e331]: Your Full Name *
+              - textbox "Your Full Name *" [ref=f23e332]:
+                - /placeholder: John Doe
+            - generic [ref=f23e333]:
+              - generic [ref=f23e334]: Email Address *
+              - textbox "Email Address *" [ref=f23e335]:
+                - /placeholder: john@company.com
+          - generic [ref=f23e336]:
+            - generic [ref=f23e337]:
+              - generic [ref=f23e338]: Phone Number *
+              - textbox "Phone Number *" [ref=f23e339]:
+                - /placeholder: +1 (555) 000-0000
+            - generic [ref=f23e340]:
+              - generic [ref=f23e341]: Interested Service *
+              - combobox "Interested Service *" [ref=f23e342]:
+                - option "Website Development" [selected]
+                - option "App Development"
+                - option "UI/UX Design"
+                - option "E-Commerce Website Development"
+                - option "Logo and Graphic Design"
+                - option "SEO & Digital Marketing"
+                - option "Website Maintenance"
+          - generic [ref=f23e343]:
+            - generic [ref=f23e344]: Project Details / Message *
+            - textbox "Project Details / Message *" [ref=f23e345]:
+              - /placeholder: Tell us about your project requirements, goals, or budget timeline...
+          - button "Submit Service Enquiry →" [ref=f23e347]
+  - contentinfo [ref=f23e348]:
+    - generic [ref=f23e349]:
+      - generic [ref=f23e350]:
+        - generic [ref=f23e351]:
+          - generic [ref=f23e352]: INFOIGA
+          - paragraph [ref=f23e361]: Empowering global brands through high-performance website development, mobile apps, UI/UX design, and AI-driven cloud infrastructure.
+          - generic [ref=f23e362]:
+            - generic [ref=f23e363]: CONNECT WITH US
+            - generic [ref=f23e364]:
+              - link "LinkedIn" [ref=f23e365] [cursor=pointer]:
+                - /url: https://linkedin.com
+              - link "Instagram" [ref=f23e368] [cursor=pointer]:
+                - /url: https://instagram.com
+              - link "Facebook" [ref=f23e371] [cursor=pointer]:
+                - /url: https://facebook.com
+              - link "WhatsApp" [ref=f23e374] [cursor=pointer]:
+                - /url: https://wa.me/15550000000
+        - generic [ref=f23e377]:
+          - heading "Our Services" [level=4] [ref=f23e378]
+          - list [ref=f23e379]:
+            - listitem [ref=f23e380]:
+              - link "› Website Development" [ref=f23e381] [cursor=pointer]:
+                - /url: /#services
+                - generic [ref=f23e382]: ›
+                - generic [ref=f23e383]: Website Development
+            - listitem [ref=f23e384]:
+              - link "› App Development" [ref=f23e385] [cursor=pointer]:
+                - /url: /#services
+                - generic [ref=f23e386]: ›
+                - generic [ref=f23e387]: App Development
+            - listitem [ref=f23e388]:
+              - link "› UI/UX Design" [ref=f23e389] [cursor=pointer]:
+                - /url: /#services
+                - generic [ref=f23e390]: ›
+                - generic [ref=f23e391]: UI/UX Design
+            - listitem [ref=f23e392]:
+              - link "› E-Commerce Websites" [ref=f23e393] [cursor=pointer]:
+                - /url: /#services
+                - generic [ref=f23e394]: ›
+                - generic [ref=f23e395]: E-Commerce Websites
+            - listitem [ref=f23e396]:
+              - link "› Logo & Graphic Design" [ref=f23e397] [cursor=pointer]:
+                - /url: /#services
+                - generic [ref=f23e398]: ›
+                - generic [ref=f23e399]: Logo & Graphic Design
+            - listitem [ref=f23e400]:
+              - link "› SEO & Digital Marketing" [ref=f23e401] [cursor=pointer]:
+                - /url: /#services
+                - generic [ref=f23e402]: ›
+                - generic [ref=f23e403]: SEO & Digital Marketing
+            - listitem [ref=f23e404]:
+              - link "› Website Maintenance" [ref=f23e405] [cursor=pointer]:
+                - /url: /#services
+                - generic [ref=f23e406]: ›
+                - generic [ref=f23e407]: Website Maintenance
+        - generic [ref=f23e408]:
+          - heading "Technologies" [level=4] [ref=f23e409]
+          - list [ref=f23e410]:
+            - listitem [ref=f23e411]:
+              - generic [ref=f23e413]: PHP 8.2 & Laravel 10
+            - listitem [ref=f23e414]:
+              - generic [ref=f23e415]: Tailwind CSS & React/Vue
+            - listitem [ref=f23e416]:
+              - generic [ref=f23e418]: MySQL 8.0 & Redis Cache
+            - listitem [ref=f23e419]:
+              - generic [ref=f23e421]: Docker & Nginx Server
+            - listitem [ref=f23e422]:
+              - generic [ref=f23e423]: OpenAI API Integration
+            - listitem [ref=f23e424]:
+              - generic [ref=f23e426]: AWS & Google Cloud
+        - generic [ref=f23e427]:
+          - heading "Get In Touch" [level=4] [ref=f23e428]
+          - list [ref=f23e429]:
+            - listitem [ref=f23e430]:
+              - generic [ref=f23e434]: 100 Tech Park Blvd, Suite 400, Cyber District
+            - listitem [ref=f23e435]:
+              - link "admin@infoiga.com" [ref=f23e438] [cursor=pointer]:
+                - /url: mailto:admin@infoiga.com
+            - listitem [ref=f23e439]:
+              - link "+1 (800) 555-INFO" [ref=f23e442] [cursor=pointer]:
+                - /url: tel:+18005554636
+      - generic [ref=f23e443]:
+        - generic [ref=f23e444]: © 2026 Info IGA // ALL RIGHTS RESERVED
+        - generic [ref=f23e445]: ALL SYSTEMS OPERATIONAL
+        - generic [ref=f23e450]:
+          - link "PRIVACY POLICY" [ref=f23e451] [cursor=pointer]:
+            - /url: /privacy
+          - generic [ref=f23e452]: //
+          - link "TERMS OF SERVICE" [ref=f23e453] [cursor=pointer]:
+            - /url: /terms

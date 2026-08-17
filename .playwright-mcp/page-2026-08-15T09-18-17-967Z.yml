@@ -1,0 +1,230 @@
+- generic [active] [ref=f9e1]:
+  - banner [ref=f9e2]:
+    - navigation [ref=f9e3]:
+      - link "INFOIGA" [ref=f9e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f9e14]:
+        - link "HOME" [ref=f9e15] [cursor=pointer]:
+          - /url: /
+        - link "ABOUT" [ref=f9e16] [cursor=pointer]:
+          - /url: /about
+        - link "SOLUTIONS" [ref=f9e17] [cursor=pointer]:
+          - /url: /solutions
+        - link "CASE STUDIES" [ref=f9e18] [cursor=pointer]:
+          - /url: /case-studies
+        - link "BLOG" [ref=f9e19] [cursor=pointer]:
+          - /url: /blog
+      - generic [ref=f9e20]:
+        - link "LOGIN" [ref=f9e21] [cursor=pointer]:
+          - /url: /login
+        - link "CONTACT US" [ref=f9e22] [cursor=pointer]:
+          - /url: /contact
+  - main [ref=f9e23]:
+    - generic [ref=f9e24]:
+      - generic [ref=f9e25]:
+        - generic [ref=f9e26]:
+          - generic [ref=f9e27]: "SYSTEM STATUS: ACTIVE // UPDATED LIVE"
+          - heading "We Build Beautiful, Fast Websites That Grow Your Business" [level=1] [ref=f9e30]
+          - paragraph [ref=f9e31]: We create stunning, interactive websites that explain what you do at a glance. By combining clean design with high-performance coding, we turn casual visitors into loyal customers.
+          - generic [ref=f9e32]:
+            - link "Launch ROI Estimator" [ref=f9e33] [cursor=pointer]:
+              - /url: /contact
+            - link "Explore Ecosystem Map →" [ref=f9e34] [cursor=pointer]:
+              - /url: /solutions
+        - generic [ref=f9e35]:
+          - generic [ref=f9e36]:
+            - generic [ref=f9e37]: infoiga-analytics.app
+            - generic [ref=f9e42]: // LIVE PREVIEW
+          - img "Interactive Web UI Preview on Laptop" [ref=f9e44]
+          - generic [ref=f9e45]:
+            - generic [ref=f9e46]:
+              - text: Total Visitors
+              - generic [ref=f9e47]: 2,481,209
+            - generic [ref=f9e48]:
+              - text: Loading Speed
+              - generic [ref=f9e49]: 420ms
+            - generic [ref=f9e50]:
+              - text: Goal Conversions
+              - generic [ref=f9e51]: 54,821
+      - generic [ref=f9e52]:
+        - generic [ref=f9e53]:
+          - heading "Interactive Visual Design" [level=2] [ref=f9e54]
+          - paragraph [ref=f9e55]: We replace boring walls of text with clean, interactive diagrams. We make it easy for your target audience to understand your product or service instantly.
+        - generic [ref=f9e56]:
+          - generic [ref=f9e57]:
+            - heading "Instant Page Loading" [level=3] [ref=f9e61]
+            - paragraph [ref=f9e62]: Our advanced Laravel 10 backend structures coupled with Nginx caching mechanisms achieve lightning-fast sub-500ms load speeds, keeping visitors engaged.
+          - generic [ref=f9e63]:
+            - heading "Visual Storytelling" [level=3] [ref=f9e67]
+            - paragraph [ref=f9e68]: We design interactive charts and diagrams that show your success, explaining complex features in a simple, engaging way.
+          - generic [ref=f9e69]:
+            - heading "Safe & Secure Code" [level=3] [ref=f9e73]
+            - paragraph [ref=f9e74]: Using professional Docker containers, we guarantee your site runs smoothly and remains secure 24/7 without crashes.
+      - generic [ref=f9e75]:
+        - generic [ref=f9e76]:
+          - generic [ref=f9e77]: // WHAT WE EXCEL AT
+          - heading "Specialized Digital Services" [level=2] [ref=f9e79]
+          - paragraph [ref=f9e80]: End-to-end digital solutions designed to elevate your brand, drive conversions, and optimize user experience across all digital touchpoints.
+        - generic [ref=f9e81]:
+          - generic [ref=f9e82]:
+            - generic [ref=f9e83]:
+              - generic [ref=f9e87]:
+                - text: FRONTEND & BACKEND
+                - heading "Website Development" [level=3] [ref=f9e88]
+                - paragraph [ref=f9e89]: Custom, ultra-fast websites engineered with Laravel 10, Tailwind CSS, and Nginx. Optimized for maximum responsiveness and search engine visibility.
+              - list [ref=f9e90]:
+                - listitem [ref=f9e91]:
+                  - generic [ref=f9e93]: Custom Laravel & Framework Architecture
+                - listitem [ref=f9e94]:
+                  - generic [ref=f9e96]: Sub-500ms Lightning Fast Load Speeds
+                - listitem [ref=f9e97]:
+                  - generic [ref=f9e99]: 100% Mobile Responsive Layouts
+            - button "Enquire For Web Dev →" [ref=f9e100]
+          - generic [ref=f9e101]:
+            - generic [ref=f9e102]:
+              - generic [ref=f9e106]:
+                - text: IOS & ANDROID
+                - heading "App Development" [level=3] [ref=f9e107]
+                - paragraph [ref=f9e108]: High-performance native & cross-platform mobile applications that provide intuitive user experiences, real-time push notifications, and robust API integration.
+              - list [ref=f9e109]:
+                - listitem [ref=f9e110]:
+                  - generic [ref=f9e112]: Cross-Platform Flutter / React Native
+                - listitem [ref=f9e113]:
+                  - generic [ref=f9e115]: Secure RESTful API Backend Connections
+                - listitem [ref=f9e116]:
+                  - generic [ref=f9e118]: App Store & Play Store Publishing
+            - button "Enquire For App Dev →" [ref=f9e119]
+          - generic [ref=f9e120]:
+            - generic [ref=f9e121]:
+              - generic [ref=f9e125]:
+                - text: CREATIVE INTERFACES
+                - heading "UI/UX Design" [level=3] [ref=f9e126]
+                - paragraph [ref=f9e127]: User-first wireframing, high-fidelity prototypes, and cyber-organic visual design systems focused on maximizing visitor retention and conversion rates.
+              - list [ref=f9e128]:
+                - listitem [ref=f9e129]:
+                  - generic [ref=f9e131]: Figma Wireframes & Interactive Mockups
+                - listitem [ref=f9e132]:
+                  - generic [ref=f9e134]: Conversion-Driven User Journeys
+                - listitem [ref=f9e135]:
+                  - generic [ref=f9e137]: Modern Dark & Cyber Design Tokens
+            - button "Enquire For UI/UX →" [ref=f9e138]
+          - generic [ref=f9e139]:
+            - generic [ref=f9e140]:
+              - generic [ref=f9e144]:
+                - text: ONLINE STORES
+                - heading "E-Commerce Development" [level=3] [ref=f9e145]
+                - paragraph [ref=f9e146]: Scalable online storefronts with seamless checkout flows, automated inventory management, Stripe/PayPal payment gateways, and order tracking.
+              - list [ref=f9e147]:
+                - listitem [ref=f9e148]:
+                  - generic [ref=f9e150]: Secure Payment Gateway Integration
+                - listitem [ref=f9e151]:
+                  - generic [ref=f9e153]: Automated Order & Inventory System
+                - listitem [ref=f9e154]:
+                  - generic [ref=f9e156]: Optimized One-Page Checkout Flow
+            - button "Enquire For E-Commerce →" [ref=f9e157]
+          - generic [ref=f9e158]:
+            - generic [ref=f9e159]:
+              - generic [ref=f9e163]:
+                - text: BRAND IDENTITY
+                - heading "Logo & Graphic Design" [level=3] [ref=f9e164]
+                - paragraph [ref=f9e165]: Distinctive brand logos, vector artwork, social media graphics, and full visual brand identity packages that stand out in crowded markets.
+              - list [ref=f9e166]:
+                - listitem [ref=f9e167]:
+                  - generic [ref=f9e169]: Vector Logo Design & Guidelines
+                - listitem [ref=f9e170]:
+                  - generic [ref=f9e172]: Social Media & Marketing Graphics
+                - listitem [ref=f9e173]:
+                  - generic [ref=f9e175]: Full Brand Identity Style Guides
+            - button "Enquire For Logo/Branding →" [ref=f9e176]
+          - generic [ref=f9e177]:
+            - generic [ref=f9e178]:
+              - generic [ref=f9e182]:
+                - text: ORGANIC GROWTH
+                - heading "SEO & Digital Marketing" [level=3] [ref=f9e183]
+                - paragraph [ref=f9e184]: Data-driven Search Engine Optimization, technical site audits, keyword strategy, and conversion rate optimization to drive organic traffic.
+              - list [ref=f9e185]:
+                - listitem [ref=f9e186]:
+                  - generic [ref=f9e188]: Technical & On-Page SEO Audits
+                - listitem [ref=f9e189]:
+                  - generic [ref=f9e191]: High-Intent Keyword Targeting
+                - listitem [ref=f9e192]:
+                  - generic [ref=f9e194]: Monthly Performance & Rank Analytics
+            - button "Enquire For SEO →" [ref=f9e195]
+          - generic [ref=f9e196]:
+            - generic [ref=f9e197]:
+              - generic [ref=f9e198]: 24/7 REASSURANCE & PERFORMANCE
+              - heading "Website Maintenance & Managed Support" [level=3] [ref=f9e201]
+              - paragraph [ref=f9e202]: Keep your digital assets running flawlessly. We provide continuous server monitoring, security updates, daily automated backups, speed tuning, and emergency technical support.
+              - generic [ref=f9e203]:
+                - generic [ref=f9e204]: Continuous Uptime Monitoring
+                - generic [ref=f9e207]: Automated Cloud Backups
+                - generic [ref=f9e210]: Security Patching & Speed Audits
+            - button "Enquire For Maintenance →" [ref=f9e214]
+      - generic [ref=f9e215]:
+        - generic [ref=f9e216]:
+          - generic [ref=f9e217]: // START YOUR PROJECT TODAY
+          - heading "Request a Quick Service Quote" [level=2] [ref=f9e219]
+          - paragraph [ref=f9e220]: Select your required service below and send us your project details. Our team will get back to you within 24 hours with a custom roadmap.
+        - generic [ref=f9e221]:
+          - generic [ref=f9e222]:
+            - generic [ref=f9e223]:
+              - generic [ref=f9e224]: Your Full Name *
+              - textbox "Your Full Name *" [ref=f9e225]:
+                - /placeholder: John Doe
+            - generic [ref=f9e226]:
+              - generic [ref=f9e227]: Email Address *
+              - textbox "Email Address *" [ref=f9e228]:
+                - /placeholder: john@company.com
+            - generic [ref=f9e229]:
+              - generic [ref=f9e230]: Phone Number *
+              - textbox "Phone Number *" [ref=f9e231]:
+                - /placeholder: +1 (555) 000-0000
+            - generic [ref=f9e232]:
+              - generic [ref=f9e233]: Interested Service *
+              - combobox "Interested Service *" [ref=f9e234]:
+                - option "Website Development" [selected]
+                - option "App Development"
+                - option "UI/UX Design"
+                - option "E-Commerce Website Development"
+                - option "Logo and Graphic Design"
+                - option "SEO & Digital Marketing"
+                - option "Website Maintenance"
+          - generic [ref=f9e235]:
+            - generic [ref=f9e236]: Project Details / Message *
+            - textbox "Project Details / Message *" [ref=f9e237]:
+              - /placeholder: Tell us about your project requirements, goals, or budget timeline...
+          - button "Submit Service Enquiry →" [ref=f9e239]
+  - contentinfo [ref=f9e240]:
+    - generic [ref=f9e241]:
+      - generic [ref=f9e242]:
+        - generic [ref=f9e243]: INFOIGA
+        - paragraph [ref=f9e251]: Empowering brands through interactive websites, visual charts, and fast page loading performance.
+      - generic [ref=f9e252]:
+        - heading "Company" [level=4] [ref=f9e253]
+        - list [ref=f9e254]:
+          - listitem [ref=f9e255]:
+            - link "About Our Journey" [ref=f9e256] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f9e257]:
+            - link "Interactive Visuals" [ref=f9e258] [cursor=pointer]:
+              - /url: /solutions
+          - listitem [ref=f9e259]:
+            - link "Success Stories" [ref=f9e260] [cursor=pointer]:
+              - /url: /case-studies
+          - listitem [ref=f9e261]:
+            - link "Cyber Insights Blog" [ref=f9e262] [cursor=pointer]:
+              - /url: /blog
+      - generic [ref=f9e263]:
+        - heading "Tech Ecosystem" [level=4] [ref=f9e264]
+        - list [ref=f9e265]:
+          - listitem [ref=f9e266]: PHP 8.2 & Laravel 10
+          - listitem [ref=f9e267]: Tailwind CSS Interactivity
+          - listitem [ref=f9e268]: High-Performance Nginx
+          - listitem [ref=f9e269]: Docker Infrastructure
+      - generic [ref=f9e270]:
+        - heading "Live Network Status" [level=4] [ref=f9e271]
+        - generic [ref=f9e272]: OPERATIONAL // CLOUD ONLINE
+        - generic [ref=f9e277]:
+          - generic [ref=f9e278]: "Client Requests: 40.2k/hr"
+          - generic [ref=f9e279]: "Server Latency: 28ms"
+    - generic [ref=f9e280]: © 2026 Info IGA // © 2026 Info IGA. All rights reserved.

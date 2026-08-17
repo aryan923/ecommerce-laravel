@@ -32,32 +32,18 @@ class CouponController extends BaseController
      *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="type", in="query", required=false, @OA\Schema(type="string", enum={"percentage", "fixed_amount", "free_shipping"})),
      *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string", enum={"active", "inactive", "archived"})),
+     *     @OA\Parameter(name="sort_by", in="query", required=false, @OA\Schema(type="string", default="id")),
+     *     @OA\Parameter(name="sort_order", in="query", required=false, @OA\Schema(type="string", enum={"asc", "desc"}, default="desc")),
      *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
      *     @OA\Response(response=200, description="Coupons listed successfully")
      * )
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Coupon::withCount('usages');
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('type')) {
-            $query->where('type', $request->input('type'));
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-
-        $perPage = (int) $request->input('per_page', 15);
-        $coupons = $query->orderBy('id', 'desc')->paginate($perPage);
+        $coupons = $this->couponService->getAdminCouponsList(
+            $request->all(),
+            (int) $request->input('per_page', 15)
+        );
 
         return $this->paginatedResponse($coupons, 'Coupons retrieved successfully.');
     }
@@ -137,7 +123,7 @@ class CouponController extends BaseController
     public function destroy(int $id): JsonResponse
     {
         $coupon = Coupon::findOrFail($id);
-        $coupon->update(['status' => 'archived']);
+        $this->couponService->deleteCoupon($coupon);
         return $this->successResponse(null, 'Coupon archived successfully.');
     }
 

@@ -198,13 +198,13 @@ Route::prefix('v1')->group(function () {
             Route::delete('/media/{id}', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'destroy'])->middleware('permission:media.delete');
 
             // Coupon Management
-            Route::get('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'index']);
-            Route::post('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'store']);
-            Route::get('/coupons/{id}', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'show']);
-            Route::put('/coupons/{id}', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'update']);
-            Route::delete('/coupons/{id}', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'destroy']);
-            Route::patch('/coupons/{id}/status', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'toggleStatus']);
-            Route::get('/coupons/{id}/reports', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'report']);
+            Route::get('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'index'])->middleware('permission:coupons.view');
+            Route::post('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'store'])->middleware('permission:coupons.create');
+            Route::get('/coupons/{id}', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'show'])->middleware('permission:coupons.view');
+            Route::put('/coupons/{id}', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'update'])->middleware('permission:coupons.update');
+            Route::delete('/coupons/{id}', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'destroy'])->middleware('permission:coupons.delete');
+            Route::patch('/coupons/{id}/status', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'toggleStatus'])->middleware('permission:coupons.update');
+            Route::get('/coupons/{id}/reports', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'report'])->middleware('permission:coupons.view');
 
             // Tax Class Management
             Route::get('/tax-classes', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'index']);

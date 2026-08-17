@@ -21,7 +21,8 @@ import {
     Moon,
     Menu,
     X,
-    Search
+    Search,
+    Ticket
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -35,6 +36,7 @@ import InventoryPage from './pages/InventoryPage';
 import CustomerListPage from './pages/CustomerListPage';
 import OrderListPage from './pages/OrderListPage';
 import ReturnsPage from './pages/ReturnsPage';
+import CouponsPage from './pages/CouponsPage';
 
 function ProtectedRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
@@ -108,6 +110,7 @@ function AdminLayout() {
         if (location.pathname.includes('/inventory')) return 'Inventory Management';
         if (location.pathname.includes('/orders')) return 'Order Management';
         if (location.pathname.includes('/returns')) return 'Return & Refund Management';
+        if (location.pathname.includes('/coupons')) return 'Coupon Management';
         if (location.pathname.includes('/customers')) return 'Customer Management';
         return 'Executive Dashboard';
     };
@@ -253,6 +256,21 @@ function AdminLayout() {
                         <div className="nav-item-content">
                             <Users size={17} />
                             <span>Customer Accounts</span>
+                        </div>
+                    </NavLink>
+
+                    {/* SECTION 5: PROMOTIONS & MARKETING */}
+                    <div className="nav-section-label" style={{ marginTop: '10px' }}>
+                        <span>Promotions & Marketing</span>
+                    </div>
+
+                    <NavLink
+                        to="/coupons"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <Ticket size={17} />
+                            <span>Coupons & Discounts</span>
                         </div>
                     </NavLink>
 
@@ -452,6 +470,7 @@ function AdminLayout() {
                         <Route path="/orders" element={<OrderListPage />} />
                         <Route path="/returns" element={<ReturnsPage />} />
                         <Route path="/customers" element={<CustomerListPage />} />
+                        <Route path="/coupons" element={<CouponsPage />} />
                         <Route path="*" element={<DashboardPage />} />
                     </Routes>
                 </main>

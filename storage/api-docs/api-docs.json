@@ -1794,6 +1794,28 @@
                         }
                     },
                     {
+                        "name": "sort_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "sort_order",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "desc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "required": false,
@@ -2051,14 +2073,34 @@
                 ]
             }
         },
-        "/api/v1/admin/inventory": {
+        "/api/v1/admin/customers/stats": {
             "get": {
                 "tags": [
-                    "Admin Inventory Management"
+                    "Admin Customer Management"
                 ],
-                "summary": "List Inventory Records (Admin)",
-                "description": "Retrieve paginated list of variant inventory levels with SKU search and stock status filters.",
-                "operationId": "adminListInventory",
+                "summary": "Executive Customer KPI Statistics",
+                "description": "Retrieve summary KPIs: total customers, active accounts, suspended accounts, inactive accounts, and lifetime total revenue.",
+                "operationId": "adminCustomerStats",
+                "responses": {
+                    "200": {
+                        "description": "Customer stats retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers": {
+            "get": {
+                "tags": [
+                    "Admin Customer Management"
+                ],
+                "summary": "List Registered Customers",
+                "description": "Retrieve paginated list of customers with search (name, email, mobile), status filter, and order counts.",
+                "operationId": "adminListCustomers",
                 "parameters": [
                     {
                         "name": "search",
@@ -2075,9 +2117,34 @@
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "in_stock",
-                                "low_stock",
-                                "out_of_stock"
+                                "active",
+                                "inactive",
+                                "suspended",
+                                "pending_verification"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "id",
+                                "orders_count"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_order",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
                             ]
                         }
                     },
@@ -2093,7 +2160,364 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Inventory records retrieved successfully"
+                        "description": "Customer list retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers/{id}": {
+            "get": {
+                "tags": [
+                    "Admin Customer Management"
+                ],
+                "summary": "Single Customer Profile Details",
+                "description": "Retrieve customer profile data with lifetime metrics (total orders, total spent, AOV, last order date).",
+                "operationId": "adminShowCustomer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Customer profile retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers/{id}/orders": {
+            "get": {
+                "tags": [
+                    "Admin Customer Management"
+                ],
+                "summary": "Customer Order History Tab",
+                "description": "Retrieve paginated order history for a specific customer.",
+                "operationId": "adminCustomerOrders",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Customer orders retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers/{id}/addresses": {
+            "get": {
+                "tags": [
+                    "Admin Customer Management"
+                ],
+                "summary": "Customer Addresses Tab",
+                "description": "Retrieve saved shipping and billing addresses for a customer.",
+                "operationId": "adminCustomerAddresses",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Customer addresses retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers/{id}/reviews": {
+            "get": {
+                "tags": [
+                    "Admin Customer Management"
+                ],
+                "summary": "Customer Reviews Tab",
+                "description": "Retrieve product reviews submitted by a customer.",
+                "operationId": "adminCustomerReviews",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Customer reviews retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers/{id}/returns": {
+            "get": {
+                "tags": [
+                    "Admin Customer Management"
+                ],
+                "summary": "Customer Return Requests Tab",
+                "description": "Retrieve return requests submitted by a customer.",
+                "operationId": "adminCustomerReturns",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Customer return requests retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers/{id}/refunds": {
+            "get": {
+                "tags": [
+                    "Admin Customer Management"
+                ],
+                "summary": "Customer Refunds Tab",
+                "description": "Retrieve refund records associated with customer orders.",
+                "operationId": "adminCustomerRefunds",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Customer refunds retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Admin Customer Management"
+                ],
+                "summary": "Update Customer Account Status",
+                "description": "Change customer account status to active, inactive, or suspended.",
+                "operationId": "adminUpdateCustomerStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "inactive",
+                                            "suspended",
+                                            "pending_verification"
+                                        ],
+                                        "example": "suspended"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Customer status updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/customers/{id}/notes": {
+            "patch": {
+                "tags": [
+                    "Admin Customer Management"
+                ],
+                "summary": "Update Admin Internal Notes for Customer",
+                "description": "Save staff internal reference notes for a customer account.",
+                "operationId": "adminUpdateCustomerNotes",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "VIP buyer. Requested weekend delivery.",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Customer admin notes updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/kpis": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Inventory Dashboard KPIs",
+                "description": "Retrieve summary KPIs: total SKUs, total stock units, low stock count, out of stock count, COGS cost valuation, retail valuation, potential profit margin, damaged stock loss, and warehouse filters.",
+                "operationId": "adminInventoryKpis",
+                "parameters": [
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPI metrics retrieved successfully"
                     }
                 },
                 "security": [
@@ -2108,12 +2532,164 @@
                 "tags": [
                     "Admin Inventory Management"
                 ],
-                "summary": "Get Inventory Dashboard Summary (Admin)",
-                "description": "Retrieve key inventory metrics including total SKUs, total units, low stock count, and valuation.",
-                "operationId": "adminGetInventoryDashboard",
+                "summary": "Inventory Dashboard Summary Metrics (Alias)",
+                "description": "Retrieve summary metrics for inventory dashboard.",
+                "operationId": "adminInventoryDashboardMetrics",
+                "parameters": [
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Inventory dashboard metrics retrieved successfully"
+                        "description": "Dashboard metrics retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "List Inventory Items",
+                "description": "Retrieve paginated inventory list with search, stock status, category, brand, warehouse, and sorting filters.",
+                "operationId": "adminListInventory",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "stock_status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "in_stock",
+                                "low_stock",
+                                "out_of_stock"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "brand_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "available_qty",
+                                "cost_price",
+                                "low_stock_threshold",
+                                "sku",
+                                "id"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_order",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Inventory list retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/low-stock": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "List Low Stock Items",
+                "description": "Retrieve paginated list of SKUs where available stock is less than or equal to low stock threshold.",
+                "operationId": "adminListLowStockInventory",
+                "parameters": [
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Low stock items retrieved successfully"
                     }
                 },
                 "security": [
@@ -2128,10 +2704,18 @@
                 "tags": [
                     "Admin Inventory Management"
                 ],
-                "summary": "Get Low & Out of Stock Alerts (Admin)",
-                "description": "Fetch paginated list of items with stock at or below low stock threshold.",
-                "operationId": "adminGetInventoryAlerts",
+                "summary": "Inventory Stock Alerts",
+                "description": "Retrieve low-stock and out-of-stock items requiring attention.",
+                "operationId": "adminInventoryAlerts",
                 "parameters": [
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
                     {
                         "name": "per_page",
                         "in": "query",
@@ -2154,69 +2738,14 @@
                 ]
             }
         },
-        "/api/v1/admin/inventory/history": {
-            "get": {
-                "tags": [
-                    "Admin Inventory Management"
-                ],
-                "summary": "Get Inventory Transaction Audit Trail (Admin)",
-                "description": "Retrieve paginated history of all stock movements and adjustments.",
-                "operationId": "adminGetInventoryHistory",
-                "parameters": [
-                    {
-                        "name": "sku",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "product_variant_id",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "transaction_type",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Inventory audit history retrieved successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/api/v1/admin/inventory/{variant_id}": {
             "get": {
                 "tags": [
                     "Admin Inventory Management"
                 ],
-                "summary": "Get Variant Inventory Detail (Admin)",
-                "description": "Fetch single inventory record details by variant ID.",
-                "operationId": "adminGetInventoryDetail",
+                "summary": "Single Variant Inventory Details",
+                "description": "Retrieve inventory breakdown, thresholds, unit cost, location code, and transactions for a specific variant.",
+                "operationId": "adminShowVariantInventory",
                 "parameters": [
                     {
                         "name": "variant_id",
@@ -2225,14 +2754,19 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Inventory detail retrieved successfully"
-                    },
-                    "404": {
-                        "description": "Inventory not found"
+                        "description": "Variant inventory retrieved successfully"
                     }
                 },
                 "security": [
@@ -2247,9 +2781,9 @@
                 "tags": [
                     "Admin Inventory Management"
                 ],
-                "summary": "Manual Stock Adjustment (Admin)",
-                "description": "Add, deduct, override, or mark damaged stock for a product variant with pessimistic row locking.",
-                "operationId": "adminAdjustInventory",
+                "summary": "Adjust Stock Quantity & Properties",
+                "description": "Perform atomic stock adjustment (add, deduct, set, damage) with warehouse_id, cost_price, reorder_qty, allow_backorders, location_code, mandatory reason, and optional remarks.",
+                "operationId": "adminAdjustStock",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2257,33 +2791,64 @@
                             "schema": {
                                 "required": [
                                     "product_variant_id",
-                                    "adjustment_type",
+                                    "type",
                                     "quantity",
-                                    "remarks"
+                                    "reason"
                                 ],
                                 "properties": {
                                     "product_variant_id": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "example": 1
                                     },
-                                    "adjustment_type": {
+                                    "warehouse_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "type": {
                                         "type": "string",
                                         "enum": [
                                             "add",
                                             "deduct",
                                             "set",
                                             "damage"
-                                        ]
+                                        ],
+                                        "example": "add"
                                     },
                                     "quantity": {
                                         "type": "integer",
-                                        "minimum": 0
+                                        "example": 10
+                                    },
+                                    "cost_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 450
                                     },
                                     "low_stock_threshold": {
                                         "type": "integer",
-                                        "minimum": 0
+                                        "example": 10,
+                                        "nullable": true
+                                    },
+                                    "reorder_qty": {
+                                        "type": "integer",
+                                        "example": 50,
+                                        "nullable": true
+                                    },
+                                    "allow_backorder": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "location_code": {
+                                        "type": "string",
+                                        "example": "Aisle 3, Shelf B"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Supplier Restock"
                                     },
                                     "remarks": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "PO #9842 received"
                                     }
                                 },
                                 "type": "object"
@@ -2293,10 +2858,68 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Inventory stock adjusted successfully"
+                        "description": "Stock adjusted successfully"
                     },
                     "422": {
-                        "description": "Validation or insufficient stock error"
+                        "description": "Validation failed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/transfer": {
+            "post": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Inter-Warehouse Stock Transfer",
+                "description": "Atomically transfer stock quantity from a source warehouse to a target destination warehouse with transaction audit log.",
+                "operationId": "adminTransferStock",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_variant_id",
+                                    "source_warehouse_id",
+                                    "target_warehouse_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_variant_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "source_warehouse_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "target_warehouse_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 15
+                                    },
+                                    "remarks": {
+                                        "type": "string",
+                                        "example": "Balancing regional stock levels"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Stock transferred successfully"
                     }
                 },
                 "security": [
@@ -2311,9 +2934,9 @@
                 "tags": [
                     "Admin Inventory Management"
                 ],
-                "summary": "Atomic Stock Reservation (Admin / Internal)",
-                "description": "Reserve available stock for checkout/order placement.",
-                "operationId": "adminReserveInventory",
+                "summary": "Reserve Stock Endpoint",
+                "description": "Atomic stock reservation endpoint.",
+                "operationId": "adminReserveStock",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2325,20 +2948,17 @@
                                 ],
                                 "properties": {
                                     "product_variant_id": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "example": 1
                                     },
                                     "quantity": {
                                         "type": "integer",
-                                        "minimum": 1
+                                        "example": 2
                                     },
-                                    "reference_type": {
-                                        "type": "string"
-                                    },
-                                    "reference_id": {
-                                        "type": "integer"
-                                    },
-                                    "remarks": {
-                                        "type": "string"
+                                    "warehouse_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -2349,9 +2969,6 @@
                 "responses": {
                     "200": {
                         "description": "Stock reserved successfully"
-                    },
-                    "422": {
-                        "description": "Insufficient stock available"
                     }
                 },
                 "security": [
@@ -2366,9 +2983,9 @@
                 "tags": [
                     "Admin Inventory Management"
                 ],
-                "summary": "Atomic Stock Release (Admin / Internal)",
-                "description": "Release reserved stock back to available pool upon order cancellation or timeout.",
-                "operationId": "adminReleaseInventory",
+                "summary": "Release Reserved Stock",
+                "description": "Atomic stock release endpoint.",
+                "operationId": "adminReleaseStock",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2380,20 +2997,17 @@
                                 ],
                                 "properties": {
                                     "product_variant_id": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "example": 1
                                     },
                                     "quantity": {
                                         "type": "integer",
-                                        "minimum": 1
+                                        "example": 2
                                     },
-                                    "reference_type": {
-                                        "type": "string"
-                                    },
-                                    "reference_id": {
-                                        "type": "integer"
-                                    },
-                                    "remarks": {
-                                        "type": "string"
+                                    "warehouse_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -2418,9 +3032,9 @@
                 "tags": [
                     "Admin Inventory Management"
                 ],
-                "summary": "Atomic Stock Commit / Shipment (Admin / Internal)",
-                "description": "Commit reserved stock upon order fulfillment/shipment.",
-                "operationId": "adminCommitInventory",
+                "summary": "Commit Stock Shipment",
+                "description": "Atomic stock commitment upon order shipment.",
+                "operationId": "adminCommitStock",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2432,20 +3046,17 @@
                                 ],
                                 "properties": {
                                     "product_variant_id": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "example": 1
                                     },
                                     "quantity": {
                                         "type": "integer",
-                                        "minimum": 1
+                                        "example": 2
                                     },
-                                    "reference_type": {
-                                        "type": "string"
-                                    },
-                                    "reference_id": {
-                                        "type": "integer"
-                                    },
-                                    "remarks": {
-                                        "type": "string"
+                                    "warehouse_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -2456,6 +3067,226 @@
                 "responses": {
                     "200": {
                         "description": "Stock committed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/transactions": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "List Inventory Transactions",
+                "description": "Retrieve paginated inventory transaction audit trail logs with search, SKU, transaction type, and warehouse filters.",
+                "operationId": "adminListInventoryTransactions",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sku",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "transaction_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Inventory transactions retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/history": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "List Inventory Audit History (Alias)",
+                "description": "Retrieve paginated inventory transaction audit trail logs.",
+                "operationId": "adminListInventoryHistory",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sku",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "transaction_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Inventory history retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/import": {
+            "post": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Bulk Stock Audit CSV Import",
+                "description": "Upload CSV file to perform bulk stock level audits across SKUs for a specified warehouse.",
+                "operationId": "adminImportInventoryCsv",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "warehouse_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bulk inventory CSV imported successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/sample-template": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Download Sample Stock Import CSV Template",
+                "description": "Download sample ready-to-fill CSV template for bulk inventory audits.",
+                "operationId": "adminDownloadSampleInventoryCsv",
+                "responses": {
+                    "200": {
+                        "description": "Sample CSV file streamed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/inventory/export": {
+            "get": {
+                "tags": [
+                    "Admin Inventory Management"
+                ],
+                "summary": "Export Inventory to CSV",
+                "description": "Stream CSV download containing current inventory stock levels and location codes.",
+                "operationId": "adminExportInventory",
+                "parameters": [
+                    {
+                        "name": "warehouse_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CSV file streamed successfully"
                     }
                 },
                 "security": [
@@ -3224,6 +4055,465 @@
                 ]
             }
         },
+        "/api/v1/admin/orders/stats": {
+            "get": {
+                "tags": [
+                    "Admin Orders"
+                ],
+                "summary": "Get order statistics for admin dashboard",
+                "operationId": "bcbc9f681f54ca2e678408943fef698f",
+                "responses": {
+                    "200": {
+                        "description": "Order statistics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "total_orders": {
+                                                    "type": "integer",
+                                                    "example": 120
+                                                },
+                                                "pending_orders": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "confirmed_orders": {
+                                                    "type": "integer",
+                                                    "example": 35
+                                                },
+                                                "processing_orders": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "shipped_orders": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "delivered_orders": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "cancelled_orders": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "total_revenue": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 45250.5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/orders": {
+            "get": {
+                "tags": [
+                    "Admin Orders"
+                ],
+                "summary": "Get paginated list of store orders with search and multi-filtering",
+                "operationId": "583eed38b0874a7b72456b719838be93",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Order #, Customer Name/Email/Mobile, SKU",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Order status filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "payment_method",
+                        "in": "query",
+                        "description": "Payment method filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "YYYY-MM-DD",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "YYYY-MM-DD",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "min_amount",
+                        "in": "query",
+                        "description": "Minimum order total",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "max_amount",
+                        "in": "query",
+                        "description": "Maximum order total",
+                        "required": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated orders catalog retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/orders/{id}": {
+            "get": {
+                "tags": [
+                    "Admin Orders"
+                ],
+                "summary": "Get complete 360 details for an order",
+                "operationId": "1a192ffe889e78d46ef20275fae620d5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/orders/{id}/status": {
+            "post": {
+                "tags": [
+                    "Admin Orders"
+                ],
+                "summary": "Update order status and log audit history",
+                "operationId": "9184b56e990d31a1d535f36114542752",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "confirmed"
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Order verified by admin staff."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order status updated successfully."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/orders/{id}/shipment": {
+            "post": {
+                "tags": [
+                    "Admin Orders"
+                ],
+                "summary": "Create shipment record and assign tracking details",
+                "operationId": "cf56d79063397b652eeac672701d6d71",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "courier_name"
+                                ],
+                                "properties": {
+                                    "courier_name": {
+                                        "type": "string",
+                                        "example": "FedEx Express"
+                                    },
+                                    "awb_number": {
+                                        "type": "string",
+                                        "example": "AWB-987654321"
+                                    },
+                                    "tracking_number": {
+                                        "type": "string",
+                                        "example": "TRK100987"
+                                    },
+                                    "provider": {
+                                        "type": "string",
+                                        "example": "fedex"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Shipment created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Shipment created and order marked as shipped."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/orders/{id}/notes": {
+            "post": {
+                "tags": [
+                    "Admin Orders"
+                ],
+                "summary": "Update internal staff notes on order",
+                "operationId": "eb89dd32c600f4452b26f0e2c8032c6e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Order ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Customer requested delivery after 5 PM."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Internal notes updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal admin notes saved successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/payments": {
             "get": {
                 "tags": [
@@ -3894,6 +5184,41 @@
                 ]
             }
         },
+        "/api/v1/admin/refunds/stats": {
+            "get": {
+                "tags": [
+                    "Admin Refunds"
+                ],
+                "summary": "Executive Refund Dashboard KPIs",
+                "operationId": "a65fdf26fc251b205b5266d927510fb2",
+                "responses": {
+                    "200": {
+                        "description": "Refund statistics overview",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/refunds": {
             "get": {
                 "tags": [
@@ -3919,11 +5244,37 @@
                         }
                     },
                     {
+                        "name": "refund_channel",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "name": "search",
                         "in": "query",
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
                         }
                     }
                 ],
@@ -3939,12 +5290,41 @@
                 ]
             }
         },
+        "/api/v1/admin/refunds/{id}": {
+            "get": {
+                "tags": [
+                    "Admin Refunds"
+                ],
+                "summary": "Fetch single refund transaction details with frozen bank snapshots",
+                "operationId": "2d87eebdb82eab2da90fa76da3649c87",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Refund record details"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/refunds/process": {
             "post": {
                 "tags": [
                     "Admin Refunds"
                 ],
-                "summary": "Process full or partial refund for order/return",
+                "summary": "Process dual-channel refund (Original Gateway, Bank Transfer, Store Credit)",
                 "operationId": "4ab6164156d88c2b9a31ab6d6c9ba28b",
                 "requestBody": {
                     "required": true,
@@ -3972,17 +5352,25 @@
                                     },
                                     "reason": {
                                         "type": "string",
-                                        "example": "Approved customer return refund"
+                                        "example": "Customer approved return payout"
                                     },
-                                    "gateway": {
+                                    "refund_channel": {
                                         "type": "string",
                                         "enum": [
-                                            "razorpay",
-                                            "stripe",
-                                            "manual",
-                                            "store_credit"
+                                            "original_gateway",
+                                            "bank_transfer",
+                                            "store_credit",
+                                            "manual_cash"
                                         ],
-                                        "example": "manual"
+                                        "example": "bank_transfer"
+                                    },
+                                    "bank_account_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "transaction_reference": {
+                                        "type": "string",
+                                        "example": "UTR9876543210"
                                     }
                                 },
                                 "type": "object"
@@ -3992,7 +5380,58 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Refund processed successfully",
+                        "description": "Refund processed successfully"
+                    },
+                    "422": {
+                        "description": "Invalid refund amount or parameters"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/refunds/{id}/retry": {
+            "post": {
+                "tags": [
+                    "Admin Refunds"
+                ],
+                "summary": "Retry failed refund transaction",
+                "operationId": "c5e8c1078927a00964c734821d99fb0c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Refund retried successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/returns/stats": {
+            "get": {
+                "tags": [
+                    "Admin Returns"
+                ],
+                "summary": "Executive Return & Refund Dashboard KPIs",
+                "operationId": "2a4a99765b80f71213878cfb8a07140d",
+                "responses": {
+                    "200": {
+                        "description": "Returns dashboard statistics",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4000,10 +5439,6 @@
                                         "success": {
                                             "type": "boolean",
                                             "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Refund processed successfully."
                                         },
                                         "data": {
                                             "type": "object"
@@ -4013,9 +5448,6 @@
                                 }
                             }
                         }
-                    },
-                    "422": {
-                        "description": "Invalid refund amount or parameters"
                     }
                 },
                 "security": [
@@ -4048,6 +5480,40 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
@@ -4067,7 +5533,7 @@
                 "tags": [
                     "Admin Returns"
                 ],
-                "summary": "Fetch admin return detail record",
+                "summary": "Fetch 360-degree admin return detail record",
                 "operationId": "c269b6ed959625aeea4ea27d889a6911",
                 "parameters": [
                     {
@@ -4081,7 +5547,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Return detail record"
+                        "description": "Return detail record with frozen snapshot data"
                     }
                 },
                 "security": [
@@ -4123,7 +5589,7 @@
                                     },
                                     "notes": {
                                         "type": "string",
-                                        "example": "Approved for pickup"
+                                        "example": "Approved for courier pickup"
                                     }
                                 },
                                 "type": "object"
@@ -4148,7 +5614,7 @@
                 "tags": [
                     "Admin Returns"
                 ],
-                "summary": "Restock returned variant items into inventory",
+                "summary": "Restock returned variant items into inventory with double-restock protection",
                 "operationId": "1fa4fd52074efad3454798353923546f",
                 "parameters": [
                     {
@@ -5760,6 +7226,214 @@
                 ]
             }
         },
+        "/api/v1/admin/warehouses": {
+            "get": {
+                "tags": [
+                    "Admin Warehouse Management"
+                ],
+                "summary": "List Warehouse Locations",
+                "description": "Retrieve all fulfillment warehouses with active filter and stock count.",
+                "operationId": "adminListWarehouses",
+                "parameters": [
+                    {
+                        "name": "active",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Warehouses retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin Warehouse Management"
+                ],
+                "summary": "Create Warehouse Location",
+                "description": "Create a new fulfillment warehouse location.",
+                "operationId": "adminCreateWarehouse",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Regional East Hub"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "WH-EAST"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Kolkata"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "example": "West Bengal"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "India"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "is_default": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Warehouse created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/warehouses/{id}": {
+            "get": {
+                "tags": [
+                    "Admin Warehouse Management"
+                ],
+                "summary": "Single Warehouse Detail",
+                "description": "Get details of a specific warehouse with its stock inventory records.",
+                "operationId": "adminShowWarehouse",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Warehouse retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin Warehouse Management"
+                ],
+                "summary": "Update Warehouse Details",
+                "description": "Update warehouse properties.",
+                "operationId": "adminUpdateWarehouse",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Warehouse updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin Warehouse Management"
+                ],
+                "summary": "Delete Warehouse Location",
+                "description": "Delete a non-default warehouse location with no active stock.",
+                "operationId": "adminDeleteWarehouse",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Warehouse deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/warehouses/{id}/default": {
+            "post": {
+                "tags": [
+                    "Admin Warehouse Management"
+                ],
+                "summary": "Set Primary Default Warehouse",
+                "description": "Set the default primary fulfillment warehouse.",
+                "operationId": "adminSetDefaultWarehouse",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Default warehouse updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/auth/register": {
             "post": {
                 "tags": [
@@ -6159,6 +7833,21 @@
                     },
                     "422": {
                         "description": "Invalid or expired OTP code"
+                    }
+                }
+            }
+        },
+        "/api/v1/currencies": {
+            "get": {
+                "tags": [
+                    "Storefront Catalog & Currency"
+                ],
+                "summary": "List Active Store Currencies",
+                "description": "Retrieve all active store currencies with symbols and exchange rates relative to INR base.",
+                "operationId": "getPublicCurrencies",
+                "responses": {
+                    "200": {
+                        "description": "List of active currencies retrieved successfully"
                     }
                 }
             }
@@ -7090,6 +8779,157 @@
                         "description": "Invalid or expired coupon code"
                     }
                 }
+            }
+        },
+        "/api/v1/customer/bank-accounts": {
+            "get": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "List Customer Saved Bank Accounts",
+                "description": "Retrieve all saved bank accounts belonging to the authenticated customer.",
+                "operationId": "customerListBankAccounts",
+                "responses": {
+                    "200": {
+                        "description": "Bank accounts list retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Add Saved Bank Account",
+                "description": "Store a new customer bank account for refund payouts.",
+                "operationId": "customerStoreBankAccount",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "account_holder_name",
+                                    "bank_name",
+                                    "account_number",
+                                    "ifsc_code"
+                                ],
+                                "properties": {
+                                    "account_holder_name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "bank_name": {
+                                        "type": "string",
+                                        "example": "HDFC Bank"
+                                    },
+                                    "account_number": {
+                                        "type": "string",
+                                        "example": "50100234567890"
+                                    },
+                                    "ifsc_code": {
+                                        "type": "string",
+                                        "example": "HDFC0001234"
+                                    },
+                                    "account_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "savings",
+                                            "current"
+                                        ],
+                                        "example": "savings"
+                                    },
+                                    "upi_id": {
+                                        "type": "string",
+                                        "example": "johndoe@okhdfcbank"
+                                    },
+                                    "is_default": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Bank account saved successfully"
+                    },
+                    "422": {
+                        "description": "Validation failure"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/customer/bank-accounts/{id}/default": {
+            "patch": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Set Default Bank Account",
+                "description": "Designate a saved bank account as the default payout destination.",
+                "operationId": "customerSetDefaultBankAccount",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Default bank account set successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/customer/bank-accounts/{id}": {
+            "delete": {
+                "tags": [
+                    "Customer Profile & Addresses"
+                ],
+                "summary": "Delete Saved Bank Account",
+                "description": "Remove a saved bank account from the customer's profile.",
+                "operationId": "customerDeleteBankAccount",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bank account deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/v1/customer/notifications": {
@@ -8832,6 +10672,10 @@
     },
     "tags": [
         {
+            "name": "Admin Orders",
+            "description": "Admin Order Management & Storefront Order Fulfillment APIs"
+        },
+        {
             "name": "Admin Authentication",
             "description": "Admin Authentication"
         },
@@ -8858,6 +10702,10 @@
         {
             "name": "Admin - Coupons",
             "description": "Admin - Coupons"
+        },
+        {
+            "name": "Admin Customer Management",
+            "description": "Admin Customer Management"
         },
         {
             "name": "Admin Inventory Management",
@@ -8912,8 +10760,16 @@
             "description": "Admin Product Variants"
         },
         {
+            "name": "Admin Warehouse Management",
+            "description": "Admin Warehouse Management"
+        },
+        {
             "name": "Authentication",
             "description": "Authentication"
+        },
+        {
+            "name": "Storefront Catalog & Currency",
+            "description": "Storefront Catalog & Currency"
         },
         {
             "name": "Customer Profile & Addresses",

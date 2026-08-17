@@ -1,0 +1,99 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - navigation [ref=f1e3]:
+      - link "INFOIGA" [ref=f1e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f1e13]:
+        - link "HOME" [ref=f1e14] [cursor=pointer]:
+          - /url: /
+        - link "ABOUT" [ref=f1e15] [cursor=pointer]:
+          - /url: /about
+        - link "SOLUTIONS" [ref=f1e16] [cursor=pointer]:
+          - /url: /solutions
+        - link "CASE STUDIES" [ref=f1e17] [cursor=pointer]:
+          - /url: /case-studies
+        - link "BLOG" [ref=f1e18] [cursor=pointer]:
+          - /url: /blog
+      - generic [ref=f1e19]:
+        - link "LOGIN" [ref=f1e20] [cursor=pointer]:
+          - /url: /login
+        - link "CONTACT US" [ref=f1e21] [cursor=pointer]:
+          - /url: /contact
+  - main [ref=f1e22]:
+    - generic [ref=f1e23]:
+      - generic [ref=f1e24]:
+        - generic [ref=f1e25]:
+          - generic [ref=f1e26]: "SYSTEM STATUS: ACTIVE // UPDATED LIVE"
+          - heading "We Build Beautiful, Fast Websites That Grow Your Business" [level=1] [ref=f1e27]
+          - paragraph [ref=f1e28]: We create stunning, interactive websites that explain what you do at a glance. By combining clean design with high-performance coding, we turn casual visitors into loyal customers.
+          - generic [ref=f1e29]:
+            - link "Launch ROI Estimator" [ref=f1e30] [cursor=pointer]:
+              - /url: /contact
+            - link "Explore Ecosystem Map →" [ref=f1e31] [cursor=pointer]:
+              - /url: /solutions
+        - generic [ref=f1e32]:
+          - generic [ref=f1e33]:
+            - heading "Interactive Customer Journey" [level=3] [ref=f1e34]
+            - text: // LIVE STATISTICS
+          - img [ref=f1e36]:
+            - generic [ref=f1e38]: Website Visitors
+            - generic [ref=f1e40]: Speed Optimization
+            - generic [ref=f1e42]: Sales & Enquiries
+          - generic [ref=f1e45]:
+            - generic [ref=f1e46]:
+              - text: Total Visitors
+              - generic [ref=f1e47]: 2,481,209
+            - generic [ref=f1e48]:
+              - text: Loading Speed
+              - generic [ref=f1e49]: 420ms
+            - generic [ref=f1e50]:
+              - text: Goal Conversions
+              - generic [ref=f1e51]: 54,821
+      - generic [ref=f1e52]:
+        - generic [ref=f1e53]:
+          - heading "Interactive Visual Design" [level=2] [ref=f1e54]
+          - paragraph [ref=f1e55]: We replace boring walls of text with clean, interactive diagrams. We make it easy for your target audience to understand your product or service instantly.
+        - generic [ref=f1e56]:
+          - generic [ref=f1e57]:
+            - heading "Instant Page Loading" [level=3] [ref=f1e61]
+            - paragraph [ref=f1e62]: Our advanced Laravel 10 backend structures coupled with Nginx caching mechanisms achieve lightning-fast sub-500ms load speeds, keeping visitors engaged.
+          - generic [ref=f1e63]:
+            - heading "Visual Storytelling" [level=3] [ref=f1e67]
+            - paragraph [ref=f1e68]: We design interactive charts and diagrams that show your success, explaining complex features in a simple, engaging way.
+          - generic [ref=f1e69]:
+            - heading "Safe & Secure Code" [level=3] [ref=f1e73]
+            - paragraph [ref=f1e74]: Using professional Docker containers, we guarantee your site runs smoothly and remains secure 24/7 without crashes.
+  - contentinfo [ref=f1e75]:
+    - generic [ref=f1e76]:
+      - generic [ref=f1e77]:
+        - generic [ref=f1e78]: INFOIGA
+        - paragraph [ref=f1e86]: Empowering brands through interactive websites, visual charts, and fast page loading performance.
+      - generic [ref=f1e87]:
+        - heading "Company" [level=4] [ref=f1e88]
+        - list [ref=f1e89]:
+          - listitem [ref=f1e90]:
+            - link "About Our Journey" [ref=f1e91] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=f1e92]:
+            - link "Interactive Visuals" [ref=f1e93] [cursor=pointer]:
+              - /url: /solutions
+          - listitem [ref=f1e94]:
+            - link "Success Stories" [ref=f1e95] [cursor=pointer]:
+              - /url: /case-studies
+          - listitem [ref=f1e96]:
+            - link "Cyber Insights Blog" [ref=f1e97] [cursor=pointer]:
+              - /url: /blog
+      - generic [ref=f1e98]:
+        - heading "Tech Ecosystem" [level=4] [ref=f1e99]
+        - list [ref=f1e100]:
+          - listitem [ref=f1e101]: PHP 8.2 & Laravel 10
+          - listitem [ref=f1e102]: Tailwind CSS Interactivity
+          - listitem [ref=f1e103]: High-Performance Nginx
+          - listitem [ref=f1e104]: Docker Infrastructure
+      - generic [ref=f1e105]:
+        - heading "Live Network Status" [level=4] [ref=f1e106]
+        - generic [ref=f1e107]: OPERATIONAL // CLOUD ONLINE
+        - generic [ref=f1e108]:
+          - generic [ref=f1e109]: "Client Requests: 40.2k/hr"
+          - generic [ref=f1e110]: "Server Latency: 28ms"
+    - generic [ref=f1e111]: © 2026 Info IGA // © 2026 Info IGA. All rights reserved.

@@ -302,17 +302,6 @@ export default function ProductsPage() {
             {/* Page Header */}
             <div className="page-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
                 <div>
-<<<<<<< HEAD
-                    <h2 className="page-header-title" style={{ margin: 0, fontSize: '1.4rem' }}>Product Management</h2>
-                    <p className="page-header-subtitle" style={{ margin: '2px 0 0 0', fontSize: '0.82rem' }}>Manage store catalog, media assets, multi-currency pricing, and bulk operations</p>
-                </div>
-
-                <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                    {/* Currency Switcher Control */}
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: 'var(--admin-bg)', padding: '0 10px', height: '34px', borderRadius: '6px', border: '1px solid var(--admin-border)', boxSizing: 'border-box' }}>
-                        <Globe size={14} style={{ color: 'var(--admin-primary)', flexShrink: 0 }} />
-                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted)' }}>Display:</span>
-=======
                     <h2 className="page-header-title">Product Catalog Management</h2>
                     <p className="page-header-subtitle">Manage storefront catalog items, variable variants, multi-currency pricing, media, and inventory status</p>
                 </div>
@@ -331,15 +320,10 @@ export default function ProductsPage() {
                     }}>
                         <Globe size={13} style={{ color: 'var(--admin-primary)' }} />
                         <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)' }}>Display:</span>
->>>>>>> ed3db9a3de87f2f82f3c26ffc9c7c68fbb4dac63
                         <select
                             value={displayCurrency}
                             onChange={(e) => setDisplayCurrency(e.target.value)}
-<<<<<<< HEAD
-                            style={{ border: 'none', background: 'transparent', padding: '0', fontSize: '0.8rem', fontWeight: 700, color: 'var(--admin-text)', cursor: 'pointer', outline: 'none' }}
-=======
                             style={{ border: 'none', background: 'transparent', padding: '2px 14px 2px 2px', fontSize: '0.78rem', fontWeight: 800, color: 'var(--admin-text)', cursor: 'pointer' }}
->>>>>>> ed3db9a3de87f2f82f3c26ffc9c7c68fbb4dac63
                         >
                             {currenciesList.map((c) => (
                                 <option key={c.code} value={c.code}>
@@ -349,14 +333,6 @@ export default function ProductsPage() {
                         </select>
                     </div>
 
-<<<<<<< HEAD
-                    <button className="btn btn-secondary btn-sm" onClick={() => setIsImportModalOpen(true)} style={{ height: '34px', padding: '0 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>
-                        <Upload size={14} />
-                        <span>Import CSV</span>
-                    </button>
-                    <button className="btn btn-primary btn-sm" onClick={handleOpenCreateModal} style={{ height: '34px', padding: '0 14px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>
-                        <Plus size={14} />
-=======
                     <button
                         type="button"
                         className="btn btn-secondary btn-sm"
@@ -385,7 +361,6 @@ export default function ProductsPage() {
                         style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', fontWeight: 700 }}
                     >
                         <Plus size={15} />
->>>>>>> ed3db9a3de87f2f82f3c26ffc9c7c68fbb4dac63
                         <span>Create Product</span>
                     </button>
                 </div>
