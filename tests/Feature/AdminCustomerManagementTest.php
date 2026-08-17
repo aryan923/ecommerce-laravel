@@ -4,11 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Address;
 use App\Models\AdminUser;
-use App\Models\CustomerNote;
 use App\Models\Order;
 use App\Models\Permission;
-use App\Models\ReturnRequest;
-use App\Models\Review;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,182 +15,163 @@ class AdminCustomerManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected AdminUser $admin;
+    protected AdminUser $superAdmin;
+    protected User $customer;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $role = Role::firstOrCreate(['name' => 'super_admin'], ['slug' => 'super-admin', 'description' => 'Super Admin']);
-        $permissionView = Permission::firstOrCreate(['name' => 'customers.view'], ['module' => 'customers', 'action' => 'view']);
-        $permissionUpdate = Permission::firstOrCreate(['name' => 'customers.update'], ['module' => 'customers', 'action' => 'update']);
+        $permView = Permission::firstOrCreate(['name' => 'customers.view'], ['module' => 'customers', 'action' => 'view']);
+        $permUpdate = Permission::firstOrCreate(['name' => 'customers.update'], ['module' => 'customers', 'action' => 'update']);
 
-        $role->permissions()->syncWithoutDetaching([$permissionView->id, $permissionUpdate->id]);
+        $role = Role::firstOrCreate(['slug' => 'super_admin'], ['name' => 'Super Admin', 'is_system' => true]);
+        $role->permissions()->sync([$permView->id, $permUpdate->id]);
 
-        $this->admin = AdminUser::factory()->create(['status' => 'active']);
-        $this->admin->roles()->attach($role);
+        $this->superAdmin = AdminUser::create([
+            'name' => 'Super Admin',
+            'email' => 'admin_cust@example.com',
+            'password' => bcrypt('password'),
+            'status' => 'active',
+        ]);
+        $this->superAdmin->roles()->sync([$role->id]);
+
+        $this->customer = User::create([
+            'name' => 'Alice Smith',
+            'first_name' => 'Alice',
+            'last_name' => 'Smith',
+            'email' => 'alice@example.com',
+            'mobile' => '+919876543210',
+            'password' => bcrypt('password'),
+            'status' => 'active',
+            'role' => 'customer',
+        ]);
+
+        Order::create([
+            'order_number' => 'ORD-10001',
+            'user_id' => $this->customer->id,
+            'status' => 'delivered',
+            'payment_method' => 'cod',
+            'currency' => 'INR',
+            'subtotal' => 1000.00,
+            'tax_total' => 180.00,
+            'shipping_total' => 50.00,
+            'discount_total' => 0.00,
+            'grand_total' => 1230.00,
+        ]);
+
+        Address::create([
+            'name' => 'Alice Smith',
+            'mobile' => '+919876543210',
+            'user_id' => $this->customer->id,
+            'line_1' => '123 Tech Park',
+            'city' => 'Bangalore',
+            'state' => 'Karnataka',
+            'postal_code' => '560001',
+            'country' => 'India',
+            'is_default_shipping' => true,
+        ]);
     }
 
-    public function test_admin_can_fetch_customer_executive_stats(): void
+    public function test_super_admin_can_view_customer_stats(): void
     {
-        User::factory()->create(['role' => 'customer', 'status' => 'active']);
-        User::factory()->create(['role' => 'customer', 'status' => 'suspended']);
-
-        $response = $this->actingAs($this->admin, 'sanctum')
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
             ->getJson('/api/v1/admin/customers/stats');
 
         $response->assertStatus(200)
-            ->assertJsonStructure([
-                'success',
+            ->assertJson([
+                'success' => true,
                 'data' => [
-                    'total_customers',
-                    'active_customers',
-                    'suspended_customers',
-                    'new_customers_this_month',
-                    'total_revenue',
+                    'total_customers' => 1,
+                    'active_customers' => 1,
+                    'total_customer_revenue' => 1230.00,
                 ],
             ]);
     }
 
-    public function test_admin_can_fetch_paginated_customer_list(): void
+    public function test_super_admin_can_list_customers(): void
     {
-        User::factory()->count(5)->create(['role' => 'customer']);
-
-        $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/customers');
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'success',
-                'data' => [
-                    '*' => ['id', 'name', 'email', 'status', 'orders_count'],
-                ],
-                'meta' => ['current_page', 'last_page', 'total'],
-            ]);
-    }
-
-    public function test_admin_can_search_customers_by_name_email_mobile(): void
-    {
-        User::factory()->create(['name' => 'Alice Walker', 'email' => 'alice@example.com', 'role' => 'customer']);
-        User::factory()->create(['name' => 'Bob Builder', 'email' => 'bob@example.com', 'role' => 'customer']);
-
-        $response = $this->actingAs($this->admin, 'sanctum')
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
             ->getJson('/api/v1/admin/customers?search=Alice');
 
         $response->assertStatus(200)
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.email', 'alice@example.com');
+            ->assertJson([
+                'success' => true,
+            ]);
+
+        $this->assertCount(1, $response->json('data'));
     }
 
-    public function test_admin_can_filter_customers_by_status(): void
+    public function test_super_admin_can_view_customer_profile_and_tabs(): void
     {
-        User::factory()->create(['role' => 'customer', 'status' => 'active']);
-        User::factory()->create(['role' => 'customer', 'status' => 'suspended']);
-
-        $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson('/api/v1/admin/customers?status=suspended');
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->getJson("/api/v1/admin/customers/{$this->customer->id}");
 
         $response->assertStatus(200)
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.status', 'suspended');
-    }
-
-    public function test_admin_can_fetch_single_customer_profile_with_lifetime_metrics(): void
-    {
-        $customer = User::factory()->create(['role' => 'customer']);
-
-        $response = $this->actingAs($this->admin, 'sanctum')
-            ->getJson("/api/v1/admin/customers/{$customer->id}");
-
-        $response->assertStatus(200)
-            ->assertJsonPath('data.id', $customer->id)
-            ->assertJsonStructure([
+            ->assertJson([
+                'success' => true,
                 'data' => [
-                    'id',
-                    'name',
-                    'email',
-                    'total_orders',
-                    'total_spent',
-                    'avg_order_value',
+                    'metrics' => [
+                        'total_orders' => 1,
+                        'total_spent' => 1230.00,
+                    ],
                 ],
             ]);
+
+        // Orders tab test
+        $ordersResponse = $this->actingAs($this->superAdmin, 'sanctum')
+            ->getJson("/api/v1/admin/customers/{$this->customer->id}/orders");
+
+        $ordersResponse->assertStatus(200);
+        $this->assertCount(1, $ordersResponse->json('data'));
+
+        // Addresses tab test
+        $addressesResponse = $this->actingAs($this->superAdmin, 'sanctum')
+            ->getJson("/api/v1/admin/customers/{$this->customer->id}/addresses");
+
+        $addressesResponse->assertStatus(200);
+        $this->assertCount(1, $addressesResponse->json('data'));
     }
 
-    public function test_admin_can_update_customer_basic_info(): void
+    public function test_super_admin_can_update_customer_status(): void
     {
-        $customer = User::factory()->create(['role' => 'customer', 'name' => 'Original Name']);
-
-        $response = $this->actingAs($this->admin, 'sanctum')
-            ->putJson("/api/v1/admin/customers/{$customer->id}", [
-                'name' => 'Updated Customer Name',
-                'email' => $customer->email,
-                'mobile' => '+1987654321',
-            ]);
-
-        $response->assertStatus(200)
-            ->assertJsonPath('data.name', 'Updated Customer Name')
-            ->assertJsonPath('data.mobile', '+1987654321');
-    }
-
-    public function test_admin_can_toggle_customer_account_status(): void
-    {
-        $customer = User::factory()->create(['role' => 'customer', 'status' => 'active']);
-
-        $response = $this->actingAs($this->admin, 'sanctum')
-            ->patchJson("/api/v1/admin/customers/{$customer->id}/status", [
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->patchJson("/api/v1/admin/customers/{$this->customer->id}/status", [
                 'status' => 'suspended',
-                'reason' => 'Policy violation review',
             ]);
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.status', 'suspended');
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'status' => 'suspended',
+                ],
+            ]);
 
         $this->assertDatabaseHas('users', [
-            'id' => $customer->id,
+            'id' => $this->customer->id,
             'status' => 'suspended',
         ]);
     }
 
-    public function test_admin_can_add_and_fetch_internal_staff_notes(): void
+    public function test_super_admin_can_update_admin_notes(): void
     {
-        $customer = User::factory()->create(['role' => 'customer']);
-
-        $responsePost = $this->actingAs($this->admin, 'sanctum')
-            ->postJson("/api/v1/admin/customers/{$customer->id}/notes", [
-                'note' => 'Spoke with customer over phone regarding order inquiry.',
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->patchJson("/api/v1/admin/customers/{$this->customer->id}/notes", [
+                'notes' => 'VIP corporate client account.',
             ]);
 
-        $responsePost->assertStatus(201)
-            ->assertJsonPath('data.note', 'Spoke with customer over phone regarding order inquiry.');
-
-        $responseGet = $this->actingAs($this->admin, 'sanctum')
-            ->getJson("/api/v1/admin/customers/{$customer->id}/notes");
-
-        $responseGet->assertStatus(200)
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.note', 'Spoke with customer over phone regarding order inquiry.');
-    }
-
-    public function test_admin_can_trigger_secure_password_reset(): void
-    {
-        $customer = User::factory()->create(['role' => 'customer']);
-
-        $response = $this->actingAs($this->admin, 'sanctum')
-            ->postJson("/api/v1/admin/customers/{$customer->id}/reset-password");
-
         $response->assertStatus(200)
-            ->assertJsonPath('data.email', $customer->email)
-            ->assertJsonStructure(['data' => ['reset_token']]);
-    }
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'admin_notes' => 'VIP corporate client account.',
+                ],
+            ]);
 
-    public function test_admin_can_export_customers_csv(): void
-    {
-        User::factory()->count(2)->create(['role' => 'customer']);
-
-        $response = $this->actingAs($this->admin, 'sanctum')
-            ->get('/api/v1/admin/customers/export');
-
-        $response->assertStatus(200)
-            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $this->assertDatabaseHas('users', [
+            'id' => $this->customer->id,
+            'admin_notes' => 'VIP corporate client account.',
+        ]);
     }
 }

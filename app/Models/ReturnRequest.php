@@ -18,19 +18,24 @@ class ReturnRequest extends Model
         'return_number',
         'order_id',
         'user_id',
+        'bank_account_id',
         'status',
         'reason',
         'description',
         'images',
+        'bank_details_snapshot',
         'admin_notes',
         'approved_at',
         'rejected_at',
+        'restocked_at',
     ];
 
     protected $casts = [
         'images' => 'array',
+        'bank_details_snapshot' => 'array',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
+        'restocked_at' => 'datetime',
     ];
 
     public static function generateReturnNumber(): string
@@ -54,6 +59,11 @@ class ReturnRequest extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(CustomerBankAccount::class, 'bank_account_id');
     }
 
     public function items(): HasMany

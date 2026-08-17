@@ -16,19 +16,24 @@ class Refund extends Model
         'order_id',
         'payment_id',
         'return_id',
+        'bank_account_id',
         'amount',
         'reason',
         'gateway',
+        'refund_channel',
         'gateway_refund_id',
+        'transaction_reference',
         'status',
         'processed_by',
         'payload',
+        'bank_details_snapshot',
         'completed_at',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'payload' => 'array',
+        'bank_details_snapshot' => 'array',
         'completed_at' => 'datetime',
     ];
 
@@ -58,6 +63,11 @@ class Refund extends Model
     public function returnRequest(): BelongsTo
     {
         return $this->belongsTo(ReturnRequest::class, 'return_id');
+    }
+
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(CustomerBankAccount::class, 'bank_account_id');
     }
 
     public function processor(): BelongsTo

@@ -47,6 +47,20 @@ class AdminDashboardService
         $pendingReturns = (int) ReturnRequest::whereIn('status', ['requested', 'under_review'])->count();
         $pendingRefunds = (int) Refund::where('status', 'pending')->count();
 
+        // Payment Method Breakdown
+        $paymentMethods = Order::select('payment_method', DB::raw('COUNT(id) as order_count'), DB::raw('SUM(grand_total) as volume'))
+            ->whereNotIn('status', ['cancelled'])
+            ->groupBy('payment_method')
+            ->get()
+            ->map(fn ($pm) => [
+                'method' => strtoupper($pm->payment_method ?: 'COD'),
+                'order_count' => (int) $pm->order_count,
+                'volume' => round((float) $pm->volume, 2),
+            ]);
+
+        // To Ship / Fulfillment Backlog (paid or processing)
+        $readyToShipCount = (int) Order::whereIn('status', ['paid', 'confirmed', 'processing'])->count();
+
         return [
             'total_revenue' => round($totalRevenue, 2),
             'today_revenue' => round($todayRevenue, 2),
@@ -54,6 +68,7 @@ class AdminDashboardService
             'total_orders' => $totalOrders,
             'today_orders' => $todayOrders,
             'pending_orders' => $pendingOrders,
+            'ready_to_ship' => $readyToShipCount,
             'delivered_orders' => $deliveredOrders,
             'cancelled_orders' => $cancelledOrders,
             'total_customers' => $totalCustomers,
@@ -62,6 +77,7 @@ class AdminDashboardService
             'low_stock_count' => $lowStockCount,
             'pending_returns' => $pendingReturns,
             'pending_refunds' => $pendingRefunds,
+            'payment_methods' => $paymentMethods,
         ];
     }
 
@@ -222,9 +238,12 @@ class AdminDashboardService
     /**
      * Get dashboard highlights (recent orders and low stock inventory).
      */
-    public function getHighlights(int $limit = 5): array
+    public function getHighlights(int $limit = 6): array
     {
-        $recentOrders = Order::with('user:id,name,email')
+        $recentOrders = Order::with([
+            'user:id,name,email',
+            'items:id,order_id,product_name,quantity,unit_price,total_amount'
+        ])
             ->orderBy('id', 'desc')
             ->take($limit)
             ->get();

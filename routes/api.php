@@ -6,7 +6,10 @@ use App\Http\Controllers\Api\V1\Admin\AttributeController;
 use App\Http\Controllers\Api\V1\Admin\AttributeValueController;
 use App\Http\Controllers\Api\V1\Admin\BrandController;
 use App\Http\Controllers\Api\V1\Admin\CategoryController;
+use App\Http\Controllers\Api\V1\Admin\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\InventoryController;
+use App\Http\Controllers\Api\V1\Admin\OrderAdminController;
+use App\Http\Controllers\Api\V1\Admin\WarehouseController;
 use App\Http\Controllers\Api\V1\Admin\PermissionController;
 use App\Http\Controllers\Api\V1\Admin\ProductController;
 use App\Http\Controllers\Api\V1\Admin\RoleController;
@@ -78,6 +81,27 @@ Route::prefix('v1')->group(function () {
             Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->middleware('permission:staff.update');
             Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->middleware('permission:staff.delete');
 
+            // Admin Customer Management
+            Route::get('/customers/stats', [CustomerController::class, 'stats'])->middleware('permission:customers.view');
+            Route::get('/customers', [CustomerController::class, 'index'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}', [CustomerController::class, 'show'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/orders', [CustomerController::class, 'orders'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/addresses', [CustomerController::class, 'addresses'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/reviews', [CustomerController::class, 'reviews'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/returns', [CustomerController::class, 'returns'])->middleware('permission:customers.view');
+            Route::get('/customers/{id}/refunds', [CustomerController::class, 'refunds'])->middleware('permission:customers.view');
+            Route::patch('/customers/{id}/status', [CustomerController::class, 'updateStatus'])->middleware('permission:customers.update');
+            Route::patch('/customers/{id}/notes', [CustomerController::class, 'updateNotes'])->middleware('permission:customers.update');
+
+            // Admin Order Management
+            Route::get('/orders/stats', [OrderAdminController::class, 'stats'])->middleware('permission:orders.view');
+            Route::get('/orders', [OrderAdminController::class, 'index'])->middleware('permission:orders.view');
+            Route::get('/orders/{id}', [OrderAdminController::class, 'show'])->middleware('permission:orders.view');
+            Route::post('/orders/{id}/status', [OrderAdminController::class, 'updateStatus'])->middleware('permission:orders.update');
+            Route::post('/orders/{id}/shipment', [OrderAdminController::class, 'createShipment'])->middleware('permission:orders.update');
+            Route::post('/orders/{id}/notes', [OrderAdminController::class, 'updateNotes'])->middleware('permission:orders.update');
+
+
             // Role Management
             Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.view');
             Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:roles.create');
@@ -137,7 +161,14 @@ Route::prefix('v1')->group(function () {
             Route::patch('/variants/{variant}/status', [VariantController::class, 'toggleStatus'])->middleware('permission:products.update');
             Route::delete('/variants/{variant}', [VariantController::class, 'destroy'])->middleware('permission:products.delete');
 
-            // Inventory Management
+            // Inventory & Warehouse Management
+            Route::get('/warehouses', [WarehouseController::class, 'index'])->middleware('permission:inventory.view');
+            Route::post('/warehouses', [WarehouseController::class, 'store'])->middleware('permission:inventory.update');
+            Route::get('/warehouses/{id}', [WarehouseController::class, 'show'])->middleware('permission:inventory.view');
+            Route::put('/warehouses/{id}', [WarehouseController::class, 'update'])->middleware('permission:inventory.update');
+            Route::delete('/warehouses/{id}', [WarehouseController::class, 'destroy'])->middleware('permission:inventory.update');
+            Route::post('/warehouses/{id}/default', [WarehouseController::class, 'setDefault'])->middleware('permission:inventory.update');
+
             Route::get('/inventory/dashboard', [InventoryController::class, 'dashboard'])->middleware('permission:inventory.view');
             Route::get('/inventory/kpis', [InventoryController::class, 'kpis'])->middleware('permission:inventory.view');
             Route::get('/inventory', [InventoryController::class, 'index'])->middleware('permission:inventory.view');
@@ -146,7 +177,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/inventory/history', [InventoryController::class, 'history'])->middleware('permission:inventory.view');
             Route::get('/inventory/transactions', [InventoryController::class, 'transactions'])->middleware('permission:inventory.view');
             Route::get('/inventory/export', [InventoryController::class, 'export'])->middleware('permission:inventory.view');
+            Route::get('/inventory/sample-template', [InventoryController::class, 'sampleTemplate'])->middleware('permission:inventory.view');
             Route::post('/inventory/adjust', [InventoryController::class, 'adjust'])->middleware('permission:inventory.update');
+            Route::post('/inventory/transfer', [InventoryController::class, 'transfer'])->middleware('permission:inventory.update');
+            Route::post('/inventory/import', [InventoryController::class, 'import'])->middleware('permission:inventory.update');
             Route::post('/inventory/reserve', [InventoryController::class, 'reserve'])->middleware('permission:inventory.update');
             Route::post('/inventory/release', [InventoryController::class, 'release'])->middleware('permission:inventory.update');
             Route::post('/inventory/commit', [InventoryController::class, 'commit'])->middleware('permission:inventory.update');
@@ -162,32 +196,6 @@ Route::prefix('v1')->group(function () {
             Route::post('/media/sort', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'sort'])->middleware('permission:media.update');
             Route::delete('/media/unused', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'purgeUnused'])->middleware('permission:media.delete');
             Route::delete('/media/{id}', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'destroy'])->middleware('permission:media.delete');
-
-            // Inventory Management
-            Route::get('/inventory', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'index'])->middleware('permission:inventory.view');
-            Route::get('/inventory/dashboard', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'dashboard'])->middleware('permission:inventory.view');
-            Route::get('/inventory/alerts', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'alerts'])->middleware('permission:inventory.view');
-            Route::get('/inventory/history', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'history'])->middleware('permission:inventory.view');
-            Route::get('/inventory/{variant_id}', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'show'])->middleware('permission:inventory.view');
-            Route::post('/inventory/adjust', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'adjust'])->middleware('permission:inventory.adjust');
-            Route::post('/inventory/reserve', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'reserve'])->middleware('permission:inventory.update');
-            Route::post('/inventory/release', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'release'])->middleware('permission:inventory.update');
-            Route::post('/inventory/commit', [\App\Http\Controllers\Api\V1\Admin\InventoryController::class, 'commit'])->middleware('permission:inventory.update');
-
-            // Customer Management
-            Route::get('/customers/stats', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'stats'])->middleware('permission:customers.view');
-            Route::get('/customers/export', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'export'])->middleware('permission:customers.view');
-            Route::get('/customers', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'index'])->middleware('permission:customers.view');
-            Route::get('/customers/{id}', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'show'])->middleware('permission:customers.view');
-            Route::put('/customers/{id}', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'update'])->middleware('permission:customers.update');
-            Route::patch('/customers/{id}/status', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'updateStatus'])->middleware('permission:customers.update');
-            Route::get('/customers/{id}/orders', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'orders'])->middleware('permission:customers.view');
-            Route::get('/customers/{id}/addresses', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'addresses'])->middleware('permission:customers.view');
-            Route::get('/customers/{id}/reviews', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'reviews'])->middleware('permission:customers.view');
-            Route::get('/customers/{id}/returns', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'returns'])->middleware('permission:customers.view');
-            Route::get('/customers/{id}/notes', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'getNotes'])->middleware('permission:customers.view');
-            Route::post('/customers/{id}/notes', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'addNote'])->middleware('permission:customers.update');
-            Route::post('/customers/{id}/reset-password', [\App\Http\Controllers\Api\V1\Admin\CustomerAdminController::class, 'resetPassword'])->middleware('permission:customers.update');
 
             // Coupon Management
             Route::get('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'index']);
@@ -245,14 +253,18 @@ Route::prefix('v1')->group(function () {
             Route::post('/payments/{id}/mark-paid', [\App\Http\Controllers\Api\V1\Admin\PaymentAdminController::class, 'markPaid']);
 
             // Admin Return Management
+            Route::get('/returns/stats', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'stats']);
             Route::get('/returns', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'index']);
             Route::get('/returns/{id}', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'show']);
             Route::post('/returns/{id}/status', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'updateStatus']);
             Route::post('/returns/{id}/restock', [\App\Http\Controllers\Api\V1\Admin\ReturnAdminController::class, 'restock']);
 
             // Admin Refund Management
+            Route::get('/refunds/stats', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'stats']);
             Route::get('/refunds', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'index']);
+            Route::get('/refunds/{id}', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'show']);
             Route::post('/refunds/process', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'process']);
+            Route::post('/refunds/{id}/retry', [\App\Http\Controllers\Api\V1\Admin\RefundAdminController::class, 'retry']);
 
             // Admin Review Management
             Route::get('/reviews', [\App\Http\Controllers\Api\V1\Admin\ReviewAdminController::class, 'index']);
@@ -297,6 +309,12 @@ Route::middleware('auth:sanctum')->prefix('v1/customer')->group(function () {
     Route::delete('/addresses/{id}', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'destroy']);
     Route::patch('/addresses/{id}/default-shipping', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'setDefaultShipping']);
     Route::patch('/addresses/{id}/default-billing', [\App\Http\Controllers\Api\V1\Customer\AddressController::class, 'setDefaultBilling']);
+
+    // Customer Saved Bank Accounts
+    Route::get('/bank-accounts', [\App\Http\Controllers\Api\V1\Customer\CustomerBankAccountController::class, 'index']);
+    Route::post('/bank-accounts', [\App\Http\Controllers\Api\V1\Customer\CustomerBankAccountController::class, 'store']);
+    Route::patch('/bank-accounts/{id}/default', [\App\Http\Controllers\Api\V1\Customer\CustomerBankAccountController::class, 'setDefault']);
+    Route::delete('/bank-accounts/{id}', [\App\Http\Controllers\Api\V1\Customer\CustomerBankAccountController::class, 'destroy']);
 
     // Protected Customer Order Routes
     Route::get('/orders', [\App\Http\Controllers\Api\V1\Customer\CustomerOrderController::class, 'index']);

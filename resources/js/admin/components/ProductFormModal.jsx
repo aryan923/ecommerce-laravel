@@ -17,7 +17,15 @@ import {
     Wand2,
     Info,
     Clock,
-    Scale
+    Scale,
+    Sparkles,
+    Globe,
+    CheckCircle2,
+    ChevronRight,
+    ChevronLeft,
+    UploadCloud,
+    Maximize2,
+    Eye
 } from 'lucide-react';
 import axios from 'axios';
 import MediaLibraryModal from './MediaLibraryModal';
@@ -37,6 +45,9 @@ export default function ProductFormModal({
     const [taxClasses, setTaxClasses] = useState([]);
     const [attributes, setAttributes] = useState([]);
     const [shippingMethods, setShippingMethods] = useState([]);
+
+    // Category search filter
+    const [categoryFilter, setCategoryFilter] = useState('');
 
     // Media Modal State
     const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
@@ -67,6 +78,7 @@ export default function ProductFormModal({
         requires_shipping: true,
         is_free_shipping: false,
         shipping_class_id: '',
+        shipping_fee: '',
         weight: '',
         length: '',
         width: '',
@@ -96,6 +108,7 @@ export default function ProductFormModal({
     useEffect(() => {
         if (isOpen) {
             setError('');
+            setCategoryFilter('');
             fetchDropdownData();
 
             if (mode === 'edit' && initialData) {
@@ -470,6 +483,22 @@ export default function ProductFormModal({
         (s) => String(s.id) === String(formData.shipping_class_id)
     );
 
+    const filteredCategories = categories.filter((c) =>
+        c.name.toLowerCase().includes(categoryFilter.toLowerCase())
+    );
+
+    const tabsList = [
+        { id: 'general', label: 'General', icon: Tag },
+        { id: 'pricing', label: 'Pricing & Tax', icon: DollarSign },
+        { id: 'media', label: 'Media & Gallery', icon: ImageIcon, count: (formData.main_image ? 1 : 0) + formData.gallery.length },
+        ...(formData.type === 'variable' || formData.type === 'digital' ? [{ id: 'variants', label: 'Variants & Matrix', icon: Layers, count: formData.variants.length }] : []),
+        { id: 'shipping', label: 'Shipping & Specs', icon: Truck },
+        { id: 'seo', label: 'SEO & SERP', icon: Search },
+        ...(formData.type === 'digital' ? [{ id: 'digital', label: 'Digital Download', icon: Download }] : []),
+    ];
+
+    const currentTabIndex = tabsList.findIndex((t) => t.id === activeTab);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -615,337 +644,352 @@ export default function ProductFormModal({
             <div
                 className="modal-card"
                 style={{
-                    maxWidth: '940px',
-                    width: '95%',
-                    maxHeight: '92vh',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    borderRadius: '16px',
-                    boxShadow: '0 24px 64px -12px rgba(0,0,0,0.25), 0 0 0 1px var(--admin-border)',
-                    padding: 0,
-                    backgroundColor: 'var(--admin-card-bg, #fff)'
+                    maxWidth: '1020px',
+                    width: '96%',
+                    maxHeight: '90vh',
                 }}
             >
                 {/* Modal Header */}
-                <div
-                    style={{
-                        padding: '18px 24px',
-                        borderBottom: '1px solid var(--admin-border)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        backgroundColor: 'var(--admin-bg, #f8fafc)',
-                        borderTopLeftRadius: '16px',
-                        borderTopRightRadius: '16px'
-                    }}
-                >
+                <div className="modal-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div
                             style={{
-                                width: '40px',
-                                height: '40px',
+                                width: '38px',
+                                height: '38px',
                                 borderRadius: '10px',
-                                backgroundColor: 'var(--admin-primary-light, rgba(79, 70, 229, 0.1))',
+                                backgroundColor: 'rgba(99, 102, 241, 0.12)',
                                 color: 'var(--admin-primary)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center'
                             }}
                         >
-                            <Package size={22} />
+                            <Package size={20} />
                         </div>
                         <div>
-                            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: 'var(--admin-text)' }}>
-                                {mode === 'edit' ? 'Edit Product Specification' : 'Create Complete Product'}
-                            </h3>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                                {mode === 'edit' ? `Modifying Catalog Item #${initialData?.id || ''}` : 'Configure pricing, media, attributes, shipping & SEO metadata'}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--admin-text)' }}>
+                                    {mode === 'edit' ? 'Edit Product Specification' : 'Create New Product'}
+                                </h3>
+                                <span style={{
+                                    fontSize: '0.7rem',
+                                    fontWeight: 800,
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    textTransform: 'uppercase',
+                                    backgroundColor: mode === 'edit' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+                                    color: mode === 'edit' ? 'var(--admin-primary)' : '#10b981',
+                                    border: `1px solid ${mode === 'edit' ? 'rgba(99, 102, 241, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`
+                                }}>
+                                    {mode === 'edit' ? `Item #${initialData?.id || ''}` : 'New Catalog Item'}
+                                </span>
+                            </div>
+                            <p style={{ margin: '2px 0 0 0', fontSize: '0.76rem', color: 'var(--admin-muted)' }}>
+                                {mode === 'edit' ? 'Update SKU, prices, inventory variants, photos & shipping specs' : 'Configure pricing, media, attributes, shipping classes & SEO metadata'}
+                            </p>
                         </div>
                     </div>
+
                     <button
+                        type="button"
                         className="btn btn-secondary btn-sm"
                         onClick={onClose}
-                        style={{ borderRadius: '50%', width: '34px', height: '34px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ borderRadius: '8px', width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        title="Close Modal (Esc)"
                     >
                         <X size={16} />
                     </button>
                 </div>
 
+                {/* Tabbed Navigation Bar */}
+                <div className="modal-tabs-nav">
+                    {tabsList.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                className={`modal-tab-pill ${isActive ? 'active' : ''}`}
+                                onClick={() => setActiveTab(tab.id)}
+                            >
+                                <Icon size={14} />
+                                <span>{tab.label}</span>
+                                {tab.count !== undefined && tab.count > 0 && (
+                                    <span
+                                        className="badge-count"
+                                        style={{
+                                            fontSize: '0.68rem',
+                                            padding: '1px 6px',
+                                            borderRadius: '10px',
+                                            fontWeight: 800,
+                                            backgroundColor: isActive ? '#ffffff' : 'var(--admin-primary)',
+                                            color: isActive ? 'var(--admin-primary)' : '#ffffff'
+                                        }}
+                                    >
+                                        {tab.count}
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+
                 {/* Main Scrollable Content Area */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+                <div className="modal-body">
                     {error && (
                         <div
                             style={{
-                                padding: '12px 16px',
-                                backgroundColor: 'var(--admin-danger-light, rgba(239, 68, 68, 0.1))',
-                                color: 'var(--admin-danger)',
-                                border: '1px solid var(--admin-danger)',
+                                padding: '10px 14px',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                color: '#ef4444',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
                                 borderRadius: '8px',
-                                fontSize: '0.85rem',
-                                marginBottom: '20px',
+                                fontSize: '0.82rem',
+                                marginBottom: '14px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px'
+                                gap: '8px',
+                                fontWeight: 600
                             }}
                         >
-                            <AlertCircle size={18} />
+                            <AlertCircle size={16} />
                             <span>{error}</span>
                         </div>
                     )}
 
-                    {/* Tabbed Navigation Bar */}
-                    <div
-                        style={{
-                            display: 'flex',
-                            gap: '8px',
-                            borderBottom: '1px solid var(--admin-border)',
-                            marginBottom: '24px',
-                            paddingBottom: '8px',
-                            overflowX: 'auto',
-                            scrollbars: 'none'
-                        }}
-                    >
-                        <button
-                            type="button"
-                            className={`btn btn-sm ${activeTab === 'general' ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setActiveTab('general')}
-                            style={{ borderRadius: '20px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                        >
-                            <Tag size={14} />
-                            <span>General</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            className={`btn btn-sm ${activeTab === 'pricing' ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setActiveTab('pricing')}
-                            style={{ borderRadius: '20px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                        >
-                            <DollarSign size={14} />
-                            <span>Pricing & Tax</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            className={`btn btn-sm ${activeTab === 'media' ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setActiveTab('media')}
-                            style={{ borderRadius: '20px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                        >
-                            <ImageIcon size={14} />
-                            <span>Media & Images</span>
-                            {formData.gallery.length > 0 && (
-                                <span style={{ backgroundColor: activeTab === 'media' ? '#fff' : 'var(--admin-primary)', color: activeTab === 'media' ? 'var(--admin-primary)' : '#fff', fontSize: '0.7rem', padding: '1px 6px', borderRadius: '10px', fontWeight: 700 }}>
-                                    {formData.gallery.length}
-                                </span>
-                            )}
-                        </button>
-
-                        {(formData.type === 'variable' || formData.type === 'digital') && (
-                            <button
-                                type="button"
-                                className={`btn btn-sm ${activeTab === 'variants' ? 'btn-primary' : 'btn-secondary'}`}
-                                onClick={() => setActiveTab('variants')}
-                                style={{ borderRadius: '20px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                            >
-                                <Layers size={14} />
-                                <span>Variants & Attributes</span>
-                                {formData.variants.length > 0 && (
-                                    <span style={{ backgroundColor: activeTab === 'variants' ? '#fff' : 'var(--admin-primary)', color: activeTab === 'variants' ? 'var(--admin-primary)' : '#fff', fontSize: '0.7rem', padding: '1px 6px', borderRadius: '10px', fontWeight: 700 }}>
-                                        {formData.variants.length}
-                                    </span>
-                                )}
-                            </button>
-                        )}
-
-                        <button
-                            type="button"
-                            className={`btn btn-sm ${activeTab === 'shipping' ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setActiveTab('shipping')}
-                            style={{ borderRadius: '20px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                        >
-                            <Truck size={14} />
-                            <span>Shipping & Specs</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            className={`btn btn-sm ${activeTab === 'seo' ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setActiveTab('seo')}
-                            style={{ borderRadius: '20px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                        >
-                            <Search size={14} />
-                            <span>SEO</span>
-                        </button>
-
-                        {formData.type === 'digital' && (
-                            <button
-                                type="button"
-                                className={`btn btn-sm ${activeTab === 'digital' ? 'btn-primary' : 'btn-secondary'}`}
-                                onClick={() => setActiveTab('digital')}
-                                style={{ borderRadius: '20px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-                            >
-                                <Download size={14} />
-                                <span>Digital File</span>
-                            </button>
-                        )}
-                    </div>
-
                     <form id="productForm" onSubmit={handleSubmit}>
                         {/* Tab 1: General & Catalog */}
                         {activeTab === 'general' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                <div style={{ padding: '20px', border: '1px solid var(--admin-border)', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px' }}>
-                                        <Tag size={18} style={{ color: 'var(--admin-primary)' }} />
-                                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>General Information</h4>
+                            <div>
+                                {/* Basic Details Card */}
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
+                                        <h4 className="form-section-title">
+                                            <Tag size={15} style={{ color: 'var(--admin-primary)' }} />
+                                            <span>Product Classification & Identifiers</span>
+                                        </h4>
+                                        <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)', fontWeight: 600 }}>Step 1 of Catalog Entry</span>
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Product Title / Name *
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="name"
-                                                className="form-control"
-                                                placeholder="e.g. Premium Wireless Noise-Cancelling Headphones"
-                                                value={formData.name}
-                                                onChange={handleChange}
-                                                style={{ fontSize: '0.95rem', fontWeight: 600 }}
-                                                required
-                                            />
-                                        </div>
+                                    <div className="form-section-body">
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                                            <div style={{ gridColumn: '1 / -1' }}>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Product Title / Name *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="name"
+                                                    className="form-control"
+                                                    placeholder="e.g. Sony WH-1000XM5 Wireless Noise-Cancelling Headphones"
+                                                    value={formData.name}
+                                                    onChange={handleChange}
+                                                    style={{ fontSize: '0.92rem', fontWeight: 700 }}
+                                                    required
+                                                />
+                                            </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                SKU (Stock Keeping Unit)
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="sku"
-                                                className="form-control"
-                                                placeholder="PRD-AUDIO-100"
-                                                value={formData.sku}
-                                                onChange={handleChange}
-                                            />
-                                            <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)' }}>Auto-generated if left blank</span>
-                                        </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    SKU (Stock Keeping Unit)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="sku"
+                                                    className="form-control"
+                                                    placeholder="PRD-AUDIO-100"
+                                                    value={formData.sku}
+                                                    onChange={handleChange}
+                                                    style={{ fontFamily: 'monospace', fontWeight: 600 }}
+                                                />
+                                                <span style={{ fontSize: '0.7rem', color: 'var(--admin-muted)' }}>Auto-generated if left blank</span>
+                                            </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Product Classification Type *
-                                            </label>
-                                            <select name="type" className="form-select" value={formData.type} onChange={handleChange} style={{ fontWeight: 600 }}>
-                                                <option value="simple">Simple Product (Single Item)</option>
-                                                <option value="variable">Variable Product (Multiple Variants)</option>
-                                                <option value="digital">Digital Product (Downloadable)</option>
-                                            </select>
-                                        </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Product Type *
+                                                </label>
+                                                <select name="type" className="form-select" value={formData.type} onChange={handleChange} style={{ fontWeight: 700 }}>
+                                                    <option value="simple">Simple Product (Single Item)</option>
+                                                    <option value="variable">Variable Product (Multiple Variants)</option>
+                                                    <option value="digital">Digital Product (Downloadable File)</option>
+                                                </select>
+                                            </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Publication Status *
-                                            </label>
-                                            <select name="status" className="form-select" value={formData.status} onChange={handleChange}>
-                                                <option value="active">Active (Visible on Storefront)</option>
-                                                <option value="draft">Draft (Hidden)</option>
-                                                <option value="inactive">Inactive</option>
-                                                <option value="archived">Archived</option>
-                                            </select>
-                                        </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Publication Status *
+                                                </label>
+                                                <select name="status" className="form-select" value={formData.status} onChange={handleChange} style={{ fontWeight: 600 }}>
+                                                    <option value="active">Active (Published on Storefront)</option>
+                                                    <option value="draft">Draft (Hidden from Catalog)</option>
+                                                    <option value="inactive">Inactive</option>
+                                                    <option value="archived">Archived</option>
+                                                </select>
+                                            </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Manufacturer Brand
-                                            </label>
-                                            <select name="brand_id" className="form-select" value={formData.brand_id} onChange={handleChange}>
-                                                <option value="">Select Brand (Optional)</option>
-                                                {brands.map((b) => (
-                                                    <option key={b.id} value={b.id}>{b.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Category Assignments *
-                                            </label>
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '12px', backgroundColor: 'var(--admin-bg)', border: '1px solid var(--admin-border)', borderRadius: '8px', maxHeight: '140px', overflowY: 'auto' }}>
-                                                {categories.length ? categories.map((cat) => {
-                                                    const isSelected = formData.category_ids.includes(cat.id);
-                                                    return (
-                                                        <label
-                                                            key={cat.id}
-                                                            style={{
-                                                                display: 'inline-flex',
-                                                                alignItems: 'center',
-                                                                gap: '6px',
-                                                                fontSize: '0.82rem',
-                                                                cursor: 'pointer',
-                                                                padding: '5px 12px',
-                                                                borderRadius: '20px',
-                                                                border: isSelected ? '1px solid var(--admin-primary)' : '1px solid var(--admin-border)',
-                                                                backgroundColor: isSelected ? 'var(--admin-primary-light, rgba(79, 70, 229, 0.1))' : 'var(--admin-card-bg)',
-                                                                color: isSelected ? 'var(--admin-primary)' : 'var(--admin-text)',
-                                                                fontWeight: isSelected ? 600 : 400,
-                                                                transition: 'all 0.15s ease'
-                                                            }}
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={isSelected}
-                                                                onChange={() => handleCategoryToggle(cat.id)}
-                                                            />
-                                                            <span>{cat.name}</span>
-                                                        </label>
-                                                    );
-                                                }) : (
-                                                    <span className="text-muted" style={{ fontSize: '0.8rem' }}>No categories available in catalog.</span>
-                                                )}
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Manufacturer Brand
+                                                </label>
+                                                <select name="brand_id" className="form-select" value={formData.brand_id} onChange={handleChange}>
+                                                    <option value="">Select Brand (Optional)</option>
+                                                    {brands.map((b) => (
+                                                        <option key={b.id} value={b.id}>{b.name}</option>
+                                                    ))}
+                                                </select>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
 
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.85rem', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)' }}>
+                                {/* Category Assignments Card */}
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Layers size={15} style={{ color: 'var(--admin-primary)' }} />
+                                            <h4 className="form-section-title">
+                                                Category Assignments ({formData.category_ids.length} Selected) *
+                                            </h4>
+                                        </div>
+                                        {categories.length > 8 && (
+                                            <div style={{ width: '180px' }}>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Filter categories..."
+                                                    value={categoryFilter}
+                                                    onChange={(e) => setCategoryFilter(e.target.value)}
+                                                    style={{ padding: '2px 8px', fontSize: '0.74rem' }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="form-section-body">
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxHeight: '130px', overflowY: 'auto', padding: '4px' }}>
+                                            {filteredCategories.length ? filteredCategories.map((cat) => {
+                                                const isSelected = formData.category_ids.includes(cat.id);
+                                                const isPrimary = String(formData.primary_category_id) === String(cat.id);
+                                                return (
+                                                    <div
+                                                        key={cat.id}
+                                                        onClick={() => handleCategoryToggle(cat.id)}
+                                                        style={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px',
+                                                            fontSize: '0.78rem',
+                                                            cursor: 'pointer',
+                                                            padding: '4px 10px',
+                                                            borderRadius: '8px',
+                                                            border: isSelected ? '1px solid var(--admin-primary)' : '1px solid var(--admin-border)',
+                                                            backgroundColor: isSelected ? 'rgba(99, 102, 241, 0.12)' : 'var(--admin-card-hover)',
+                                                            color: isSelected ? 'var(--admin-primary)' : 'var(--admin-text)',
+                                                            fontWeight: isSelected ? 700 : 500,
+                                                            transition: 'all 0.15s ease',
+                                                            userSelect: 'none'
+                                                        }}
+                                                    >
+                                                        <div style={{
+                                                            width: '14px',
+                                                            height: '14px',
+                                                            borderRadius: '4px',
+                                                            border: isSelected ? 'none' : '1px solid var(--admin-border)',
+                                                            backgroundColor: isSelected ? 'var(--admin-primary)' : 'transparent',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            color: '#fff'
+                                                        }}>
+                                                            {isSelected && <Check size={10} strokeWidth={3} />}
+                                                        </div>
+                                                        <span>{cat.name}</span>
+                                                        {isPrimary && (
+                                                            <span style={{ fontSize: '0.65rem', backgroundColor: 'var(--admin-primary)', color: '#fff', padding: '0 4px', borderRadius: '4px' }}>
+                                                                Primary
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }) : (
+                                                <span style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>No matching categories.</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Showcase & Descriptions Card */}
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
+                                        <h4 className="form-section-title">
+                                            <Sparkles size={15} style={{ color: '#f59e0b' }} />
+                                            <span>Showcase Badging & Content Copy</span>
+                                        </h4>
+                                    </div>
+
+                                    <div className="form-section-body">
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                                            {/* Featured Switch */}
+                                            <label style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                padding: '10px 14px',
+                                                borderRadius: '10px',
+                                                border: formData.featured ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--admin-border)',
+                                                backgroundColor: formData.featured ? 'rgba(245, 158, 11, 0.08)' : 'var(--admin-card-hover)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.15s ease'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <Sparkles size={16} style={{ color: formData.featured ? '#f59e0b' : 'var(--admin-muted)' }} />
+                                                    <div>
+                                                        <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--admin-text)' }}>
+                                                            Homepage Featured Product
+                                                        </div>
+                                                        <div style={{ fontSize: '0.72rem', color: 'var(--admin-muted)' }}>
+                                                            Highlight this product in the homepage hero carousel and trending showcases
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <input
                                                     type="checkbox"
                                                     name="featured"
                                                     checked={formData.featured}
                                                     onChange={handleChange}
+                                                    style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                                                 />
-                                                <span style={{ fontWeight: 600 }}>Mark as Featured Product (Highlights item on homepage showcase)</span>
                                             </label>
-                                        </div>
 
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Short Description
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="short_description"
-                                                className="form-control"
-                                                placeholder="Brief 1-liner summary displayed on product cards..."
-                                                value={formData.short_description}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Short Summary (Teaser description on catalog cards)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="short_description"
+                                                    className="form-control"
+                                                    placeholder="Brief 1-liner summary displayed below title..."
+                                                    value={formData.short_description}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
 
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Detailed Product Description
-                                            </label>
-                                            <textarea
-                                                name="description"
-                                                className="form-control"
-                                                rows={4}
-                                                placeholder="Write full product specifications, features, and warranty details..."
-                                                value={formData.description}
-                                                onChange={handleChange}
-                                            />
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Detailed Specifications & Full Description
+                                                </label>
+                                                <textarea
+                                                    name="description"
+                                                    className="form-control"
+                                                    rows={4}
+                                                    placeholder="Write comprehensive product features, technical specifications, and warranty details..."
+                                                    value={formData.description}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -954,103 +998,129 @@ export default function ProductFormModal({
 
                         {/* Tab 2: Pricing & Tax */}
                         {activeTab === 'pricing' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                <div style={{ padding: '20px', border: '1px solid var(--admin-border)', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px' }}>
+                            <div>
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <DollarSign size={18} style={{ color: 'var(--admin-primary)' }} />
-                                            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>Pricing & Tax Setup</h4>
+                                            <DollarSign size={15} style={{ color: '#10b981' }} />
+                                            <h4 className="form-section-title">Pricing Architecture & Valuation</h4>
                                         </div>
-                                        <span style={{ fontSize: '0.8rem', padding: '3px 10px', borderRadius: '12px', backgroundColor: 'var(--admin-primary-light)', color: 'var(--admin-primary)', fontWeight: 600 }}>
-                                            Base Currency: INR (₹)
+                                        <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '6px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981', fontWeight: 800 }}>
+                                            Currency: INR (₹)
                                         </span>
                                     </div>
 
-                                    {formData.price && (
-                                        <div style={{ padding: '10px 14px', backgroundColor: 'var(--admin-bg)', borderRadius: '8px', border: '1px solid var(--admin-border)', marginBottom: '16px', fontSize: '0.82rem' }}>
-                                            <span style={{ color: 'var(--admin-muted)' }}>Multi-Currency Live Preview: </span>
-                                            <strong style={{ color: 'var(--admin-primary)', marginLeft: '6px' }}>
-                                                {formatCurrency(formData.price, displayCurrency, true)}
-                                            </strong>
-                                        </div>
-                                    )}
-
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Regular Price (₹ INR) *
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                name="price"
-                                                className="form-control"
-                                                placeholder="1999.00"
-                                                value={formData.price}
-                                                onChange={handleChange}
-                                                style={{ fontSize: '0.95rem', fontWeight: 700 }}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Sale / Discount Price (₹ INR)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                name="sale_price"
-                                                className="form-control"
-                                                placeholder="1499.00"
-                                                value={formData.sale_price}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Cost Price (₹ INR - Internal)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                name="cost_price"
-                                                className="form-control"
-                                                placeholder="850.00"
-                                                value={formData.cost_price}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
-                                        {/* Margin & Profit Calculation Indicator */}
-                                        {formData.price && formData.cost_price && (
-                                            <div style={{ gridColumn: '1 / -1', padding: '10px 14px', borderRadius: '8px', backgroundColor: 'var(--admin-primary-light, rgba(79,70,229,0.08))', border: '1px solid var(--admin-primary)', display: 'flex', gap: '20px', fontSize: '0.82rem' }}>
-                                                <div>
-                                                    <span style={{ color: 'var(--admin-muted)', display: 'block' }}>Estimated Profit</span>
-                                                    <strong style={{ color: 'var(--admin-success)', fontSize: '0.9rem' }}>
-                                                        ₹{(parseFloat(formData.sale_price || formData.price) - parseFloat(formData.cost_price)).toFixed(2)}
-                                                    </strong>
-                                                </div>
-                                                <div>
-                                                    <span style={{ color: 'var(--admin-muted)', display: 'block' }}>Profit Margin %</span>
-                                                    <strong style={{ color: 'var(--admin-primary)', fontSize: '0.9rem' }}>
-                                                        {(((parseFloat(formData.sale_price || formData.price) - parseFloat(formData.cost_price)) / parseFloat(formData.sale_price || formData.price)) * 100).toFixed(1)}%
-                                                    </strong>
+                                    <div className="form-section-body">
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Regular Price (₹ INR) *
+                                                </label>
+                                                <div style={{ position: 'relative' }}>
+                                                    <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)', fontWeight: 700, fontSize: '0.84rem' }}>₹</span>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        name="price"
+                                                        className="form-control"
+                                                        placeholder="1999.00"
+                                                        value={formData.price}
+                                                        onChange={handleChange}
+                                                        style={{ paddingLeft: '24px', fontSize: '0.92rem', fontWeight: 800 }}
+                                                        required
+                                                    />
                                                 </div>
                                             </div>
-                                        )}
 
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Tax Class / GST Tier
-                                            </label>
-                                            <select name="tax_class_id" className="form-select" value={formData.tax_class_id} onChange={handleChange}>
-                                                <option value="">Default Standard 18% GST</option>
-                                                {taxClasses.map((t) => (
-                                                    <option key={t.id} value={t.id}>{t.name}</option>
-                                                ))}
-                                            </select>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Sale / Discount Price (₹ INR)
+                                                </label>
+                                                <div style={{ position: 'relative' }}>
+                                                    <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)', fontWeight: 700, fontSize: '0.84rem' }}>₹</span>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        name="sale_price"
+                                                        className="form-control"
+                                                        placeholder="1499.00"
+                                                        value={formData.sale_price}
+                                                        onChange={handleChange}
+                                                        style={{ paddingLeft: '24px', fontSize: '0.92rem', fontWeight: 800, color: '#10b981' }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Cost Price (₹ INR - COGS)
+                                                </label>
+                                                <div style={{ position: 'relative' }}>
+                                                    <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)', fontWeight: 700, fontSize: '0.84rem' }}>₹</span>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        name="cost_price"
+                                                        className="form-control"
+                                                        placeholder="850.00"
+                                                        value={formData.cost_price}
+                                                        onChange={handleChange}
+                                                        style={{ paddingLeft: '24px', fontSize: '0.92rem', fontWeight: 700 }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Dynamic Margin & Profit Preview Box */}
+                                            {formData.price && formData.cost_price && (
+                                                <div style={{
+                                                    gridColumn: '1 / -1',
+                                                    padding: '10px 14px',
+                                                    borderRadius: '10px',
+                                                    backgroundColor: 'rgba(99, 102, 241, 0.06)',
+                                                    border: '1px solid rgba(99, 102, 241, 0.25)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    flexWrap: 'wrap',
+                                                    gap: '12px'
+                                                }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                                        <div>
+                                                            <span style={{ fontSize: '0.7rem', color: 'var(--admin-muted)', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>
+                                                                Estimated Gross Profit
+                                                            </span>
+                                                            <strong style={{ color: '#10b981', fontSize: '1.1rem', fontWeight: 800 }}>
+                                                                ₹{(parseFloat(formData.sale_price || formData.price) - parseFloat(formData.cost_price)).toFixed(2)}
+                                                            </strong>
+                                                        </div>
+
+                                                        <div style={{ borderLeft: '1px solid var(--admin-border)', paddingLeft: '20px' }}>
+                                                            <span style={{ fontSize: '0.7rem', color: 'var(--admin-muted)', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>
+                                                                Gross Profit Margin
+                                                            </span>
+                                                            <strong style={{ color: 'var(--admin-primary)', fontSize: '1.1rem', fontWeight: 800 }}>
+                                                                {(((parseFloat(formData.sale_price || formData.price) - parseFloat(formData.cost_price)) / parseFloat(formData.sale_price || formData.price)) * 100).toFixed(1)}%
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+
+                                                    <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)' }}>
+                                                        Multi-Currency Preview: <strong style={{ color: 'var(--admin-text)' }}>{formatCurrency(formData.price, displayCurrency, true)}</strong>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div style={{ gridColumn: '1 / -1' }}>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Tax Class / GST Tier
+                                                </label>
+                                                <select name="tax_class_id" className="form-select" value={formData.tax_class_id} onChange={handleChange}>
+                                                    <option value="">Standard 18% GST (Default)</option>
+                                                    {taxClasses.map((t) => (
+                                                        <option key={t.id} value={t.id}>{t.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1059,25 +1129,29 @@ export default function ProductFormModal({
 
                         {/* Tab 3: Centralized Media & Gallery */}
                         {activeTab === 'media' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                <div style={{ padding: '20px', border: '1px solid var(--admin-border)', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px' }}>
-                                        <ImageIcon size={18} style={{ color: 'var(--admin-primary)' }} />
-                                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>Main Product Cover Photo</h4>
+                            <div>
+                                {/* Main Cover Photo */}
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <ImageIcon size={15} style={{ color: 'var(--admin-primary)' }} />
+                                            <h4 className="form-section-title">Primary Cover Photo</h4>
+                                        </div>
+                                        <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)' }}>Recommended: 800×800px or 1:1 Aspect Ratio</span>
                                     </div>
 
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                                    <div className="form-section-body">
                                         {(() => {
                                             const mainSrc = typeof formData.main_image === 'object'
                                                 ? (formData.main_image?.url || (formData.main_image?.file_path ? `/storage/${formData.main_image.file_path}` : ''))
                                                 : (typeof formData.main_image === 'string' ? formData.main_image : '');
                                             return (
-                                                <>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                                                     <div
                                                         style={{
-                                                            width: '130px',
-                                                            height: '130px',
-                                                            borderRadius: '12px',
+                                                            width: '110px',
+                                                            height: '110px',
+                                                            borderRadius: '10px',
                                                             border: mainSrc ? '2px solid var(--admin-primary)' : '2px dashed var(--admin-border)',
                                                             backgroundColor: 'var(--admin-bg)',
                                                             overflow: 'hidden',
@@ -1091,146 +1165,150 @@ export default function ProductFormModal({
                                                         {mainSrc ? (
                                                             <>
                                                                 <img src={mainSrc} alt="Main product cover" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                                <span style={{ position: 'absolute', bottom: '6px', left: '6px', backgroundColor: 'rgba(15,23,42,0.85)', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700 }}>
+                                                                <span style={{ position: 'absolute', bottom: '4px', left: '4px', backgroundColor: 'rgba(15,23,42,0.85)', color: '#ffffff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.62rem', fontWeight: 800 }}>
                                                                     COVER
                                                                 </span>
                                                             </>
                                                         ) : (
                                                             <div style={{ textAlign: 'center', color: 'var(--admin-muted)' }}>
-                                                                <ImageIcon size={34} style={{ color: 'var(--admin-subtle)' }} />
-                                                                <span style={{ display: 'block', fontSize: '0.72rem', marginTop: '4px', fontWeight: 600 }}>No Cover Photo</span>
+                                                                <ImageIcon size={28} style={{ color: 'var(--admin-subtle)' }} />
+                                                                <span style={{ display: 'block', fontSize: '0.68rem', marginTop: '2px', fontWeight: 600 }}>No Cover</span>
                                                             </div>
                                                         )}
                                                     </div>
 
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                                         <div style={{ display: 'flex', gap: '8px' }}>
                                                             <button
                                                                 type="button"
-                                                                className="btn btn-secondary"
+                                                                className="btn btn-primary btn-sm"
                                                                 onClick={() => handleOpenMediaPicker('main')}
-                                                                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                                                                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
                                                             >
-                                                                <ImageIcon size={16} />
-                                                                <span>{mainSrc ? 'Change Cover Photo' : 'Select Main Cover Photo'}</span>
+                                                                <UploadCloud size={14} />
+                                                                <span>{mainSrc ? 'Change Cover Photo' : 'Select from Media Library'}</span>
                                                             </button>
 
                                                             {mainSrc && (
                                                                 <button
                                                                     type="button"
-                                                                    className="btn btn-secondary"
-                                                                    style={{ color: 'var(--admin-danger)' }}
+                                                                    className="btn btn-secondary btn-sm"
+                                                                    style={{ color: '#ef4444' }}
                                                                     onClick={() => setFormData((prev) => ({ ...prev, main_image: null }))}
                                                                 >
-                                                                    <Trash2 size={16} />
+                                                                    <Trash2 size={14} />
                                                                     <span>Remove</span>
                                                                 </button>
                                                             )}
                                                         </div>
-                                                        <span style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>
-                                                            Primary cover image featured on product listings & storefront catalog (Min 800×800 px).
+                                                        <span style={{ fontSize: '0.74rem', color: 'var(--admin-muted)' }}>
+                                                            Featured across all storefront cards, search listings, cart drawers, and order invoices.
                                                         </span>
                                                     </div>
-                                                </>
+                                                </div>
                                             );
                                         })()}
                                     </div>
                                 </div>
 
-                                <div style={{ padding: '20px', border: '1px solid var(--admin-border)', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px' }}>
+                                {/* Gallery Photos */}
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <Layers size={18} style={{ color: 'var(--admin-primary)' }} />
-                                            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
-                                                Product Photo Gallery ({formData.gallery.length} Photos)
+                                            <Layers size={15} style={{ color: 'var(--admin-primary)' }} />
+                                            <h4 className="form-section-title">
+                                                Additional Photo Gallery ({formData.gallery.length} Photos)
                                             </h4>
                                         </div>
                                         <button
                                             type="button"
                                             className="btn btn-secondary btn-sm"
                                             onClick={() => handleOpenMediaPicker('gallery')}
-                                            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
                                         >
                                             <Plus size={14} />
                                             <span>Add Gallery Photos</span>
                                         </button>
                                     </div>
 
-                                    {formData.gallery.length > 0 ? (
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '12px' }}>
-                                            {formData.gallery.map((img, idx) => {
-                                                const src = typeof img === 'object' ? (img.url || (img.file_path ? `/storage/${img.file_path}` : '')) : img;
-                                                return (
-                                                    <div key={idx} style={{ position: 'relative', height: '110px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)' }}>
-                                                        <img src={src} alt="Gallery item" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                        <span style={{ position: 'absolute', bottom: '4px', left: '4px', backgroundColor: 'rgba(15,23,42,0.75)', color: '#ffffff', fontSize: '0.65rem', padding: '1px 6px', borderRadius: '3px', fontWeight: 600 }}>
-                                                            #{idx + 1}
-                                                        </span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleRemoveGalleryPhoto(idx)}
-                                                            style={{ position: 'absolute', top: '4px', right: '4px', backgroundColor: 'rgba(255,255,255,0.92)', border: 'none', borderRadius: '4px', padding: '3px', cursor: 'pointer', color: 'var(--admin-danger)', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
-                                                            title="Remove gallery photo"
-                                                        >
-                                                            <Trash2 size={12} />
-                                                        </button>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <div style={{ padding: '30px', border: '2px dashed var(--admin-border)', borderRadius: '10px', textAlign: 'center', color: 'var(--admin-muted)', fontSize: '0.85rem' }}>
-                                            No additional gallery photos attached yet. Click "Add Gallery Photos" to select from Media Library.
-                                        </div>
-                                    )}
+                                    <div className="form-section-body">
+                                        {formData.gallery.length > 0 ? (
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(95px, 1fr))', gap: '8px' }}>
+                                                {formData.gallery.map((img, idx) => {
+                                                    const src = typeof img === 'object' ? (img.url || (img.file_path ? `/storage/${img.file_path}` : '')) : img;
+                                                    return (
+                                                        <div key={idx} style={{ position: 'relative', height: '95px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--admin-border)', backgroundColor: 'var(--admin-bg)' }}>
+                                                            <img src={src} alt="Gallery item" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            <span style={{ position: 'absolute', bottom: '4px', left: '4px', backgroundColor: 'rgba(15,23,42,0.75)', color: '#ffffff', fontSize: '0.62rem', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                                                                #{idx + 1}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleRemoveGalleryPhoto(idx)}
+                                                                style={{ position: 'absolute', top: '3px', right: '3px', backgroundColor: 'rgba(255,255,255,0.92)', border: 'none', borderRadius: '4px', padding: '3px', cursor: 'pointer', color: '#ef4444', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
+                                                                title="Remove gallery photo"
+                                                            >
+                                                                <Trash2 size={12} />
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <div style={{ padding: '24px', border: '1px dashed var(--admin-border)', borderRadius: '8px', textAlign: 'center', color: 'var(--admin-muted)', fontSize: '0.8rem' }}>
+                                                No gallery photos attached yet. Click "Add Gallery Photos" to select showcase angles from Media Library.
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         )}
 
                         {/* Tab 4: Variants & Attributes */}
                         {activeTab === 'variants' && (formData.type === 'variable' || formData.type === 'digital') && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div>
                                 {/* Auto-Generate Combinations Tool */}
                                 <div
                                     style={{
-                                        padding: '20px',
-                                        background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(79, 70, 229, 0.12))',
-                                        border: '1px solid var(--admin-primary)',
-                                        borderRadius: '12px'
+                                        padding: '14px 16px',
+                                        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(99, 102, 241, 0.12))',
+                                        border: '1px solid rgba(99, 102, 241, 0.3)',
+                                        borderRadius: '12px',
+                                        marginBottom: '12px'
                                     }}
                                 >
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                                         <div>
-                                            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <Wand2 size={18} />
-                                                <span>Auto-Generate Variant Combinations Tool</span>
+                                            <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: 'var(--admin-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <Wand2 size={16} />
+                                                <span>Variant Combination Generator Matrix</span>
                                             </h4>
-                                            <span style={{ fontSize: '0.78rem', color: 'var(--admin-muted)' }}>Select attribute values below to auto-generate all possible matrix combinations</span>
+                                            <span style={{ fontSize: '0.72rem', color: 'var(--admin-muted)' }}>Select option values to auto-compute all Cartesian product combinations</span>
                                         </div>
                                         <button
                                             type="button"
-                                            className="btn btn-primary"
+                                            className="btn btn-primary btn-sm"
                                             onClick={handleAutoGenerateCombinations}
-                                            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
                                         >
-                                            <Wand2 size={16} />
-                                            <span>Generate Combinations Matrix</span>
+                                            <Wand2 size={14} />
+                                            <span>Generate Combinations</span>
                                         </button>
                                     </div>
 
                                     {attributes.length > 0 ? (
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
                                             {attributes.map((attr) => {
                                                 const selectedCount = (selectedGenAttributes[attr.id] || []).length;
                                                 const totalCount = attr.values?.length || 0;
                                                 return (
-                                                    <div key={attr.id} style={{ fontSize: '0.8rem', backgroundColor: 'var(--admin-card-bg, #fff)', padding: '12px', borderRadius: '8px', border: '1px solid var(--admin-border)' }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                                    <div key={attr.id} style={{ fontSize: '0.78rem', backgroundColor: 'var(--admin-card-bg)', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-border)' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                                                             <span style={{ fontWeight: 700, color: 'var(--admin-text)' }}>{attr.name} ({selectedCount}/{totalCount})</span>
                                                             <div style={{ display: 'flex', gap: '6px' }}>
                                                                 <button
                                                                     type="button"
-                                                                    style={{ border: 'none', background: 'none', color: 'var(--admin-primary)', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, padding: 0 }}
+                                                                    style={{ border: 'none', background: 'none', color: 'var(--admin-primary)', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, padding: 0 }}
                                                                     onClick={() => handleSelectAllAttrValues(attr.id)}
                                                                 >
                                                                     All
@@ -1238,19 +1316,19 @@ export default function ProductFormModal({
                                                                 <span style={{ color: 'var(--admin-border)' }}>|</span>
                                                                 <button
                                                                     type="button"
-                                                                    style={{ border: 'none', background: 'none', color: 'var(--admin-muted)', cursor: 'pointer', fontSize: '0.72rem', padding: 0 }}
+                                                                    style={{ border: 'none', background: 'none', color: 'var(--admin-muted)', cursor: 'pointer', fontSize: '0.7rem', padding: 0 }}
                                                                     onClick={() => handleClearAttrValues(attr.id)}
                                                                 >
                                                                     Clear
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '120px', overflowY: 'auto' }}>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '100px', overflowY: 'auto' }}>
                                                             {attr.values?.length ? (
                                                                 attr.values.map((val) => {
                                                                     const checked = (selectedGenAttributes[attr.id] || []).includes(val.id);
                                                                     return (
-                                                                        <label key={val.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                                                        <label key={val.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.76rem' }}>
                                                                             <input
                                                                                 type="checkbox"
                                                                                 checked={checked}
@@ -1261,7 +1339,7 @@ export default function ProductFormModal({
                                                                     );
                                                                 })
                                                             ) : (
-                                                                <span className="text-muted" style={{ fontSize: '0.75rem' }}>No values found</span>
+                                                                <span style={{ color: 'var(--admin-muted)', fontSize: '0.72rem' }}>No values found</span>
                                                             )}
                                                         </div>
                                                     </div>
@@ -1269,48 +1347,52 @@ export default function ProductFormModal({
                                             })}
                                         </div>
                                     ) : (
-                                        <span style={{ fontSize: '0.8rem', color: 'var(--admin-muted)' }}>No catalog attributes (Color, Size, RAM) defined yet. Configure attributes in /admin/attributes first.</span>
+                                        <span style={{ fontSize: '0.76rem', color: 'var(--admin-muted)' }}>No catalog attributes configured yet.</span>
                                     )}
                                 </div>
 
                                 {/* Variant Matrix Table Section */}
-                                <div style={{ padding: '20px', border: '1px solid var(--admin-border)', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
-                                            Variant Matrix Table ({formData.variants.length} Rows)
-                                        </h4>
-                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Layers size={15} style={{ color: 'var(--admin-primary)' }} />
+                                            <h4 className="form-section-title">
+                                                Configured Variants ({formData.variants.length} Matrix Rows)
+                                            </h4>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
                                             <button
                                                 type="button"
                                                 className="btn btn-secondary btn-sm"
                                                 onClick={handleApplyBatchPriceAndStock}
-                                                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.74rem' }}
+                                                title="Sync price and stock from base product"
                                             >
-                                                <DollarSign size={14} />
-                                                <span>Apply Base Prices & Stock to All</span>
+                                                <DollarSign size={13} />
+                                                <span>Apply Base Prices</span>
                                             </button>
                                             <button
                                                 type="button"
                                                 className="btn btn-secondary btn-sm"
                                                 onClick={handleAddVariantRow}
-                                                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                                                style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.74rem' }}
                                             >
-                                                <Plus size={14} />
-                                                <span>Add Blank Variant</span>
+                                                <Plus size={13} />
+                                                <span>Add Blank Row</span>
                                             </button>
                                         </div>
                                     </div>
 
                                     <div className="table-responsive">
-                                        <table className="admin-table" style={{ fontSize: '0.8rem', border: '1px solid var(--admin-border)' }}>
+                                        <table className="admin-table" style={{ fontSize: '0.78rem' }}>
                                             <thead>
                                                 <tr>
-                                                    <th>Image</th>
-                                                    <th>SKU</th>
-                                                    <th>Assigned Attributes</th>
-                                                    <th>Reg. Price (₹)</th>
-                                                    <th>Sale Price (₹)</th>
-                                                    <th>Cost Price (₹)</th>
+                                                    <th style={{ width: '60px' }}>Photo</th>
+                                                    <th>Variant SKU</th>
+                                                    <th>Option Badges</th>
+                                                    <th>Price (₹)</th>
+                                                    <th>Sale (₹)</th>
+                                                    <th>Cost (₹)</th>
                                                     <th>Stock</th>
                                                     <th style={{ textAlign: 'right' }}>Action</th>
                                                 </tr>
@@ -1333,16 +1415,12 @@ export default function ProductFormModal({
                                                     return (
                                                         <tr key={vIdx}>
                                                             <td>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                    <img src={vImgSrc} alt="Variant" style={{ width: '36px', height: '36px', borderRadius: '4px', objectFit: 'cover' }} />
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn btn-secondary btn-sm"
-                                                                        onClick={() => handleOpenMediaPicker('variant', vIdx)}
-                                                                        style={{ padding: '2px 6px', fontSize: '0.7rem' }}
-                                                                    >
-                                                                        Pick
-                                                                    </button>
+                                                                <div
+                                                                    onClick={() => handleOpenMediaPicker('variant', vIdx)}
+                                                                    style={{ width: '32px', height: '32px', borderRadius: '4px', overflow: 'hidden', cursor: 'pointer', border: '1px solid var(--admin-border)', position: 'relative' }}
+                                                                    title="Click to select variant photo"
+                                                                >
+                                                                    <img src={vImgSrc} alt="Variant" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                                 </div>
                                                             </td>
                                                             <td>
@@ -1351,11 +1429,11 @@ export default function ProductFormModal({
                                                                     className="form-control"
                                                                     value={v.sku}
                                                                     onChange={(e) => handleUpdateVariantRow(vIdx, 'sku', e.target.value)}
-                                                                    style={{ padding: '4px 8px', fontSize: '0.8rem', width: '130px' }}
+                                                                    style={{ padding: '3px 6px', fontSize: '0.76rem', width: '120px', fontFamily: 'monospace' }}
                                                                 />
                                                             </td>
                                                             <td>
-                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '240px' }}>
+                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', maxWidth: '220px' }}>
                                                                     {v.attribute_value_ids?.length ? (
                                                                         v.attribute_value_ids.map((valId) => {
                                                                             const info = valueLookup[valId];
@@ -1363,36 +1441,23 @@ export default function ProductFormModal({
                                                                                 <span
                                                                                     key={valId}
                                                                                     style={{
-                                                                                        fontSize: '0.72rem',
-                                                                                        padding: '3px 8px',
+                                                                                        fontSize: '0.68rem',
+                                                                                        padding: '1px 6px',
                                                                                         borderRadius: '4px',
-                                                                                        backgroundColor: 'var(--admin-primary)',
-                                                                                        color: '#fff',
-                                                                                        fontWeight: 600,
-                                                                                        display: 'inline-flex',
-                                                                                        alignItems: 'center',
-                                                                                        gap: '4px'
+                                                                                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                                                                                        color: 'var(--admin-primary)',
+                                                                                        fontWeight: 700,
+                                                                                        border: '1px solid rgba(99, 102, 241, 0.25)'
                                                                                     }}
                                                                                 >
-                                                                                    <span>{info ? `${info.attrName}: ${info.valName}` : `Val #${valId}`}</span>
+                                                                                    {info ? `${info.attrName}: ${info.valName}` : `Val #${valId}`}
                                                                                 </span>
                                                                             );
                                                                         })
                                                                     ) : (
-                                                                        <span className="text-muted" style={{ fontSize: '0.75rem' }}>No attributes assigned</span>
+                                                                        <span style={{ color: 'var(--admin-muted)', fontSize: '0.72rem' }}>No attributes</span>
                                                                     )}
                                                                 </div>
-                                                                {formData.type === 'digital' && (
-                                                                    <div style={{ marginTop: '4px' }}>
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
-                                                                            placeholder="Variant File Download URL"
-                                                                            value={v.download_url || ''}
-                                                                            onChange={(e) => handleUpdateVariantRow(vIdx, 'download_url', e.target.value)}
-                                                                        />
-                                                                    </div>
-                                                                )}
                                                             </td>
                                                             <td>
                                                                 <input
@@ -1402,7 +1467,7 @@ export default function ProductFormModal({
                                                                     value={v.price}
                                                                     onChange={(e) => handleUpdateVariantRow(vIdx, 'price', e.target.value)}
                                                                     placeholder={formData.price || '0.00'}
-                                                                    style={{ padding: '4px 6px', fontSize: '0.8rem', width: '85px' }}
+                                                                    style={{ padding: '3px 6px', fontSize: '0.76rem', width: '80px', fontWeight: 700 }}
                                                                 />
                                                             </td>
                                                             <td>
@@ -1413,7 +1478,7 @@ export default function ProductFormModal({
                                                                     value={v.sale_price || ''}
                                                                     onChange={(e) => handleUpdateVariantRow(vIdx, 'sale_price', e.target.value)}
                                                                     placeholder={formData.sale_price || 'Optional'}
-                                                                    style={{ padding: '4px 6px', fontSize: '0.8rem', width: '85px' }}
+                                                                    style={{ padding: '3px 6px', fontSize: '0.76rem', width: '80px', color: '#10b981' }}
                                                                 />
                                                             </td>
                                                             <td>
@@ -1424,7 +1489,7 @@ export default function ProductFormModal({
                                                                     value={v.cost_price || ''}
                                                                     onChange={(e) => handleUpdateVariantRow(vIdx, 'cost_price', e.target.value)}
                                                                     placeholder={formData.cost_price || 'Optional'}
-                                                                    style={{ padding: '4px 6px', fontSize: '0.8rem', width: '85px' }}
+                                                                    style={{ padding: '3px 6px', fontSize: '0.76rem', width: '80px' }}
                                                                 />
                                                             </td>
                                                             <td>
@@ -1433,15 +1498,16 @@ export default function ProductFormModal({
                                                                     className="form-control"
                                                                     value={v.stock_qty}
                                                                     onChange={(e) => handleUpdateVariantRow(vIdx, 'stock_qty', e.target.value)}
-                                                                    style={{ padding: '4px 6px', fontSize: '0.8rem', width: '70px' }}
+                                                                    style={{ padding: '3px 6px', fontSize: '0.76rem', width: '65px', fontWeight: 700 }}
                                                                 />
                                                             </td>
                                                             <td style={{ textAlign: 'right' }}>
                                                                 <button
                                                                     type="button"
                                                                     className="btn btn-secondary btn-sm"
-                                                                    style={{ color: 'var(--admin-danger)' }}
+                                                                    style={{ color: '#ef4444', padding: '2px 6px' }}
                                                                     onClick={() => handleRemoveVariantRow(vIdx)}
+                                                                    title="Remove variant"
                                                                 >
                                                                     <Trash2 size={12} />
                                                                 </button>
@@ -1458,134 +1524,139 @@ export default function ProductFormModal({
 
                         {/* Tab 5: Shipping & Specifications */}
                         {activeTab === 'shipping' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                <div style={{ padding: '20px', border: '1px solid var(--admin-border)', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px' }}>
-                                        <Truck size={18} style={{ color: 'var(--admin-primary)' }} />
-                                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>Shipping & Physical Package Specs</h4>
+                            <div>
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Truck size={15} style={{ color: '#0ea5e9' }} />
+                                            <h4 className="form-section-title">Physical Logistics & Dimension Specs</h4>
+                                        </div>
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-                                        <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '24px', padding: '14px', backgroundColor: 'var(--admin-bg)', borderRadius: '8px', border: '1px solid var(--admin-border)' }}>
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    name="requires_shipping"
-                                                    checked={formData.requires_shipping}
+                                    <div className="form-section-body">
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                                            {/* Shipping Toggles */}
+                                            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '16px', padding: '10px 14px', backgroundColor: 'var(--admin-card-hover)', borderRadius: '8px', border: '1px solid var(--admin-border)', flexWrap: 'wrap' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.82rem' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        name="requires_shipping"
+                                                        checked={formData.requires_shipping}
+                                                        onChange={handleChange}
+                                                    />
+                                                    <span style={{ fontWeight: 700 }}>Requires Physical Shipping</span>
+                                                </label>
+
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.82rem' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        name="is_free_shipping"
+                                                        checked={formData.is_free_shipping}
+                                                        onChange={handleChange}
+                                                    />
+                                                    <span style={{ fontWeight: 700, color: '#10b981' }}>Eligible for Free Shipping</span>
+                                                </label>
+                                            </div>
+
+                                            <div style={{ gridColumn: '1 / -1' }}>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Shipping Class / Delivery Carrier Tier
+                                                </label>
+                                                <select
+                                                    name="shipping_class_id"
+                                                    className="form-select"
+                                                    value={formData.shipping_class_id}
                                                     onChange={handleChange}
-                                                />
-                                                <span style={{ fontWeight: 600 }}>Requires Physical Shipping</span>
-                                            </label>
+                                                    disabled={!formData.requires_shipping}
+                                                >
+                                                    <option value="">Standard Zone Rate Delivery (Default Calculation)</option>
+                                                    {shippingMethods.map((s) => (
+                                                        <option key={s.id} value={s.id}>
+                                                            {s.name} {s.type ? `(${s.type})` : ''} {s.estimated_days ? `• Est. ${s.estimated_days} days` : ''}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
 
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                            <div style={{ gridColumn: '1 / -1' }}>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Custom Flat Shipping Surcharge (₹ INR - Optional Override)
+                                                </label>
                                                 <input
-                                                    type="checkbox"
-                                                    name="is_free_shipping"
-                                                    checked={formData.is_free_shipping}
+                                                    type="number"
+                                                    step="0.01"
+                                                    name="shipping_fee"
+                                                    className="form-control"
+                                                    placeholder="e.g. 50.00 (Leave empty to use automatic zone rates)"
+                                                    value={formData.shipping_fee}
                                                     onChange={handleChange}
+                                                    disabled={!formData.requires_shipping || formData.is_free_shipping}
                                                 />
-                                                <span style={{ fontWeight: 600, color: 'var(--admin-success)' }}>Eligible for Free Shipping</span>
-                                            </label>
-                                        </div>
+                                            </div>
 
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Shipping Class / Carrier Method Tier
-                                            </label>
-                                            <select
-                                                name="shipping_class_id"
-                                                className="form-select"
-                                                value={formData.shipping_class_id}
-                                                onChange={handleChange}
-                                                disabled={!formData.requires_shipping}
-                                            >
-                                                <option value="">Default Surface Delivery (Zone Rate Calculation)</option>
-                                                {shippingMethods.map((s) => (
-                                                    <option key={s.id} value={s.id}>
-                                                        {s.name} {s.type ? `(${s.type})` : ''} {s.estimated_days ? `• Est. ${s.estimated_days} days` : ''}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Weight (kg)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    name="weight"
+                                                    className="form-control"
+                                                    placeholder="0.75"
+                                                    value={formData.weight}
+                                                    onChange={handleChange}
+                                                    disabled={!formData.requires_shipping}
+                                                />
+                                            </div>
 
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Per-Product Custom Shipping Fee Override (₹ INR)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                name="shipping_fee"
-                                                className="form-control"
-                                                placeholder="e.g. 75.00 (Leave empty to use zone rates)"
-                                                value={formData.shipping_fee}
-                                                onChange={handleChange}
-                                                disabled={!formData.requires_shipping || formData.is_free_shipping}
-                                            />
-                                        </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Length (cm)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.1"
+                                                    name="length"
+                                                    className="form-control"
+                                                    placeholder="20.0"
+                                                    value={formData.length}
+                                                    onChange={handleChange}
+                                                    disabled={!formData.requires_shipping}
+                                                />
+                                            </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Weight (kg)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                name="weight"
-                                                className="form-control"
-                                                placeholder="0.85"
-                                                value={formData.weight}
-                                                onChange={handleChange}
-                                                disabled={!formData.requires_shipping}
-                                            />
-                                        </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Width (cm)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.1"
+                                                    name="width"
+                                                    className="form-control"
+                                                    placeholder="15.0"
+                                                    value={formData.width}
+                                                    onChange={handleChange}
+                                                    disabled={!formData.requires_shipping}
+                                                />
+                                            </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Length (cm)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                name="length"
-                                                className="form-control"
-                                                placeholder="20.0"
-                                                value={formData.length}
-                                                onChange={handleChange}
-                                                disabled={!formData.requires_shipping}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Width (cm)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                name="width"
-                                                className="form-control"
-                                                placeholder="15.0"
-                                                value={formData.width}
-                                                onChange={handleChange}
-                                                disabled={!formData.requires_shipping}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Height (cm)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                name="height"
-                                                className="form-control"
-                                                placeholder="8.5"
-                                                value={formData.height}
-                                                onChange={handleChange}
-                                                disabled={!formData.requires_shipping}
-                                            />
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Height (cm)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.1"
+                                                    name="height"
+                                                    className="form-control"
+                                                    placeholder="8.5"
+                                                    value={formData.height}
+                                                    onChange={handleChange}
+                                                    disabled={!formData.requires_shipping}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1594,54 +1665,78 @@ export default function ProductFormModal({
 
                         {/* Tab 6: SEO Metadata */}
                         {activeTab === 'seo' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                <div style={{ padding: '20px', border: '1px solid var(--admin-border)', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px' }}>
-                                        <Search size={18} style={{ color: 'var(--admin-primary)' }} />
-                                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>Search Engine Optimization (SEO)</h4>
+                            <div>
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Globe size={15} style={{ color: 'var(--admin-primary)' }} />
+                                            <h4 className="form-section-title">Search Engine Optimization & Live SERP Preview</h4>
+                                        </div>
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                SEO Meta Title
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="seo_title"
-                                                className="form-control"
-                                                placeholder="Buy Premium Headphones Online | Best Price"
-                                                value={formData.seo_title}
-                                                onChange={handleChange}
-                                            />
+                                    <div className="form-section-body">
+                                        {/* Google SERP Live Snippet Box */}
+                                        <div style={{
+                                            padding: '12px 16px',
+                                            borderRadius: '8px',
+                                            backgroundColor: 'var(--admin-card-hover)',
+                                            border: '1px solid var(--admin-border)',
+                                            marginBottom: '14px',
+                                            fontFamily: 'Arial, sans-serif'
+                                        }}>
+                                            <div style={{ fontSize: '0.72rem', color: '#10b981', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <span>https://store.example.com › products › {formData.sku ? formData.sku.toLowerCase() : 'product-title'}</span>
+                                            </div>
+                                            <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#4f46e5', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {formData.seo_title || formData.name || 'Your Product Title | Online Store'}
+                                            </div>
+                                            <div style={{ fontSize: '0.76rem', color: 'var(--admin-muted)', lineHeight: 1.4 }}>
+                                                {formData.seo_description || formData.short_description || 'Discover premium product details, specifications, and fast delivery at the best price online.'}
+                                            </div>
                                         </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Meta Keywords (Comma Separated)
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="meta_keywords"
-                                                className="form-control"
-                                                placeholder="headphones, audio, wireless, bluetooth"
-                                                value={formData.meta_keywords}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    SEO Meta Title Tag
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="seo_title"
+                                                    className="form-control"
+                                                    placeholder="Buy Premium Wireless Headphones Online | Best Price"
+                                                    value={formData.seo_title}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                SEO Meta Description
-                                            </label>
-                                            <textarea
-                                                name="seo_description"
-                                                className="form-control"
-                                                rows={3}
-                                                placeholder="Discover high fidelity wireless headphones with active noise cancellation..."
-                                                value={formData.seo_description}
-                                                onChange={handleChange}
-                                            />
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Meta Keywords (Comma-Separated)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="meta_keywords"
+                                                    className="form-control"
+                                                    placeholder="headphones, noise cancelling, audio, wireless, bluetooth"
+                                                    value={formData.meta_keywords}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    SEO Meta Description
+                                                </label>
+                                                <textarea
+                                                    name="seo_description"
+                                                    className="form-control"
+                                                    rows={3}
+                                                    placeholder="Discover high fidelity sound with active noise cancelling headphones. Shop with free shipping and official warranty..."
+                                                    value={formData.seo_description}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1650,54 +1745,59 @@ export default function ProductFormModal({
 
                         {/* Tab 7: Digital File Parameters */}
                         {activeTab === 'digital' && formData.type === 'digital' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                <div style={{ padding: '20px', border: '1px solid var(--admin-border)', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px' }}>
-                                        <Download size={18} style={{ color: 'var(--admin-primary)' }} />
-                                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>Digital File Download Parameters</h4>
+                            <div>
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Download size={15} style={{ color: 'var(--admin-primary)' }} />
+                                            <h4 className="form-section-title">Digital File Download Link & Expiry Parameters</h4>
+                                        </div>
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Download URL / File Link *
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="download_url"
-                                                className="form-control"
-                                                placeholder="https://downloads.example.com/software-v1.zip"
-                                                value={formData.download_url}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
+                                    <div className="form-section-body">
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                            <div style={{ gridColumn: '1 / -1' }}>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Download URL / Protected Storage Key *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="download_url"
+                                                    className="form-control"
+                                                    placeholder="https://downloads.example.com/software-v2.0.zip"
+                                                    value={formData.download_url}
+                                                    onChange={handleChange}
+                                                    style={{ fontFamily: 'monospace' }}
+                                                />
+                                            </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Max Download Limit
-                                            </label>
-                                            <input
-                                                type="number"
-                                                name="download_limit"
-                                                className="form-control"
-                                                placeholder="5 (Leave empty for unlimited)"
-                                                value={formData.download_limit}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Maximum Download Limit
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="download_limit"
+                                                    className="form-control"
+                                                    placeholder="5 (Leave empty for unlimited downloads)"
+                                                    value={formData.download_limit}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
 
-                                        <div>
-                                            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--admin-muted)', display: 'block', marginBottom: '6px' }}>
-                                                Link Expiry (Days)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                name="download_expiry_days"
-                                                className="form-control"
-                                                placeholder="30"
-                                                value={formData.download_expiry_days}
-                                                onChange={handleChange}
-                                            />
+                                            <div>
+                                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--admin-muted)', display: 'block', marginBottom: '4px' }}>
+                                                    Link Expiry Window (Days)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="download_expiry_days"
+                                                    className="form-control"
+                                                    placeholder="30"
+                                                    value={formData.download_expiry_days}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1707,30 +1807,45 @@ export default function ProductFormModal({
                 </div>
 
                 {/* Sticky Action Footer */}
-                <div
-                    style={{
-                        padding: '16px 24px',
-                        borderTop: '1px solid var(--admin-border)',
-                        backgroundColor: 'var(--admin-bg, #f8fafc)',
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        alignItems: 'center',
-                        gap: '12px',
-                        borderBottomLeftRadius: '16px',
-                        borderBottomRightRadius: '16px'
-                    }}
-                >
-                    <button type="button" className="btn btn-secondary" onClick={onClose}>
+                <div className="modal-footer">
+                    <div style={{ marginRight: 'auto', display: 'flex', gap: '8px' }}>
+                        {currentTabIndex > 0 && (
+                            <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => setActiveTab(tabsList[currentTabIndex - 1].id)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                                <ChevronLeft size={14} />
+                                <span>Previous</span>
+                            </button>
+                        )}
+
+                        {currentTabIndex < tabsList.length - 1 && (
+                            <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => setActiveTab(tabsList[currentTabIndex + 1].id)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                                <span>Next: {tabsList[currentTabIndex + 1].label}</span>
+                                <ChevronRight size={14} />
+                            </button>
+                        )}
+                    </div>
+
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>
                         Cancel
                     </button>
+
                     <button
                         type="submit"
                         form="productForm"
-                        className="btn btn-primary"
+                        className="btn btn-primary btn-sm"
                         disabled={submitting}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 20px', fontWeight: 600 }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, padding: '7px 18px' }}
                     >
-                        <Check size={16} />
+                        <Check size={15} />
                         <span>{submitting ? 'Saving Specification...' : mode === 'edit' ? 'Update Product' : 'Create Product'}</span>
                     </button>
                 </div>
