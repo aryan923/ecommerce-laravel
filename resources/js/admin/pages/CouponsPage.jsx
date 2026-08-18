@@ -567,13 +567,16 @@ export default function CouponsPage() {
     const filteredBrands = brands.filter(b => b.name?.toLowerCase().includes(brandFilter.toLowerCase()));
     const filteredCustomers = customers.filter(u => `${u.first_name || ''} ${u.last_name || ''} ${u.email || ''}`.toLowerCase().includes(customerFilter.toLowerCase()));
 
-    // Derived stats
+    // Derived stats for metrics cards
     const now = new Date();
     const totalCount = coupons.length;
     const activeCount = coupons.filter(c => c.status === 'active').length;
     const scheduledCount = coupons.filter(c => c.start_date && new Date(c.start_date) > now).length;
     const inactiveCount = coupons.filter(c => c.status === 'inactive' || (c.end_date && new Date(c.end_date) < now)).length;
     const archivedCount = coupons.filter(c => c.status === 'archived').length;
+
+    const totalRedemptions = coupons.reduce((sum, c) => sum + parseInt(c.uses_count || c.usages_count || 0, 10), 0);
+    const activePercentage = totalCount > 0 ? Math.round((activeCount / totalCount) * 100) : 0;
 
     return (
         <div style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
@@ -628,190 +631,333 @@ export default function CouponsPage() {
                 </p>
             </div>
 
-            {/* Status Filter Tabs (Matching Orders & Customers View Style) */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', borderBottom: '1px solid var(--admin-border)', paddingBottom: '12px', overflowX: 'auto' }}>
-                <button
-                    type="button"
-                    className={`order-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('all')}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'all' ? 'var(--admin-primary, #3b82f6)' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'all' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                >
-                    <span>All Campaigns</span>
-                    <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'all' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                        {totalCount}
-                    </span>
-                </button>
-
-                <button
-                    type="button"
-                    className={`order-tab-btn ${activeTab === 'active' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('active')}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'active' ? '#10b981' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'active' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                >
-                    <span>Active</span>
-                    <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'active' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                        {activeCount}
-                    </span>
-                </button>
-
-                <button
-                    type="button"
-                    className={`order-tab-btn ${activeTab === 'scheduled' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('scheduled')}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'scheduled' ? '#8b5cf6' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'scheduled' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                >
-                    <span>Scheduled</span>
-                    <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'scheduled' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                        {scheduledCount}
-                    </span>
-                </button>
-
-                <button
-                    type="button"
-                    className={`order-tab-btn ${activeTab === 'inactive' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('inactive')}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'inactive' ? '#f59e0b' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'inactive' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                >
-                    <span>Expired / Inactive</span>
-                    <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'inactive' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                        {inactiveCount}
-                    </span>
-                </button>
-
-                <button
-                    type="button"
-                    className={`order-tab-btn ${activeTab === 'archived' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('archived')}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'archived' ? '#ef4444' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'archived' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                >
-                    <span>Archived</span>
-                    <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'archived' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                        {archivedCount}
-                    </span>
-                </button>
-            </div>
-
-            {/* Secondary Filter Controls Bar (Search + Dropdowns) */}
-            <div className="card" style={{ padding: '16px 20px', marginBottom: '24px' }}>
-                <form onSubmit={handleSearchSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
-                    <div style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
-                        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search coupon code or name..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            style={{ paddingLeft: '36px' }}
-                        />
-                    </div>
-
-                    <select
-                        className="form-select"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        style={{ width: '150px' }}
-                    >
-                        <option value="">All Statuses</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="archived">Archived</option>
-                    </select>
-
-                    <select
-                        className="form-select"
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        style={{ width: '170px' }}
-                    >
-                        <option value="">All Discount Types</option>
-                        <option value="percentage">Percentage Rate</option>
-                        <option value="fixed_amount">Fixed Monetary</option>
-                        <option value="free_shipping">Free Shipping</option>
-                    </select>
-
-                    <select
-                        className="form-select"
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        style={{ width: '150px' }}
-                    >
-                        <option value="created_at">Sort: Created</option>
-                        <option value="code">Sort: Code</option>
-                        <option value="uses_count">Sort: Redemptions</option>
-                        <option value="start_date">Sort: Start Date</option>
-                        <option value="end_date">Sort: End Date</option>
-                    </select>
-
-                    <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                        title={`Order: ${sortOrder.toUpperCase()}`}
-                        style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                        <ArrowUpDown size={14} />
-                        <span>{sortOrder.toUpperCase()}</span>
-                    </button>
-
-                    <button type="submit" className="btn btn-secondary" style={{ padding: '8px 16px' }}>
-                        Filter
-                    </button>
-                </form>
-            </div>
-
-            {/* Bulk Actions Floating Bar */}
-            {selectedIds.length > 0 && (
+            {/* KPI Summary Metrics Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                {/* 1. Total Campaigns */}
                 <div style={{
-                    marginBottom: '16px',
-                    padding: '12px 20px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    backgroundColor: 'var(--admin-card-bg, #ffffff)',
+                    border: '1px solid var(--admin-border, #e2e8f0)',
+                    borderRadius: '12px',
+                    padding: '16px 20px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '12px'
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
                 }}>
-                    <div style={{ fontWeight: 600, color: '#3b82f6', fontSize: '0.9rem' }}>
-                        {selectedIds.length} campaign(s) selected
+                    <div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Total Campaigns
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--admin-text, #0f172a)', marginTop: '4px' }}>
+                            {totalCount}
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            {scheduledCount} scheduled for future
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleBulkAction('active')}
-                            disabled={bulkProcessing}
-                        >
-                            Set Active
-                        </button>
-                        <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleBulkAction('inactive')}
-                            disabled={bulkProcessing}
-                        >
-                            Set Inactive
-                        </button>
-                        <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleBulkAction('archive')}
-                            disabled={bulkProcessing}
-                            style={{ color: '#ef4444' }}
-                        >
-                            Archive Selected
-                        </button>
-                        <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => setSelectedIds([])}
-                        >
-                            Clear
-                        </button>
+                    <div style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '10px',
+                        backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                        color: '#3b82f6',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <Ticket size={22} />
                     </div>
                 </div>
-            )}
 
-            {/* Table Card */}
-            <div className="card" style={{ overflow: 'hidden' }}>
+                {/* 2. Active Coupons */}
+                <div style={{
+                    backgroundColor: 'var(--admin-card-bg, #ffffff)',
+                    border: '1px solid var(--admin-border, #e2e8f0)',
+                    borderRadius: '12px',
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                }}>
+                    <div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Active Coupons
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981', marginTop: '4px' }}>
+                            {activeCount}
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#10b981', fontWeight: 600, marginTop: '2px' }}>
+                            {activePercentage}% of total catalog
+                        </div>
+                    </div>
+                    <div style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '10px',
+                        backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                        color: '#10b981',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <CheckCircle size={22} />
+                    </div>
+                </div>
+
+                {/* 3. Total Redemptions */}
+                <div style={{
+                    backgroundColor: 'var(--admin-card-bg, #ffffff)',
+                    border: '1px solid var(--admin-border, #e2e8f0)',
+                    borderRadius: '12px',
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                }}>
+                    <div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Total Redemptions
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6', marginTop: '4px' }}>
+                            {totalRedemptions}
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            Customer redemptions
+                        </div>
+                    </div>
+                    <div style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '10px',
+                        backgroundColor: 'rgba(139, 92, 246, 0.12)',
+                        color: '#8b5cf6',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <BarChart2 size={22} />
+                    </div>
+                </div>
+
+                {/* 4. Expired / Inactive */}
+                <div style={{
+                    backgroundColor: 'var(--admin-card-bg, #ffffff)',
+                    border: '1px solid var(--admin-border, #e2e8f0)',
+                    borderRadius: '12px',
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                }}>
+                    <div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Expired / Inactive
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--admin-text, #0f172a)', marginTop: '4px' }}>
+                            {inactiveCount}
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
+                            {archivedCount} archived
+                        </div>
+                    </div>
+                    <div style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '10px',
+                        backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                        color: '#ef4444',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <Clock size={22} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Enclosed Structured Table & Filter Card (Matching Products & Inventory Views) */}
+            <div className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--admin-border, #e2e8f0)', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+
+                {/* 1. Status Filter Tabs Bar (Inside Card Top) */}
+                <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    padding: '16px 20px',
+                    borderBottom: '1px solid var(--admin-border, #e2e8f0)',
+                    overflowX: 'auto',
+                    backgroundColor: 'var(--admin-card-bg, #ffffff)'
+                }}>
+                    <button
+                        type="button"
+                        className={`order-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('all')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'all' ? 'var(--admin-primary, #3b82f6)' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'all' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+                    >
+                        <span>All Campaigns</span>
+                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'all' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
+                            {totalCount}
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={`order-tab-btn ${activeTab === 'active' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('active')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'active' ? '#10b981' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'active' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+                    >
+                        <span>Active</span>
+                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'active' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
+                            {activeCount}
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={`order-tab-btn ${activeTab === 'scheduled' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('scheduled')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'scheduled' ? '#8b5cf6' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'scheduled' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+                    >
+                        <span>Scheduled</span>
+                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'scheduled' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
+                            {scheduledCount}
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={`order-tab-btn ${activeTab === 'inactive' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('inactive')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'inactive' ? '#f59e0b' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'inactive' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+                    >
+                        <span>Expired / Inactive</span>
+                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'inactive' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
+                            {inactiveCount}
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={`order-tab-btn ${activeTab === 'archived' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('archived')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'archived' ? '#ef4444' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'archived' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+                    >
+                        <span>Archived</span>
+                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'archived' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
+                            {archivedCount}
+                        </span>
+                    </button>
+                </div>
+
+                {/* 2. Search & Filter Bar (Inside Card Middle) */}
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--admin-border, #e2e8f0)', backgroundColor: 'var(--admin-card-bg, #ffffff)' }}>
+                    <form onSubmit={handleSearchSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+                        <div style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
+                            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-muted)' }} />
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search Coupon Code, Campaign Name..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                style={{ paddingLeft: '36px', height: '38px', fontSize: '0.85rem' }}
+                            />
+                        </div>
+
+                        <select
+                            className="form-select"
+                            value={typeFilter}
+                            onChange={(e) => setTypeFilter(e.target.value)}
+                            style={{ width: '170px', height: '38px', fontSize: '0.85rem' }}
+                        >
+                            <option value="">All Discount Types</option>
+                            <option value="percentage">Percentage Rate</option>
+                            <option value="fixed_amount">Fixed Monetary</option>
+                            <option value="free_shipping">Free Shipping</option>
+                        </select>
+
+                        <select
+                            className="form-select"
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            style={{ width: '150px', height: '38px', fontSize: '0.85rem' }}
+                        >
+                            <option value="created_at">Latest Added</option>
+                            <option value="code">Sort: Code A-Z</option>
+                            <option value="uses_count">Sort: Redemptions</option>
+                            <option value="start_date">Sort: Start Date</option>
+                            <option value="end_date">Sort: End Date</option>
+                        </select>
+
+                        <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                            title={`Order: ${sortOrder.toUpperCase()}`}
+                            style={{ padding: '8px 12px', height: '38px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}
+                        >
+                            <ArrowUpDown size={14} />
+                            <span>{sortOrder.toUpperCase()}</span>
+                        </button>
+
+                        <button type="submit" className="btn btn-secondary" style={{ padding: '8px 16px', height: '38px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Filter size={14} />
+                            <span>Filter</span>
+                        </button>
+                    </form>
+                </div>
+
+                {/* 3. Bulk Actions Bar (Inside Card if selected) */}
+                {selectedIds.length > 0 && (
+                    <div style={{
+                        padding: '12px 20px',
+                        backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                        borderBottom: '1px solid var(--admin-border, #e2e8f0)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '12px'
+                    }}>
+                        <div style={{ fontWeight: 600, color: '#3b82f6', fontSize: '0.86rem' }}>
+                            {selectedIds.length} campaign(s) selected
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleBulkAction('active')}
+                                disabled={bulkProcessing}
+                            >
+                                Set Active
+                            </button>
+                            <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleBulkAction('inactive')}
+                                disabled={bulkProcessing}
+                            >
+                                Set Inactive
+                            </button>
+                            <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleBulkAction('archive')}
+                                disabled={bulkProcessing}
+                                style={{ color: '#ef4444' }}
+                            >
+                                Archive Selected
+                            </button>
+                            <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => setSelectedIds([])}
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* 4. Flush Table Body */}
                 {loading ? (
                     <div style={{ padding: '40px', textAlign: 'center', color: 'var(--admin-muted)' }}>
                         Loading coupons...
@@ -822,7 +968,7 @@ export default function CouponsPage() {
                     </div>
                 ) : (
                     <div style={{ overflowX: 'auto' }}>
-                        <table className="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <table className="table" style={{ width: '100%', margin: 0, borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid var(--admin-border)', textAlign: 'left', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--admin-muted)' }}>
                                     <th style={{ padding: '14px 18px', width: '40px' }}>
@@ -832,10 +978,9 @@ export default function CouponsPage() {
                                             onChange={handleSelectAll}
                                         />
                                     </th>
-                                    <th style={{ padding: '14px 18px' }}>Coupon Code</th>
-                                    <th style={{ padding: '14px 18px' }}>Campaign Name</th>
+                                    <th style={{ padding: '14px 18px' }}>Campaign Code & Name</th>
                                     <th style={{ padding: '14px 18px' }}>Discount Value</th>
-                                    <th style={{ padding: '14px 18px' }}>Redemptions & Quota</th>
+                                    <th style={{ padding: '14px 18px' }}>Redemptions Quota</th>
                                     <th style={{ padding: '14px 18px' }}>Validity Window</th>
                                     <th style={{ padding: '14px 18px' }}>Status</th>
                                     <th style={{ padding: '14px 18px', textAlign: 'right' }}>Actions</th>
@@ -843,16 +988,25 @@ export default function CouponsPage() {
                             </thead>
                             <tbody>
                                 {coupons.map((coupon) => {
+                                    const isSelected = selectedIds.includes(coupon.id);
+                                    const isExpired = coupon.end_date && new Date(coupon.end_date) < new Date();
                                     const uses = coupon.uses_count || coupon.usages_count || 0;
                                     const limit = coupon.usage_limit;
                                     const usagePct = limit ? Math.min(100, Math.round((uses / limit) * 100)) : null;
 
                                     return (
-                                        <tr key={coupon.id} style={{ borderBottom: '1px solid var(--admin-border)', fontSize: '0.9rem' }}>
+                                        <tr
+                                            key={coupon.id}
+                                            style={{
+                                                borderBottom: '1px solid var(--admin-border)',
+                                                backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.04)' : 'transparent',
+                                                transition: 'background-color 0.15s ease'
+                                            }}
+                                        >
                                             <td style={{ padding: '14px 18px' }}>
                                                 <input
                                                     type="checkbox"
-                                                    checked={selectedIds.includes(coupon.id)}
+                                                    checked={isSelected}
                                                     onChange={() => handleSelectOne(coupon.id)}
                                                 />
                                             </td>
