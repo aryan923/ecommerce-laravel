@@ -231,6 +231,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/tax-classes', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'store']);
             Route::get('/tax-classes/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'show']);
             Route::put('/tax-classes/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'update']);
+            Route::post('/tax-classes/{id}/set-default', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'setDefault']);
             Route::delete('/tax-classes/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'destroy']);
 
             // Tax Rate Management
@@ -239,6 +240,33 @@ Route::prefix('v1')->group(function () {
             Route::get('/tax-rates/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxRateController::class, 'show']);
             Route::put('/tax-rates/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxRateController::class, 'update']);
             Route::delete('/tax-rates/{id}', [\App\Http\Controllers\Api\V1\Admin\TaxRateController::class, 'destroy']);
+
+            // Tax Settings & Audit Logs
+            Route::get('/tax/settings', [\App\Http\Controllers\Api\V1\Admin\TaxSettingController::class, 'show']);
+            Route::post('/tax/settings', [\App\Http\Controllers\Api\V1\Admin\TaxSettingController::class, 'update']);
+            Route::get('/tax/audit-logs', [\App\Http\Controllers\Api\V1\Admin\TaxSettingController::class, 'auditLogs']);
+
+            // HSN / SAC Code Directory
+            Route::get('/tax/hsn-codes', [\App\Http\Controllers\Api\V1\Admin\HsnCodeController::class, 'index']);
+            Route::post('/tax/hsn-codes', [\App\Http\Controllers\Api\V1\Admin\HsnCodeController::class, 'store']);
+            Route::put('/tax/hsn-codes/{id}', [\App\Http\Controllers\Api\V1\Admin\HsnCodeController::class, 'update']);
+            Route::delete('/tax/hsn-codes/{id}', [\App\Http\Controllers\Api\V1\Admin\HsnCodeController::class, 'destroy']);
+
+            // GST Monthly Tax Reports
+            Route::get('/tax/reports', [\App\Http\Controllers\Api\V1\Admin\GstReportController::class, 'generateReport']);
+
+            // Admin Review Moderation Management (Module 32)
+            Route::get('/reviews/stats', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'stats']);
+            Route::get('/reviews/export', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'exportCsv']);
+            Route::get('/reviews', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'index']);
+            Route::get('/reviews/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'show']);
+            Route::patch('/reviews/{id}/status', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'updateStatus']);
+            Route::post('/reviews/{id}/reply', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'postReply']);
+            Route::delete('/reviews/{id}/reply', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'deleteReply']);
+            Route::patch('/reviews/{id}/flag', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'toggleFlag']);
+            Route::post('/reviews/bulk-status', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'bulkStatus']);
+            Route::delete('/reviews/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'destroy']);
+            Route::post('/reviews/bulk-delete', [\App\Http\Controllers\Api\V1\Admin\AdminReviewController::class, 'bulkDestroy']);
 
             // Shipping Zone Management
             Route::get('/shipping-zones', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'index']);
@@ -264,8 +292,14 @@ Route::prefix('v1')->group(function () {
             // Shipment Management
             Route::get('/shipments', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'index']);
             Route::post('/shipments', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'store']);
+            Route::post('/shipments/bulk-status', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'bulkStatus']);
+            Route::post('/shipments/manifest', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'manifest']);
+            Route::post('/shipping/check-serviceability', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'checkServiceability']);
+            Route::get('/shipping/analytics', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'analytics']);
             Route::get('/shipments/{id}', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'show']);
             Route::post('/shipments/{id}/tracking', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'addTracking']);
+            Route::patch('/shipments/{id}/status', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'updateStatus']);
+            Route::get('/shipments/{id}/label', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'label']);
 
             // Admin Payment Management
             Route::get('/payments', [\App\Http\Controllers\Api\V1\Admin\PaymentAdminController::class, 'index']);
@@ -293,12 +327,29 @@ Route::prefix('v1')->group(function () {
             Route::delete('/reviews/{id}', [\App\Http\Controllers\Api\V1\Admin\ReviewAdminController::class, 'destroy']);
 
             // Admin Notification Management
-            Route::get('/notifications/templates', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'indexTemplates']);
-            Route::post('/notifications/templates', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'storeTemplate']);
-            Route::get('/notifications/templates/{id}', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'showTemplate']);
-            Route::put('/notifications/templates/{id}', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'updateTemplate']);
-            Route::get('/notifications/logs', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'indexLogs']);
-            Route::post('/notifications/test-dispatch', [\App\Http\Controllers\Api\V1\Admin\NotificationAdminController::class, 'testDispatch']);
+            Route::get('/notifications/stats', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'stats']);
+            Route::get('/notifications/analytics', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'analytics']);
+            Route::get('/notifications/export-logs', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'exportLogs']);
+            Route::get('/notifications/templates', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'indexTemplates']);
+            Route::post('/notifications/templates', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'storeTemplate']);
+            Route::get('/notifications/templates/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'showTemplate']);
+            Route::put('/notifications/templates/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'updateTemplate']);
+            Route::patch('/notifications/templates/{id}/toggle-status', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'toggleStatus']);
+            Route::delete('/notifications/templates/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'destroyTemplate']);
+            Route::post('/notifications/test-dispatch', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'testDispatch']);
+            Route::get('/notifications/logs', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'indexLogs']);
+            Route::post('/notifications/logs/{id}/retry', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'retryLog']);
+            Route::get('/notifications/campaigns', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'indexCampaigns']);
+            Route::post('/notifications/campaigns', [\App\Http\Controllers\Api\V1\Admin\AdminNotificationController::class, 'createCampaign']);
+
+            // Admin Reports & Exports Management
+            Route::get('/reports/sales', [\App\Http\Controllers\Api\V1\Admin\AdminReportController::class, 'sales']);
+            Route::get('/reports/orders', [\App\Http\Controllers\Api\V1\Admin\AdminReportController::class, 'orders']);
+            Route::get('/reports/products', [\App\Http\Controllers\Api\V1\Admin\AdminReportController::class, 'products']);
+            Route::get('/reports/customers', [\App\Http\Controllers\Api\V1\Admin\AdminReportController::class, 'customers']);
+            Route::get('/reports/inventory', [\App\Http\Controllers\Api\V1\Admin\AdminReportController::class, 'inventory']);
+            Route::get('/reports/tax', [\App\Http\Controllers\Api\V1\Admin\AdminReportController::class, 'tax']);
+            Route::post('/reports/export', [\App\Http\Controllers\Api\V1\Admin\AdminReportController::class, 'export']);
 
             // Admin Dashboard Management
             Route::prefix('dashboard')->group(function () {

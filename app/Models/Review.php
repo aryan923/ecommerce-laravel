@@ -20,6 +20,11 @@ class Review extends Model
         'images',
         'status',
         'admin_notes',
+        'admin_reply',
+        'replied_at',
+        'replied_by',
+        'is_flagged',
+        'flag_reason',
         'moderated_at',
         'moderated_by',
     ];
@@ -27,6 +32,8 @@ class Review extends Model
     protected $casts = [
         'rating' => 'integer',
         'images' => 'array',
+        'is_flagged' => 'boolean',
+        'replied_at' => 'datetime',
         'moderated_at' => 'datetime',
     ];
 
@@ -48,5 +55,10 @@ class Review extends Model
     public function moderator(): BelongsTo
     {
         return $this->belongsTo(AdminUser::class, 'moderated_by');
+    }
+
+    public function repliedBy(): BelongsTo
+    {
+        return $this->belongsTo(AdminUser::class, 'replied_by');
     }
 }

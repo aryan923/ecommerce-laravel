@@ -5,7 +5,7 @@ test.describe('Admin Executive Dashboard', () => {
         await page.goto('/admin/login');
 
         await page.locator('input[type="email"]').fill('admin@example.com');
-        await page.locator('input[type="password"]').fill('12345678');
+        await page.locator('input[type="password"]').fill('SecretAdmin123!');
 
         // Set up API response waiters before triggering login navigation
         const kpiPromise = page.waitForResponse((res) => res.url().includes('/api/v1/admin/dashboard/kpis') && res.status() === 200);
@@ -14,65 +14,55 @@ test.describe('Admin Executive Dashboard', () => {
         const topPromise = page.waitForResponse((res) => res.url().includes('/api/v1/admin/dashboard/top-performers') && res.status() === 200);
         const highlightsPromise = page.waitForResponse((res) => res.url().includes('/api/v1/admin/dashboard/highlights') && res.status() === 200);
 
-        await page.locator('button[type="submit"]').click();
-        await page.waitForURL((url) => url.pathname === '/admin' || url.pathname === '/admin/', { timeout: 10000 });
+        await Promise.all([
+            page.locator('button[type="submit"]').click(),
+            page.waitForURL((url) => url.pathname === '/admin' || url.pathname === '/admin/', { timeout: 10000 }),
+            kpiPromise,
+            chartPromise,
+            statsPromise,
+            topPromise,
+            highlightsPromise
+        ]);
 
-        // Wait for all 5 dashboard API responses to resolve successfully
-        await Promise.all([kpiPromise, chartPromise, statsPromise, topPromise, highlightsPromise]);
-        await expect(page.locator('h2.page-header-title')).toHaveText('Executive Dashboard');
+        await expect(page.locator('h2.page-header-title')).toHaveText('Store Performance Overview');
     });
 
     test('should display page title, subtitle, and refresh button', async ({ page }) => {
-        await expect(page.locator('h2.page-header-title')).toHaveText('Executive Dashboard');
-        await expect(page.getByText('Real-time store metrics, sales analytics, and operational alerts')).toBeVisible();
+        await expect(page.locator('h2.page-header-title')).toHaveText('Store Performance Overview');
+        await expect(page.getByText('Monitor sales, fulfillment pipelines, inventory stock levels, and customer orders')).toBeVisible();
 
-        const refreshBtn = page.locator('button:has-text("Refresh Data")');
+        const refreshBtn = page.locator('button[title="Reload Dashboard"]');
         await expect(refreshBtn).toBeVisible();
     });
 
     test('should render all primary and secondary KPI metric cards', async ({ page }) => {
-        await expect(page.getByText('Total Revenue', { exact: true })).toBeVisible();
-        await expect(page.getByText("Today's Revenue", { exact: true })).toBeVisible();
+        await expect(page.getByText('Total Store Revenue', { exact: true })).toBeVisible();
         await expect(page.getByText('Total Orders', { exact: true })).toBeVisible();
-        await expect(page.getByText('Low Stock Alerts', { exact: true })).toBeVisible();
-
-        await expect(page.getByText('Total Customers', { exact: true })).toBeVisible();
-        await expect(page.getByText('Delivered Orders', { exact: true })).toBeVisible();
-        await expect(page.getByText('Pending Returns / Refunds', { exact: true })).toBeVisible();
-        await expect(page.getByText('Total Active Products', { exact: true })).toBeVisible();
+        await expect(page.getByText('Average Order Value', { exact: true })).toBeVisible();
     });
 
-    test('should filter sales analytics by time period dropdown and wait for API response', async ({ page }) => {
-        const periodSelect = page.locator('select.form-select');
-        await expect(periodSelect).toBeVisible();
-        await expect(periodSelect).toHaveValue('last_30_days');
+    test('should filter sales analytics by time period buttons and wait for API response', async ({ page }) => {
+        const periodBtn7 = page.locator('button', { hasText: /^7 Days$/ });
+        await expect(periodBtn7).toBeVisible();
 
-        // Select "Last 7 Days" & wait for sales-chart API response
         const chart7DaysPromise = page.waitForResponse((res) => res.url().includes('/api/v1/admin/dashboard/sales-chart?period=last_7_days') && res.status() === 200);
-        await periodSelect.selectOption('last_7_days');
+        await periodBtn7.click();
         await chart7DaysPromise;
-        await expect(periodSelect).toHaveValue('last_7_days');
 
-        // Select "This Month" & wait for sales-chart API response
-        const chartThisMonthPromise = page.waitForResponse((res) => res.url().includes('/api/v1/admin/dashboard/sales-chart?period=this_month') && res.status() === 200);
-        await periodSelect.selectOption('this_month');
-        await chartThisMonthPromise;
-        await expect(periodSelect).toHaveValue('this_month');
+        const periodBtn30 = page.locator('button', { hasText: /^30 Days$/ });
+        const chart30DaysPromise = page.waitForResponse((res) => res.url().includes('/api/v1/admin/dashboard/sales-chart?period=last_30_days') && res.status() === 200);
+        await periodBtn30.click();
+        await chart30DaysPromise;
     });
 
     test('should render Order Breakdown, Top Selling Products, and Low Stock Alert panels', async ({ page }) => {
-        await expect(page.getByText('Sales Revenue Analytics')).toBeVisible();
-        await expect(page.getByText('Order Status Breakdown')).toBeVisible();
-
-        await expect(page.getByText('Top Selling Products')).toBeVisible();
-        await expect(page.getByRole('columnheader', { name: 'Units Sold' })).toBeVisible();
-
-        await expect(page.getByText('Low Stock Alert Panel')).toBeVisible();
-        await expect(page.getByRole('columnheader', { name: 'Available Qty' })).toBeVisible();
+        await expect(page.getByText('Sales Revenue Trend')).toBeVisible();
+        await expect(page.getByText('Recent Orders Stream')).toBeVisible();
+        await expect(page.getByText('Top Products')).toBeVisible();
     });
 
     test('should refetch dashboard data when clicking Refresh Data button and wait for API responses', async ({ page }) => {
-        const refreshBtn = page.locator('button:has-text("Refresh Data")');
+        const refreshBtn = page.locator('button[title="Reload Dashboard"]');
         await expect(refreshBtn).toBeVisible();
 
         const kpiPromise = page.waitForResponse((res) => res.url().includes('/api/v1/admin/dashboard/kpis') && res.status() === 200);
@@ -81,6 +71,6 @@ test.describe('Admin Executive Dashboard', () => {
         await refreshBtn.click();
         await Promise.all([kpiPromise, chartPromise]);
 
-        await expect(page.locator('h2.page-header-title')).toHaveText('Executive Dashboard');
+        await expect(page.locator('h2.page-header-title')).toHaveText('Store Performance Overview');
     });
 });

@@ -2,93 +2,111 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
-use App\Http\Controllers\Api\V1\BaseController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreTaxRateRequest;
+use App\Http\Requests\Admin\UpdateTaxRateRequest;
 use App\Models\TaxRate;
+use App\Services\TaxService;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class TaxRateController extends BaseController
+/**
+ * @OA\Tag(
+ *     name="Admin - Tax Management",
+ *     description="API Endpoints for Managing Tax Component Rates"
+ * )
+ */
+class TaxRateController extends Controller
 {
+    use ApiResponseTrait;
+
+    protected TaxService $taxService;
+
+    public function __construct(TaxService $taxService)
+    {
+        $this->taxService = $taxService;
+    }
+
     /**
      * @OA\Get(
      *     path="/api/v1/admin/tax-rates",
-     *     summary="List tax rates",
-     *     tags={"Admin - Tax Engine"},
+     *     summary="List all tax rates",
+     *     tags={"Admin - Tax Management"},
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="tax_class_id", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="type", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer", default=15)),
      *     @OA\Response(response=200, description="Tax rates retrieved successfully")
      * )
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $taxRates = TaxRate::with('taxClass')->get();
-        return $this->successResponse($taxRates, 'Tax rates retrieved successfully.');
+        $rates = $this->taxService->getAdminTaxRates(
+            $request->all(),
+            (int) $request->input('per_page', 15)
+        );
+
+        return $this->paginatedResponse($rates, 'Tax rates retrieved successfully.');
     }
 
     /**
      * @OA\Post(
      *     path="/api/v1/admin/tax-rates",
-     *     summary="Create tax rate",
-     *     tags={"Admin - Tax Engine"},
+     *     summary="Create a new tax rate",
+     *     tags={"Admin - Tax Management"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"tax_class_id", "name", "type", "rate"},
-     *             @OA\Property(property="tax_class_id", type="integer", example=1),
-     *             @OA\Property(property="name", type="string", example="CGST 9%"),
-     *             @OA\Property(property="type", type="string", enum={"cgst", "sgst", "igst", "flat", "standard"}, example="cgst"),
-     *             @OA\Property(property="rate", type="number", format="float", example=9.00),
-     *             @OA\Property(property="state_code", type="string", example="MH")
-     *         )
-     *     ),
      *     @OA\Response(response=201, description="Tax rate created successfully")
      * )
      */
     public function store(StoreTaxRateRequest $request): JsonResponse
     {
-        $taxRate = TaxRate::create($request->validated());
-        return $this->successResponse($taxRate, 'Tax rate created successfully.', 201);
+        $rate = $this->taxService->createTaxRate($request->validated());
+
+        return $this->successResponse($rate, 'Tax rate created successfully.', 201);
     }
 
     /**
      * @OA\Get(
      *     path="/api/v1/admin/tax-rates/{id}",
-     *     summary="Get single tax rate",
-     *     tags={"Admin - Tax Engine"},
+     *     summary="Get single tax rate details",
+     *     tags={"Admin - Tax Management"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Tax rate details retrieved successfully")
+     *     @OA\Response(response=200, description="Tax rate details retrieved")
      * )
      */
     public function show(int $id): JsonResponse
     {
-        $taxRate = TaxRate::with('taxClass')->findOrFail($id);
-        return $this->successResponse($taxRate, 'Tax rate details retrieved successfully.');
+        $rate = TaxRate::with('taxClass')->findOrFail($id);
+
+        return $this->successResponse($rate, 'Tax rate details retrieved.');
     }
 
     /**
      * @OA\Put(
      *     path="/api/v1/admin/tax-rates/{id}",
-     *     summary="Update tax rate",
-     *     tags={"Admin - Tax Engine"},
+     *     summary="Update a tax rate",
+     *     tags={"Admin - Tax Management"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Tax rate updated successfully")
      * )
      */
-    public function update(StoreTaxRateRequest $request, int $id): JsonResponse
+    public function update(UpdateTaxRateRequest $request, int $id): JsonResponse
     {
-        $taxRate = TaxRate::findOrFail($id);
-        $taxRate->update($request->validated());
-        return $this->successResponse($taxRate, 'Tax rate updated successfully.');
+        $rate = TaxRate::findOrFail($id);
+        $updated = $this->taxService->updateTaxRate($rate, $request->validated());
+
+        return $this->successResponse($updated, 'Tax rate updated successfully.');
     }
 
     /**
      * @OA\Delete(
      *     path="/api/v1/admin/tax-rates/{id}",
-     *     summary="Delete tax rate",
-     *     tags={"Admin - Tax Engine"},
+     *     summary="Delete a tax rate",
+     *     tags={"Admin - Tax Management"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Tax rate deleted successfully")
@@ -96,8 +114,9 @@ class TaxRateController extends BaseController
      */
     public function destroy(int $id): JsonResponse
     {
-        $taxRate = TaxRate::findOrFail($id);
-        $taxRate->delete();
+        $rate = TaxRate::findOrFail($id);
+        $this->taxService->deleteTaxRate($rate);
+
         return $this->successResponse(null, 'Tax rate deleted successfully.');
     }
 }

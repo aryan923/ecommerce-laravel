@@ -14,6 +14,7 @@ class Shipment extends Model
 
     protected $fillable = [
         'order_id',
+        'warehouse_id',
         'shipment_number',
         'provider',
         'courier_name',
@@ -52,6 +53,11 @@ class Shipment extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'warehouse_id');
     }
 
     public function items(): HasMany

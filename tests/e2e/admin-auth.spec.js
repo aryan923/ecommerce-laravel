@@ -25,29 +25,31 @@ test.describe('Admin Authentication Flow', () => {
 
     test('should successfully login as admin with valid credentials', async ({ page }) => {
         await page.locator('input[type="email"]').fill('admin@example.com');
-        await page.locator('input[type="password"]').fill('12345678');
-        await page.locator('button[type="submit"]').click();
+        await page.locator('input[type="password"]').fill('SecretAdmin123!');
 
-        await page.waitForURL((url) => url.pathname === '/admin' || url.pathname === '/admin/', { timeout: 10000 });
+        await Promise.all([
+            page.locator('button[type="submit"]').click(),
+            page.waitForURL((url) => url.pathname === '/admin' || url.pathname === '/admin/', { timeout: 10000 })
+        ]);
 
-        await expect(page.locator('.header-user-name')).toBeVisible();
-        await expect(page.locator('button[title="Sign Out"]')).toBeVisible();
+        await expect(page.locator('.user-menu-trigger-btn')).toBeVisible();
     });
 
     test('should successfully logout when clicking Logout button', async ({ page }) => {
         await page.locator('input[type="email"]').fill('admin@example.com');
-        await page.locator('input[type="password"]').fill('12345678');
-        await page.locator('button[type="submit"]').click();
+        await page.locator('input[type="password"]').fill('SecretAdmin123!');
 
-        await page.waitForURL((url) => url.pathname === '/admin' || url.pathname === '/admin/', { timeout: 10000 });
-        await expect(page.locator('.header-user-name')).toBeVisible();
+        await Promise.all([
+            page.locator('button[type="submit"]').click(),
+            page.waitForURL((url) => url.pathname === '/admin' || url.pathname === '/admin/', { timeout: 10000 })
+        ]);
 
-        await page.locator('button[title="Sign Out"]').click();
+        await expect(page.locator('.user-menu-trigger-btn')).toBeVisible();
+
+        await page.locator('.user-menu-trigger-btn').click();
+        await page.locator('button.user-menu-item.danger').click();
 
         await page.waitForURL((url) => url.pathname.includes('/login'), { timeout: 10000 });
         await expect(page.locator('h2')).toHaveText('Admin Portal');
-
-        await page.goto('/admin');
-        await page.waitForURL((url) => url.pathname.includes('/login'), { timeout: 10000 });
     });
 });

@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreTaxClassRequest extends FormRequest
 {
@@ -14,12 +13,16 @@ class StoreTaxClassRequest extends FormRequest
 
     public function rules(): array
     {
-        $taxClassId = $this->route('id') ?? $this->route('tax_class');
-
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('tax_classes', 'name')->ignore($taxClassId)],
-            'description' => ['nullable', 'string'],
-            'is_default' => ['boolean'],
+            'name' => 'required|string|max:150',
+            'code' => 'nullable|string|max:50|unique:tax_classes,code',
+            'description' => 'nullable|string',
+            'is_default' => 'nullable|boolean',
+            'status' => 'nullable|in:active,inactive',
+            'cgst_rate' => 'nullable|numeric|min:0|max:100',
+            'sgst_rate' => 'nullable|numeric|min:0|max:100',
+            'igst_rate' => 'nullable|numeric|min:0|max:100',
+            'state_code' => 'nullable|string|max:10',
         ];
     }
 }

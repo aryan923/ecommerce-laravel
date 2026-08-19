@@ -23,7 +23,11 @@ import {
     X,
     Search,
     Ticket,
-    Truck
+    Truck,
+    Percent,
+    MessageSquare,
+    BarChart3,
+    Image
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -39,6 +43,11 @@ import OrderListPage from './pages/OrderListPage';
 import ReturnsPage from './pages/ReturnsPage';
 import CouponsPage from './pages/CouponsPage';
 import ShippingPage from './pages/ShippingPage';
+import TaxesPage from './pages/TaxesPage';
+import ReviewsPage from './pages/ReviewsPage';
+import NotificationPage from './pages/NotificationPage';
+import ReportsPage from './pages/ReportsPage';
+import MediaLibraryPage from './pages/MediaLibraryPage';
 
 function ProtectedRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
@@ -114,6 +123,8 @@ function AdminLayout() {
         if (location.pathname.includes('/returns')) return 'Return & Refund Management';
         if (location.pathname.includes('/coupons')) return 'Coupon Management';
         if (location.pathname.includes('/customers')) return 'Customer Management';
+        if (location.pathname.includes('/notifications')) return 'Notification Center';
+        if (location.pathname.includes('/reports')) return 'Reports & Analytics';
         return 'Executive Dashboard';
     };
 
@@ -221,6 +232,16 @@ function AdminLayout() {
                         </div>
                     </NavLink>
 
+                    <NavLink
+                        to="/media"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <Image size={17} />
+                            <span>Media Asset Library</span>
+                        </div>
+                    </NavLink>
+
                     {/* SECTION 3: SALES & FULFILLMENT */}
                     <div className="nav-section-label" style={{ marginTop: '10px' }}>
                         <span>Sales & Orders</span>
@@ -256,6 +277,16 @@ function AdminLayout() {
                         </div>
                     </NavLink>
 
+                    <NavLink
+                        to="/taxes"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <Percent size={17} />
+                            <span>Taxes & GST</span>
+                        </div>
+                    </NavLink>
+
                     {/* SECTION 4: CUSTOMERS & CRM */}
                     <div className="nav-section-label" style={{ marginTop: '10px' }}>
                         <span>Customers & CRM</span>
@@ -268,6 +299,16 @@ function AdminLayout() {
                         <div className="nav-item-content">
                             <Users size={17} />
                             <span>Customer Accounts</span>
+                        </div>
+                    </NavLink>
+
+                    <NavLink
+                        to="/reviews"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <MessageSquare size={17} />
+                            <span>Review Moderation</span>
                         </div>
                     </NavLink>
 
@@ -290,6 +331,26 @@ function AdminLayout() {
                     <div className="nav-section-label" style={{ marginTop: '10px' }}>
                         <span>System Config</span>
                     </div>
+
+                    <NavLink
+                        to="/notifications"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <Bell size={17} />
+                            <span>Notifications</span>
+                        </div>
+                    </NavLink>
+
+                    <NavLink
+                        to="/reports"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <BarChart3 size={17} />
+                            <span>Reports & Analytics</span>
+                        </div>
+                    </NavLink>
 
                     <NavLink
                         to="/settings"
@@ -484,6 +545,11 @@ function AdminLayout() {
                         <Route path="/customers" element={<CustomerListPage />} />
                         <Route path="/coupons" element={<CouponsPage />} />
                         <Route path="/shipping" element={<ShippingPage />} />
+                        <Route path="/taxes" element={<TaxesPage />} />
+                        <Route path="/reviews" element={<ReviewsPage />} />
+                        <Route path="/notifications" element={<NotificationPage />} />
+                        <Route path="/reports" element={<ReportsPage />} />
+                        <Route path="/media" element={<MediaLibraryPage />} />
                         <Route path="*" element={<DashboardPage />} />
                     </Routes>
                 </main>

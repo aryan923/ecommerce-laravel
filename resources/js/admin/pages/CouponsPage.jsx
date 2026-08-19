@@ -31,7 +31,8 @@ import {
     Users,
     Award,
     Package,
-    FileText
+    FileText,
+    RefreshCw
 } from 'lucide-react';
 
 export default function CouponsPage() {
@@ -579,7 +580,7 @@ export default function CouponsPage() {
     const activePercentage = totalCount > 0 ? Math.round((activeCount / totalCount) * 100) : 0;
 
     return (
-        <div style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+        <div>
             {/* Notification Toast */}
             {notification && (
                 <div style={{
@@ -602,253 +603,119 @@ export default function CouponsPage() {
             )}
 
             {/* Page Header */}
-            <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '4px' }}>
-                    <h1 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--admin-text, #0f172a)', letterSpacing: '-0.01em' }}>
-                        Coupon & Promotion Management
-                    </h1>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <button
-                            className="btn btn-secondary"
-                            onClick={handleExportCSV}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600 }}
-                        >
-                            <Download size={14} />
-                            <span>Export CSV</span>
-                        </button>
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleOpenCreate}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600 }}
-                        >
-                            <Plus size={15} />
-                            <span>Create New Coupon</span>
-                        </button>
-                    </div>
-                </div>
-                <p style={{ color: 'var(--admin-muted)', margin: 0, fontSize: '0.82rem' }}>
-                    Manage promo codes, discount rules, campaign eligibility, targeting restrictions, and performance analytics.
-                </p>
-            </div>
-
-            {/* KPI Summary Metrics Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                {/* 1. Total Campaigns */}
-                <div style={{
-                    backgroundColor: 'var(--admin-card-bg, #ffffff)',
-                    border: '1px solid var(--admin-border, #e2e8f0)',
-                    borderRadius: '12px',
-                    padding: '16px 20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-                }}>
-                    <div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                            Total Campaigns
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--admin-text, #0f172a)', marginTop: '4px' }}>
-                            {totalCount}
-                        </div>
-                        <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
-                            {scheduledCount} scheduled for future
-                        </div>
-                    </div>
-                    <div style={{
-                        width: '42px',
-                        height: '42px',
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(59, 130, 246, 0.12)',
-                        color: '#3b82f6',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <Ticket size={22} />
-                    </div>
+            <div className="page-header-row">
+                <div>
+                    <h2 className="page-header-title">Coupon & Promotion Management</h2>
+                    <p className="page-header-subtitle">Manage promo codes, discount rules, campaign eligibility, targeting restrictions, and performance analytics</p>
                 </div>
 
-                {/* 2. Active Coupons */}
-                <div style={{
-                    backgroundColor: 'var(--admin-card-bg, #ffffff)',
-                    border: '1px solid var(--admin-border, #e2e8f0)',
-                    borderRadius: '12px',
-                    padding: '16px 20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-                }}>
-                    <div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                            Active Coupons
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981', marginTop: '4px' }}>
-                            {activeCount}
-                        </div>
-                        <div style={{ fontSize: '0.74rem', color: '#10b981', fontWeight: 600, marginTop: '2px' }}>
-                            {activePercentage}% of total catalog
-                        </div>
-                    </div>
-                    <div style={{
-                        width: '42px',
-                        height: '42px',
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(16, 185, 129, 0.12)',
-                        color: '#10b981',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <CheckCircle size={22} />
-                    </div>
-                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={fetchCoupons}
+                        disabled={loading}
+                        title="Reload coupons and campaign metrics"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 12px', borderRadius: '8px' }}
+                    >
+                        <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+                        <span>Refresh</span>
+                    </button>
 
-                {/* 3. Total Redemptions */}
-                <div style={{
-                    backgroundColor: 'var(--admin-card-bg, #ffffff)',
-                    border: '1px solid var(--admin-border, #e2e8f0)',
-                    borderRadius: '12px',
-                    padding: '16px 20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-                }}>
-                    <div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                            Total Redemptions
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#8b5cf6', marginTop: '4px' }}>
-                            {totalRedemptions}
-                        </div>
-                        <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
-                            Customer redemptions
-                        </div>
-                    </div>
-                    <div style={{
-                        width: '42px',
-                        height: '42px',
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(139, 92, 246, 0.12)',
-                        color: '#8b5cf6',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <BarChart2 size={22} />
-                    </div>
-                </div>
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={handleExportCSV}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 12px', borderRadius: '8px' }}
+                    >
+                        <Download size={14} />
+                        <span>Export CSV</span>
+                    </button>
 
-                {/* 4. Expired / Inactive */}
-                <div style={{
-                    backgroundColor: 'var(--admin-card-bg, #ffffff)',
-                    border: '1px solid var(--admin-border, #e2e8f0)',
-                    borderRadius: '12px',
-                    padding: '16px 20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-                }}>
-                    <div>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--admin-muted, #64748b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                            Expired / Inactive
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--admin-text, #0f172a)', marginTop: '4px' }}>
-                            {inactiveCount}
-                        </div>
-                        <div style={{ fontSize: '0.74rem', color: 'var(--admin-muted)', marginTop: '2px' }}>
-                            {archivedCount} archived
-                        </div>
-                    </div>
-                    <div style={{
-                        width: '42px',
-                        height: '42px',
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(239, 68, 68, 0.12)',
-                        color: '#ef4444',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <Clock size={22} />
-                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handleOpenCreate}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', fontWeight: 700 }}
+                    >
+                        <Plus size={14} />
+                        <span>Create New Coupon</span>
+                    </button>
                 </div>
             </div>
 
-            {/* Enclosed Structured Table & Filter Card (Matching Products & Inventory Views) */}
-            <div className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--admin-border, #e2e8f0)', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            {/* Executive KPI Summary Metrics Cards */}
+            <div className="stat-cards-grid-4" style={{ marginBottom: '20px' }}>
+                <div style={{ padding: '16px 18px', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--shadow-sm)' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>Total Campaigns</span>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--admin-text)', marginTop: '4px' }}>{totalCount}</div>
+                </div>
+                <div style={{ padding: '16px 18px', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--shadow-sm)' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>Active Coupons</span>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#10b981', marginTop: '4px' }}>{activeCount}</div>
+                </div>
+                <div style={{ padding: '16px 18px', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--shadow-sm)' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>Total Redemptions</span>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#8b5cf6', marginTop: '4px' }}>{totalRedemptions}</div>
+                </div>
+                <div style={{ padding: '16px 18px', borderRadius: '12px', backgroundColor: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--shadow-sm)' }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--admin-muted)', textTransform: 'uppercase' }}>Expired / Inactive</span>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ef4444', marginTop: '4px' }}>{inactiveCount}</div>
+                </div>
+            </div>
 
-                {/* 1. Status Filter Tabs Bar (Inside Card Top) */}
+            {/* Enclosed Structured Table & Filter Card */}
+            <div className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--admin-border)', borderRadius: '12px' }}>
+
+                {/* 1. Status Filter Tabs Bar (Non-scrolling Flex Wrap) */}
                 <div style={{
                     display: 'flex',
-                    gap: '8px',
-                    padding: '16px 20px',
-                    borderBottom: '1px solid var(--admin-border, #e2e8f0)',
-                    overflowX: 'auto',
-                    backgroundColor: 'var(--admin-card-bg, #ffffff)'
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '4px',
+                    padding: '10px 14px',
+                    borderBottom: '1px solid var(--admin-border)',
+                    backgroundColor: 'var(--admin-card-bg)'
                 }}>
-                    <button
-                        type="button"
-                        className={`order-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('all')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'all' ? 'var(--admin-primary, #3b82f6)' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'all' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                    >
-                        <span>All Campaigns</span>
-                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'all' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                            {totalCount}
-                        </span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className={`order-tab-btn ${activeTab === 'active' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('active')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'active' ? '#10b981' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'active' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                    >
-                        <span>Active</span>
-                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'active' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                            {activeCount}
-                        </span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className={`order-tab-btn ${activeTab === 'scheduled' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('scheduled')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'scheduled' ? '#8b5cf6' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'scheduled' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                    >
-                        <span>Scheduled</span>
-                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'scheduled' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                            {scheduledCount}
-                        </span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className={`order-tab-btn ${activeTab === 'inactive' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('inactive')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'inactive' ? '#f59e0b' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'inactive' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                    >
-                        <span>Expired / Inactive</span>
-                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'inactive' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                            {inactiveCount}
-                        </span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className={`order-tab-btn ${activeTab === 'archived' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('archived')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'archived' ? '#ef4444' : 'var(--admin-bg, #f1f5f9)', color: activeTab === 'archived' ? '#fff' : 'var(--admin-text)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                    >
-                        <span>Archived</span>
-                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: activeTab === 'archived' ? 'rgba(255,255,255,0.25)' : 'var(--admin-border)', fontSize: '0.75rem' }}>
-                            {archivedCount}
-                        </span>
-                    </button>
+                    {[
+                        { id: 'all', label: 'All Campaigns', count: totalCount },
+                        { id: 'active', label: 'Active', count: activeCount },
+                        { id: 'scheduled', label: 'Scheduled', count: scheduledCount },
+                        { id: 'inactive', label: 'Expired / Inactive', count: inactiveCount },
+                        { id: 'archived', label: 'Archived', count: archivedCount },
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => setActiveTab(tab.id)}
+                            style={{
+                                padding: '6px 12px',
+                                borderRadius: '18px',
+                                fontWeight: 700,
+                                fontSize: '0.8rem',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                whiteSpace: 'nowrap',
+                                backgroundColor: activeTab === tab.id ? 'var(--admin-primary, #6366f1)' : 'transparent',
+                                color: activeTab === tab.id ? '#ffffff' : 'var(--admin-muted, #64748b)'
+                            }}
+                        >
+                            <span>{tab.label}</span>
+                            <span style={{
+                                fontSize: '0.7rem',
+                                padding: '1px 6px',
+                                borderRadius: '10px',
+                                fontWeight: 800,
+                                backgroundColor: activeTab === tab.id ? 'rgba(255, 255, 255, 0.25)' : 'var(--admin-border, #e2e8f0)',
+                                color: activeTab === tab.id ? '#ffffff' : 'var(--admin-text, #0f172a)'
+                            }}>
+                                {tab.count}
+                            </span>
+                        </button>
+                    ))}
                 </div>
 
                 {/* 2. Search & Filter Bar (Inside Card Middle) */}
@@ -978,7 +845,8 @@ export default function CouponsPage() {
                                             onChange={handleSelectAll}
                                         />
                                     </th>
-                                    <th style={{ padding: '14px 18px' }}>Campaign Code & Name</th>
+                                    <th style={{ padding: '14px 18px' }}>Campaign Code</th>
+                                    <th style={{ padding: '14px 18px' }}>Campaign Name</th>
                                     <th style={{ padding: '14px 18px' }}>Discount Value</th>
                                     <th style={{ padding: '14px 18px' }}>Redemptions Quota</th>
                                     <th style={{ padding: '14px 18px' }}>Validity Window</th>

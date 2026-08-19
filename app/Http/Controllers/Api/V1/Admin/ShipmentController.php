@@ -69,9 +69,18 @@ class ShipmentController extends Controller
      *     @OA\Response(response=200, description="Shipment details retrieved successfully")
      * )
      */
+    /**
+     * @OA\Get(
+     *     path="/api/v1/admin/shipments/{id}",
+     *     summary="Get single shipment details and tracking timeline",
+     *     tags={"Admin - Shipping Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Shipment details retrieved successfully")
+     * )
+     */
     public function show(int $id): JsonResponse
     {
-        $shipment = Shipment::with(['order', 'items.orderItem', 'trackingLogs'])->findOrFail($id);
+        $shipment = Shipment::with(['order', 'warehouse', 'items.orderItem', 'trackingLogs'])->findOrFail($id);
 
         return $this->successResponse($shipment, 'Shipment details retrieved successfully.');
     }
@@ -91,6 +100,68 @@ class ShipmentController extends Controller
         $updated = $this->shipmentService->updateShipmentStatus($shipment, $request->validated());
 
         return $this->successResponse($updated, 'Shipment status updated successfully.');
+    }
+
+    /**
+     * Bulk update shipment statuses.
+     */
+    public function bulkStatus(Request $request): JsonResponse
+    {
+        $request->validate([
+            'shipment_ids' => 'required|array|min:1',
+            'shipment_ids.*' => 'integer|exists:shipments,id',
+            'status' => 'required|string',
+        ]);
+
+        $count = $this->shipmentService->bulkUpdateStatus(
+            $request->input('shipment_ids'),
+            $request->input('status')
+        );
+
+        return $this->successResponse(['updated_count' => $count], "Bulk updated {$count} shipments successfully.");
+    }
+
+    /**
+     * Generate courier pickup manifest for selected shipments.
+     */
+    public function manifest(Request $request): JsonResponse
+    {
+        $request->validate([
+            'shipment_ids' => 'required|array|min:1',
+            'shipment_ids.*' => 'integer|exists:shipments,id',
+        ]);
+
+        $manifestData = $this->shipmentService->generatePickupManifest($request->input('shipment_ids'));
+
+        return $this->successResponse($manifestData, 'Courier pickup manifest generated successfully.');
+    }
+
+    /**
+     * Test postal code/country serviceability against active shipping zones.
+     */
+    public function checkServiceability(Request $request): JsonResponse
+    {
+        $request->validate([
+            'country_code' => 'required|string|max:10',
+            'postal_code' => 'nullable|string|max:20',
+        ]);
+
+        $result = $this->shipmentService->checkServiceability(
+            $request->input('country_code'),
+            $request->input('postal_code')
+        );
+
+        return $this->successResponse($result, 'Serviceability check performed successfully.');
+    }
+
+    /**
+     * Get fulfillment analytics KPI metrics.
+     */
+    public function analytics(): JsonResponse
+    {
+        $data = $this->shipmentService->getFulfillmentAnalytics();
+
+        return $this->successResponse($data, 'Fulfillment analytics retrieved successfully.');
     }
 
     /**

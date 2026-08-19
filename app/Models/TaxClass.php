@@ -12,8 +12,10 @@ class TaxClass extends Model
 
     protected $fillable = [
         'name',
+        'code',
         'description',
         'is_default',
+        'status',
     ];
 
     protected $casts = [

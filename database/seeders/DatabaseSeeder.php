@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             RbacSeeder::class,
             ProductSeeder::class,
             CustomerSeeder::class,
+            ReviewSeeder::class,
         ]);
     }
 }

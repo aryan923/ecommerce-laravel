@@ -152,4 +152,60 @@ class ShippingManagementTest extends TestCase
 
         $this->assertDatabaseHas('shipments', ['tracking_number' => 'AWB-1234567890']);
     }
+
+    public function test_admin_can_bulk_update_shipment_status()
+    {
+        $customer = User::factory()->create();
+        $order = Order::create(['user_id' => $customer->id, 'order_number' => 'ORD-101', 'subtotal' => 50, 'grand_total' => 50, 'status' => 'processing']);
+        $shipment = Shipment::create(['order_id' => $order->id, 'shipment_number' => 'SHP-101', 'courier_name' => 'FedEx', 'tracking_number' => 'AWB-101', 'status' => 'pending']);
+
+        $response = $this->actingAs($this->adminUser, 'sanctum')
+            ->postJson('/api/v1/admin/shipments/bulk-status', [
+                'shipment_ids' => [$shipment->id],
+                'status' => 'in_transit',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.updated_count', 1);
+
+        $this->assertDatabaseHas('shipments', ['id' => $shipment->id, 'status' => 'in_transit']);
+    }
+
+    public function test_admin_can_generate_pickup_manifest()
+    {
+        $customer = User::factory()->create();
+        $order = Order::create(['user_id' => $customer->id, 'order_number' => 'ORD-102', 'subtotal' => 75, 'grand_total' => 75, 'status' => 'processing']);
+        $shipment = Shipment::create(['order_id' => $order->id, 'shipment_number' => 'SHP-102', 'courier_name' => 'DHL', 'tracking_number' => 'AWB-102', 'status' => 'in_transit']);
+
+        $response = $this->actingAs($this->adminUser, 'sanctum')
+            ->postJson('/api/v1/admin/shipments/manifest', [
+                'shipment_ids' => [$shipment->id],
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.total_shipments', 1);
+    }
+
+    public function test_admin_can_check_pincode_serviceability()
+    {
+        $response = $this->actingAs($this->adminUser, 'sanctum')
+            ->postJson('/api/v1/admin/shipping/check-serviceability', [
+                'country_code' => 'US',
+                'postal_code' => '90210',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true);
+    }
+
+    public function test_admin_can_fetch_fulfillment_analytics()
+    {
+        $response = $this->actingAs($this->adminUser, 'sanctum')
+            ->getJson('/api/v1/admin/shipping/analytics');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure(['data' => ['overview', 'carrier_performance']]);
+    }
 }
