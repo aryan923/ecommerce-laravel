@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreShippingZoneRequest extends FormRequest
 {
@@ -14,18 +13,15 @@ class StoreShippingZoneRequest extends FormRequest
 
     public function rules(): array
     {
-        $zoneId = $this->route('id') ?? $this->route('shipping_zone');
-
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'countries' => ['nullable', 'array'],
-            'countries.*' => ['string', 'max:2'],
-            'states' => ['nullable', 'array'],
-            'states.*' => ['string', 'max:10'],
-            'postal_codes' => ['nullable', 'array'],
-            'postal_codes.*' => ['string', 'max:20'],
-            'is_global' => ['boolean'],
-            'status' => ['nullable', 'string', Rule::in(['active', 'inactive'])],
+            'name' => 'required|string|max:150',
+            'description' => 'nullable|string',
+            'countries' => 'nullable|array',
+            'states' => 'nullable|array',
+            'postal_codes' => 'nullable|array',
+            'is_global' => 'nullable|boolean',
+            'status' => 'nullable|in:active,inactive',
+            'sort_order' => 'nullable|integer|min:0',
         ];
     }
 }

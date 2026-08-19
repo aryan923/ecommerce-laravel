@@ -5985,11 +5985,19 @@
         "/api/v1/admin/shipments": {
             "get": {
                 "tags": [
-                    "Admin - Shipment Management"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "List shipments",
+                "summary": "List all order shipments",
                 "operationId": "9dc5fc6d48199d4dafe2cc41ef2a29fe",
                 "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     {
                         "name": "status",
                         "in": "query",
@@ -6010,7 +6018,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Shipments listed successfully"
+                        "description": "Shipments retrieved successfully"
                     }
                 },
                 "security": [
@@ -6021,40 +6029,13 @@
             },
             "post": {
                 "tags": [
-                    "Admin - Shipment Management"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Create shipment & generate AWB",
+                "summary": "Dispatch items and create shipment for order",
                 "operationId": "60c2a18e391aee25e81f8e4925404fd1",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "courier_name"
-                                ],
-                                "properties": {
-                                    "courier_name": {
-                                        "type": "string",
-                                        "example": "Delhivery"
-                                    },
-                                    "awb_number": {
-                                        "type": "string",
-                                        "example": "DL123456789"
-                                    },
-                                    "tracking_number": {
-                                        "type": "string",
-                                        "example": "TRK987654"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "201": {
-                        "description": "Shipment created successfully"
+                        "description": "Shipment created & items dispatched"
                     }
                 },
                 "security": [
@@ -6067,20 +6048,10 @@
         "/api/v1/admin/shipments/{id}": {
             "get": {
                 "tags": [
-                    "Admin - Shipment Management"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Get single shipment details",
+                "summary": "Get single shipment details and tracking timeline",
                 "operationId": "c92e4902008e3290f7858a9bcaf622f0",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Shipment details retrieved successfully"
@@ -6093,53 +6064,16 @@
                 ]
             }
         },
-        "/api/v1/admin/shipments/{id}/tracking": {
-            "post": {
+        "/api/v1/admin/shipments/{id}/status": {
+            "patch": {
                 "tags": [
-                    "Admin - Shipment Management"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Add tracking log event to shipment",
-                "operationId": "75cd897031dc79ad0f1cb5de9956b85d",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "status"
-                                ],
-                                "properties": {
-                                    "status": {
-                                        "type": "string",
-                                        "example": "in_transit"
-                                    },
-                                    "location": {
-                                        "type": "string",
-                                        "example": "Mumbai Hub"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Dispatched from sorting facility"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "Update shipment status and add tracking timeline event",
+                "operationId": "54de56c091b9765ae70787561bc305b2",
                 "responses": {
                     "200": {
-                        "description": "Tracking log added successfully"
+                        "description": "Shipment status updated successfully"
                     }
                 },
                 "security": [
@@ -6149,13 +6083,42 @@
                 ]
             }
         },
-        "/api/v1/admin/shipping-methods": {
+        "/api/v1/admin/shipments/{id}/label": {
             "get": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
+                ],
+                "summary": "Get packing slip and shipping label payload",
+                "operationId": "75796ff07c801230c46bb0e14d96ab84",
+                "responses": {
+                    "200": {
+                        "description": "Label payload generated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipping/methods": {
+            "get": {
+                "tags": [
+                    "Admin - Shipping Management"
                 ],
                 "summary": "List shipping methods",
-                "operationId": "a07053244e85ae7f12ab67f3790ea147",
+                "operationId": "85d48a60ca2e7cab08235df29ff4f0e0",
+                "parameters": [
+                    {
+                        "name": "zone_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Shipping methods retrieved successfully"
@@ -6169,44 +6132,10 @@
             },
             "post": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Create shipping method",
-                "operationId": "6d54e5c93cf7fd9b1afc5a0a98747172",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name",
-                                    "type"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Standard Delivery"
-                                    },
-                                    "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "standard",
-                                            "express",
-                                            "same_day",
-                                            "pickup"
-                                        ],
-                                        "example": "standard"
-                                    },
-                                    "estimated_days": {
-                                        "type": "string",
-                                        "example": "3-5 business days"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "Create a shipping method",
+                "operationId": "709f80c14ce40075e22115778e565b72",
                 "responses": {
                     "201": {
                         "description": "Shipping method created successfully"
@@ -6219,26 +6148,16 @@
                 ]
             }
         },
-        "/api/v1/admin/shipping-methods/{id}": {
+        "/api/v1/admin/shipping/methods/{id}": {
             "get": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
                 ],
                 "summary": "Get single shipping method",
-                "operationId": "0cab45e671426d1f348aeb9e54defc25",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
+                "operationId": "6aa48994e7308021c4d25a688da509c9",
                 "responses": {
                     "200": {
-                        "description": "Shipping method details retrieved successfully"
+                        "description": "Shipping method details retrieved"
                     }
                 },
                 "security": [
@@ -6249,20 +6168,10 @@
             },
             "put": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Update shipping method",
-                "operationId": "115408aa3b404268322fc71d7d44000c",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
+                "summary": "Update a shipping method",
+                "operationId": "793d4423fa0e8c4051f467e71871dfb5",
                 "responses": {
                     "200": {
                         "description": "Shipping method updated successfully"
@@ -6276,23 +6185,32 @@
             },
             "delete": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Delete shipping method",
-                "operationId": "c61a4f5cdb23a767640dc978f9f94ed9",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
+                "summary": "Delete a shipping method",
+                "operationId": "5bf71875ce5468a9f0413d66b284c797",
                 "responses": {
                     "200": {
                         "description": "Shipping method deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/shipping/methods/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Admin - Shipping Management"
+                ],
+                "summary": "Toggle shipping method status",
+                "operationId": "1d83eaa4c1bc25b7c19f4ff0f0898b57",
+                "responses": {
+                    "200": {
+                        "description": "Status toggled successfully"
                     }
                 },
                 "security": [
@@ -6467,16 +6385,47 @@
                 ]
             }
         },
-        "/api/v1/admin/shipping-zones": {
+        "/api/v1/admin/shipping/zones": {
             "get": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "List shipping zones",
-                "operationId": "381d1cdebb339a6b3e174c6510baa529",
+                "summary": "List all shipping zones",
+                "description": "Retrieve paginated list of geographical shipping zones.",
+                "operationId": "568f3d3b4d19bc2358c3802e97329992",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Shipping zones retrieved successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -6487,10 +6436,10 @@
             },
             "post": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Create shipping zone",
-                "operationId": "55c887d375d52831732c9a02466df481",
+                "summary": "Create a shipping zone",
+                "operationId": "4ee53c7039c1a65d5743cc500c4111ec",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -6502,26 +6451,22 @@
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "example": "Local MH Zone"
+                                        "example": "Domestic Zone"
                                     },
-                                    "states": {
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Mainland shipping"
+                                    },
+                                    "countries": {
                                         "type": "array",
                                         "items": {
-                                            "type": "string"
-                                        },
-                                        "example": [
-                                            "MH"
-                                        ]
+                                            "type": "string",
+                                            "example": "US"
+                                        }
                                     },
-                                    "postal_codes": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "example": [
-                                            "400001",
-                                            "400002"
-                                        ]
+                                    "is_global": {
+                                        "type": "boolean",
+                                        "example": false
                                     }
                                 },
                                 "type": "object"
@@ -6541,13 +6486,13 @@
                 ]
             }
         },
-        "/api/v1/admin/shipping-zones/{id}": {
+        "/api/v1/admin/shipping/zones/{id}": {
             "get": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Get single shipping zone",
-                "operationId": "881f66bbb60a932f6a4fdfa451bc3efe",
+                "summary": "Get single shipping zone details",
+                "operationId": "7dcac3ca5d476e6552182abcceea07c4",
                 "parameters": [
                     {
                         "name": "id",
@@ -6560,7 +6505,10 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Shipping zone details retrieved successfully"
+                        "description": "Zone details retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Zone not found"
                     }
                 },
                 "security": [
@@ -6571,10 +6519,10 @@
             },
             "put": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Update shipping zone",
-                "operationId": "2787f31661fdfceec21b42f557c73652",
+                "summary": "Update a shipping zone",
+                "operationId": "5d7959d08a3d07be2dbaddd413e33827",
                 "parameters": [
                     {
                         "name": "id",
@@ -6598,10 +6546,10 @@
             },
             "delete": {
                 "tags": [
-                    "Admin - Shipping Engine"
+                    "Admin - Shipping Management"
                 ],
-                "summary": "Delete shipping zone",
-                "operationId": "6db0417d0b70643de0f85a4e3f1190c7",
+                "summary": "Delete a shipping zone",
+                "operationId": "82f5a1c759cde7a479746464184bd2c9",
                 "parameters": [
                     {
                         "name": "id",
@@ -10676,6 +10624,10 @@
             "description": "Admin Order Management & Storefront Order Fulfillment APIs"
         },
         {
+            "name": "Admin - Shipping Management",
+            "description": "API Endpoints for Managing Shipping Zones, Delivery Methods, and Rates"
+        },
+        {
             "name": "Admin Authentication",
             "description": "Admin Authentication"
         },
@@ -10742,10 +10694,6 @@
         {
             "name": "Admin Reviews",
             "description": "Admin Reviews"
-        },
-        {
-            "name": "Admin - Shipment Management",
-            "description": "Admin - Shipment Management"
         },
         {
             "name": "Admin - Shipping Engine",

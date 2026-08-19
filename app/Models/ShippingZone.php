@@ -12,11 +12,13 @@ class ShippingZone extends Model
 
     protected $fillable = [
         'name',
+        'description',
         'countries',
         'states',
         'postal_codes',
         'is_global',
         'status',
+        'sort_order',
     ];
 
     protected $casts = [
@@ -24,7 +26,13 @@ class ShippingZone extends Model
         'states' => 'array',
         'postal_codes' => 'array',
         'is_global' => 'boolean',
+        'sort_order' => 'integer',
     ];
+
+    public function methods(): HasMany
+    {
+        return $this->hasMany(ShippingMethod::class, 'shipping_zone_id');
+    }
 
     public function rates(): HasMany
     {

@@ -1,0 +1,114 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e13]:
+      - generic [ref=e14]: APC Commerce
+      - generic [ref=e15]: Console v2.8
+    - navigation [ref=e16]:
+      - generic [ref=e17]: Overview
+      - link "Executive Dashboard" [ref=e19] [cursor=pointer]:
+        - /url: /admin
+      - generic [ref=e27]: Catalog & Stock
+      - link "Products & SKUs" [ref=e29] [cursor=pointer]:
+        - /url: /admin/products
+      - link "Inventory Control" [ref=e36] [cursor=pointer]:
+        - /url: /admin/inventory
+      - link "Categories" [ref=e49] [cursor=pointer]:
+        - /url: /admin/categories
+      - link "Brands" [ref=e55] [cursor=pointer]:
+        - /url: /admin/brands
+      - link "Attributes & Variants" [ref=e61] [cursor=pointer]:
+        - /url: /admin/attributes
+      - generic [ref=e65]: Sales & Orders
+      - link "Orders & Shipping" [ref=e67] [cursor=pointer]:
+        - /url: /admin/orders
+      - link "Returns & Refunds" [ref=e73] [cursor=pointer]:
+        - /url: /admin/returns
+      - link "Shipping & Fulfillment" [ref=e79] [cursor=pointer]:
+        - /url: /admin/shipping
+      - generic [ref=e87]: Customers & CRM
+      - link "Customer Accounts" [ref=e89] [cursor=pointer]:
+        - /url: /admin/customers
+      - generic [ref=e97]: Promotions & Marketing
+      - link "Coupons & Discounts" [ref=e99] [cursor=pointer]:
+        - /url: /admin/coupons
+      - generic [ref=e104]: System Config
+      - link "Store Settings" [ref=e106] [cursor=pointer]:
+        - /url: /admin/settings
+  - generic [ref=e112]:
+    - banner [ref=e113]:
+      - heading "Executive Dashboard" [level=1] [ref=e115]
+      - generic [ref=e117]:
+        - textbox "Search products, orders, inventory, customers..." [ref=e121]
+        - generic [ref=e122]: Ctrl K
+      - generic [ref=e123]:
+        - button "Switch to Dark Mode" [ref=e124] [cursor=pointer]
+        - button "System Notifications" [ref=e127] [cursor=pointer]
+        - generic "Admin User Menu" [ref=e133] [cursor=pointer]:
+          - generic [ref=e134]: A
+          - generic [ref=e135]:
+            - generic [ref=e136]: Administrator
+            - generic [ref=e137]: Super Admin
+    - main [ref=e140]:
+      - generic [ref=e141]:
+        - generic [ref=e142]:
+          - heading "Shipping & Fulfillment Management" [level=1] [ref=e144]
+          - generic [ref=e145]:
+            - button "Refresh" [ref=e146] [cursor=pointer]
+            - button "+ New Zone" [ref=e152] [cursor=pointer]
+            - button "+ New Method" [ref=e156] [cursor=pointer]
+            - button "+ Dispatch Shipment" [ref=e162] [cursor=pointer]
+        - paragraph [ref=e167]: Configure geographical shipping zones, delivery methods, pricing rate rules, order shipment dispatch, and courier AWB tracking.
+        - generic [ref=e168]:
+          - generic [ref=e171]:
+            - generic [ref=e172]: Shipping Zones
+            - generic [ref=e173]: "0"
+          - generic [ref=e180]:
+            - generic [ref=e181]: Active Methods
+            - generic [ref=e182]: "0"
+          - generic [ref=e191]:
+            - generic [ref=e192]: Pending Dispatch
+            - generic [ref=e193]: "0"
+          - generic [ref=e201]:
+            - generic [ref=e202]: Active In-Transit
+            - generic [ref=e203]: "0"
+        - generic [ref=e208]:
+          - generic [ref=e209]:
+            - button "🗺️ Shipping Zones (0)" [ref=e210] [cursor=pointer]
+            - button "🚚 Delivery Methods (0)" [ref=e211] [cursor=pointer]
+            - button "📦 Order Shipments (0)" [active] [ref=e212] [cursor=pointer]
+          - generic [ref=e213]:
+            - button "All Shipments (0)" [ref=e214] [cursor=pointer]:
+              - generic [ref=e215]: All Shipments
+              - generic [ref=e216]: (0)
+            - button "Pending Pickup (0)" [ref=e217] [cursor=pointer]:
+              - generic [ref=e218]: Pending Pickup
+              - generic [ref=e219]: (0)
+            - button "In Transit (0)" [ref=e220] [cursor=pointer]:
+              - generic [ref=e221]: In Transit
+              - generic [ref=e222]: (0)
+            - button "Out for Delivery (0)" [ref=e223] [cursor=pointer]:
+              - generic [ref=e224]: Out for Delivery
+              - generic [ref=e225]: (0)
+            - button "Delivered (0)" [ref=e226] [cursor=pointer]:
+              - generic [ref=e227]: Delivered
+              - generic [ref=e228]: (0)
+            - button "Failed / Exception (0)" [ref=e229] [cursor=pointer]:
+              - generic [ref=e230]: Failed / Exception
+              - generic [ref=e231]: (0)
+          - generic [ref=e232]:
+            - 'textbox "Search shipment #, tracking AWB, carrier..." [ref=e237]'
+            - combobox [ref=e238]:
+              - option "All Carriers" [selected]
+              - option "FedEx"
+              - option "DHL"
+              - option "BlueDart"
+              - option "Delhivery"
+            - combobox [ref=e239]:
+              - option "All Time" [selected]
+              - option "Dispatched Today"
+              - option "Last 7 Days"
+              - option "Last 30 Days"
+            - combobox [ref=e240]:
+              - 'option "Sort: Dispatch Date (Newest)" [selected]'
+              - 'option "Sort: Dispatch Date (Oldest)"'
+          - generic [ref=e241]: No order shipments found matching your filter criteria.

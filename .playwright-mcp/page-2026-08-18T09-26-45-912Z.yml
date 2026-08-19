@@ -1,0 +1,112 @@
+- generic [ref=f1e4]:
+  - complementary [ref=f1e5]:
+    - generic [ref=f1e13]:
+      - generic [ref=f1e14]: APC Commerce
+      - generic [ref=f1e15]: Console v2.8
+    - navigation [ref=f1e16]:
+      - generic [ref=f1e17]: Overview
+      - link "Executive Dashboard" [ref=f1e19] [cursor=pointer]:
+        - /url: /admin
+      - generic [ref=f1e27]: Catalog & Stock
+      - link "Products & SKUs" [ref=f1e29] [cursor=pointer]:
+        - /url: /admin/products
+      - link "Inventory Control" [ref=f1e36] [cursor=pointer]:
+        - /url: /admin/inventory
+      - link "Categories" [ref=f1e49] [cursor=pointer]:
+        - /url: /admin/categories
+      - link "Brands" [ref=f1e55] [cursor=pointer]:
+        - /url: /admin/brands
+      - link "Attributes & Variants" [ref=f1e61] [cursor=pointer]:
+        - /url: /admin/attributes
+      - generic [ref=f1e65]: Sales & Orders
+      - link "Orders & Shipping" [ref=f1e67] [cursor=pointer]:
+        - /url: /admin/orders
+      - link "Returns & Refunds" [ref=f1e73] [cursor=pointer]:
+        - /url: /admin/returns
+      - link "Shipping & Fulfillment" [ref=f1e79] [cursor=pointer]:
+        - /url: /admin/shipping
+      - generic [ref=f1e87]: Customers & CRM
+      - link "Customer Accounts" [ref=f1e89] [cursor=pointer]:
+        - /url: /admin/customers
+      - generic [ref=f1e97]: Promotions & Marketing
+      - link "Coupons & Discounts" [ref=f1e99] [cursor=pointer]:
+        - /url: /admin/coupons
+      - generic [ref=f1e104]: System Config
+      - link "Store Settings" [ref=f1e106] [cursor=pointer]:
+        - /url: /admin/settings
+  - generic [ref=f1e112]:
+    - banner [ref=f1e113]:
+      - heading "Executive Dashboard" [level=1] [ref=f1e115]
+      - generic [ref=f1e117]:
+        - textbox "Search products, orders, inventory, customers..." [ref=f1e121]
+        - generic [ref=f1e122]: Ctrl K
+      - generic [ref=f1e123]:
+        - button "Switch to Dark Mode" [ref=f1e124] [cursor=pointer]
+        - button "System Notifications" [ref=f1e127] [cursor=pointer]
+        - generic "Admin User Menu" [ref=f1e133] [cursor=pointer]:
+          - generic [ref=f1e134]: A
+          - generic [ref=f1e135]:
+            - generic [ref=f1e136]: Administrator
+            - generic [ref=f1e137]: Super Admin
+    - main [ref=f1e140]:
+      - generic [ref=f1e141]:
+        - generic [ref=f1e142]:
+          - heading "Shipping & Fulfillment Management" [level=1] [ref=f1e144]
+          - generic [ref=f1e145]:
+            - button "Refresh" [ref=f1e146] [cursor=pointer]
+            - button "+ New Zone" [ref=f1e152] [cursor=pointer]
+            - button "+ New Method" [active] [ref=f1e156] [cursor=pointer]
+            - button "+ Dispatch Shipment" [ref=f1e162] [cursor=pointer]
+        - paragraph [ref=f1e167]: Configure geographical shipping zones, delivery methods, pricing rate rules, order shipment dispatch, and courier AWB tracking.
+        - generic [ref=f1e168]:
+          - generic [ref=f1e171]:
+            - generic [ref=f1e172]: Shipping Zones
+            - generic [ref=f1e173]: "0"
+          - generic [ref=f1e180]:
+            - generic [ref=f1e181]: Active Methods
+            - generic [ref=f1e182]: "0"
+          - generic [ref=f1e191]:
+            - generic [ref=f1e192]: Pending Dispatch
+            - generic [ref=f1e193]: "0"
+          - generic [ref=f1e201]:
+            - generic [ref=f1e202]: Active In-Transit
+            - generic [ref=f1e203]: "0"
+        - generic [ref=f1e208]:
+          - generic [ref=f1e209]:
+            - button "🗺️ Shipping Zones (0)" [ref=f1e210] [cursor=pointer]
+            - button "🚚 Delivery Methods (0)" [ref=f1e211] [cursor=pointer]
+            - button "📦 Order Shipments (0)" [ref=f1e212] [cursor=pointer]
+          - textbox "Search zones, methods, or shipment tracking numbers..." [ref=f1e218]
+        - generic [ref=f1e221]:
+          - generic [ref=f1e222]:
+            - heading "Create Delivery Method" [level=2] [ref=f1e223]
+            - button [ref=f1e224] [cursor=pointer]
+          - generic [ref=f1e228]:
+            - generic [ref=f1e229]:
+              - generic [ref=f1e230]:
+                - generic [ref=f1e231]: Method Name
+                - textbox "e.g. Express Air" [ref=f1e232]
+              - generic [ref=f1e233]:
+                - generic [ref=f1e234]: Method Code
+                - textbox "e.g. EXP_AIR" [ref=f1e235]
+            - generic [ref=f1e236]:
+              - generic [ref=f1e237]:
+                - generic [ref=f1e238]: Carrier Partner
+                - textbox [ref=f1e239]: FedEx
+              - generic [ref=f1e240]:
+                - generic [ref=f1e241]: Calculation Model
+                - combobox [ref=f1e242]:
+                  - option "Flat Rate" [selected]
+                  - option "Weight-Based Tier"
+                  - option "Order-Value Tier"
+                  - option "Free Shipping"
+            - generic [ref=f1e243]:
+              - generic [ref=f1e244]:
+                - generic [ref=f1e245]: Base Cost ($)
+                - spinbutton [ref=f1e246]: "10.00"
+              - generic [ref=f1e247]:
+                - generic [ref=f1e248]: Free Shipping Threshold ($)
+                - spinbutton [ref=f1e249]: "100.00"
+            - generic [ref=f1e250]:
+              - button "Cancel" [ref=f1e251] [cursor=pointer]
+              - button "Create Method" [ref=f1e252] [cursor=pointer]

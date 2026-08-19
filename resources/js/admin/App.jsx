@@ -22,7 +22,8 @@ import {
     Menu,
     X,
     Search,
-    Ticket
+    Ticket,
+    Truck
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -37,6 +38,7 @@ import CustomerListPage from './pages/CustomerListPage';
 import OrderListPage from './pages/OrderListPage';
 import ReturnsPage from './pages/ReturnsPage';
 import CouponsPage from './pages/CouponsPage';
+import ShippingPage from './pages/ShippingPage';
 
 function ProtectedRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
@@ -241,6 +243,16 @@ function AdminLayout() {
                         <div className="nav-item-content">
                             <RotateCcw size={17} />
                             <span>Returns & Refunds</span>
+                        </div>
+                    </NavLink>
+
+                    <NavLink
+                        to="/shipping"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <Truck size={17} />
+                            <span>Shipping & Fulfillment</span>
                         </div>
                     </NavLink>
 
@@ -471,6 +483,7 @@ function AdminLayout() {
                         <Route path="/returns" element={<ReturnsPage />} />
                         <Route path="/customers" element={<CustomerListPage />} />
                         <Route path="/coupons" element={<CouponsPage />} />
+                        <Route path="/shipping" element={<ShippingPage />} />
                         <Route path="*" element={<DashboardPage />} />
                     </Routes>
                 </main>

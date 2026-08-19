@@ -206,6 +206,26 @@ Route::prefix('v1')->group(function () {
             Route::patch('/coupons/{id}/status', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'toggleStatus'])->middleware('permission:coupons.update');
             Route::get('/coupons/{id}/reports', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'report'])->middleware('permission:coupons.view');
 
+            // Shipping & Shipment Management
+            Route::get('/shipping/zones', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'index'])->middleware('permission:shipping.view');
+            Route::post('/shipping/zones', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'store'])->middleware('permission:shipping.create');
+            Route::get('/shipping/zones/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'show'])->middleware('permission:shipping.view');
+            Route::put('/shipping/zones/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'update'])->middleware('permission:shipping.update');
+            Route::delete('/shipping/zones/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingZoneController::class, 'destroy'])->middleware('permission:shipping.delete');
+
+            Route::get('/shipping/methods', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'index'])->middleware('permission:shipping.view');
+            Route::post('/shipping/methods', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'store'])->middleware('permission:shipping.create');
+            Route::get('/shipping/methods/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'show'])->middleware('permission:shipping.view');
+            Route::put('/shipping/methods/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'update'])->middleware('permission:shipping.update');
+            Route::patch('/shipping/methods/{id}/status', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'toggleStatus'])->middleware('permission:shipping.update');
+            Route::delete('/shipping/methods/{id}', [\App\Http\Controllers\Api\V1\Admin\ShippingMethodController::class, 'destroy'])->middleware('permission:shipping.delete');
+
+            Route::get('/shipments', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'index'])->middleware('permission:shipments.manage');
+            Route::post('/shipments', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'store'])->middleware('permission:shipments.manage');
+            Route::get('/shipments/{id}', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'show'])->middleware('permission:shipments.manage');
+            Route::patch('/shipments/{id}/status', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'updateStatus'])->middleware('permission:shipments.manage');
+            Route::get('/shipments/{id}/label', [\App\Http\Controllers\Api\V1\Admin\ShipmentController::class, 'label'])->middleware('permission:shipments.manage');
+
             // Tax Class Management
             Route::get('/tax-classes', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'index']);
             Route::post('/tax-classes', [\App\Http\Controllers\Api\V1\Admin\TaxClassController::class, 'store']);
