@@ -27,7 +27,8 @@ import {
     Percent,
     MessageSquare,
     BarChart3,
-    Image
+    Image,
+    Activity
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -48,6 +49,9 @@ import ReviewsPage from './pages/ReviewsPage';
 import NotificationPage from './pages/NotificationPage';
 import ReportsPage from './pages/ReportsPage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
+import SettingsPage from './pages/SettingsPage';
+import StaffPage from './pages/StaffPage';
+import AuditLogsPage from './pages/AuditLogsPage';
 
 function ProtectedRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
@@ -125,6 +129,9 @@ function AdminLayout() {
         if (location.pathname.includes('/customers')) return 'Customer Management';
         if (location.pathname.includes('/notifications')) return 'Notification Center';
         if (location.pathname.includes('/reports')) return 'Reports & Analytics';
+        if (location.pathname.includes('/staff')) return 'Staff & RBAC Management';
+        if (location.pathname.includes('/audit-logs')) return 'System Audit Logs';
+        if (location.pathname.includes('/settings')) return 'Store Configuration';
         return 'Executive Dashboard';
     };
 
@@ -361,6 +368,26 @@ function AdminLayout() {
                             <span>Store Settings</span>
                         </div>
                     </NavLink>
+
+                    <NavLink
+                        to="/staff"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <Users size={17} />
+                            <span>Staff & Roles (RBAC)</span>
+                        </div>
+                    </NavLink>
+
+                    <NavLink
+                        to="/audit-logs"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <Activity size={17} />
+                            <span>System Audit Logs</span>
+                        </div>
+                    </NavLink>
                 </nav>
             </aside>
 
@@ -550,6 +577,9 @@ function AdminLayout() {
                         <Route path="/notifications" element={<NotificationPage />} />
                         <Route path="/reports" element={<ReportsPage />} />
                         <Route path="/media" element={<MediaLibraryPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/staff" element={<StaffPage />} />
+                        <Route path="/audit-logs" element={<AuditLogsPage />} />
                         <Route path="*" element={<DashboardPage />} />
                     </Routes>
                 </main>

@@ -102,6 +102,15 @@ Route::prefix('v1')->group(function () {
             Route::post('/orders/{id}/notes', [OrderAdminController::class, 'updateNotes'])->middleware('permission:orders.update');
 
 
+            // Staff User Management
+            Route::get('/users', [AdminUserController::class, 'index'])->middleware('permission:staff.view');
+            Route::post('/users', [AdminUserController::class, 'store'])->middleware('permission:staff.create');
+            Route::get('/users/{user}', [AdminUserController::class, 'show'])->middleware('permission:staff.view');
+            Route::put('/users/{user}', [AdminUserController::class, 'update'])->middleware('permission:staff.update');
+            Route::patch('/users/{user}/status', [AdminUserController::class, 'toggleStatus'])->middleware('permission:staff.update');
+            Route::post('/users/{user}/reset-access', [AdminUserController::class, 'resetAccess'])->middleware('permission:staff.update');
+            Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->middleware('permission:staff.delete');
+
             // Role Management
             Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.view');
             Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:roles.create');
@@ -351,6 +360,22 @@ Route::prefix('v1')->group(function () {
             Route::get('/reports/tax', [\App\Http\Controllers\Api\V1\Admin\AdminReportController::class, 'tax']);
             Route::post('/reports/export', [\App\Http\Controllers\Api\V1\Admin\AdminReportController::class, 'export']);
 
+            // Admin Store Settings & Audit Logs (Module 37)
+            Route::get('/settings/audit-logs', [\App\Http\Controllers\Api\V1\Admin\StoreSettingController::class, 'auditLogs']);
+            Route::post('/settings/test-email', [\App\Http\Controllers\Api\V1\Admin\StoreSettingController::class, 'sendTestEmail']);
+            Route::post('/settings/clear-cache', [\App\Http\Controllers\Api\V1\Admin\StoreSettingController::class, 'clearCache']);
+            Route::get('/settings', [\App\Http\Controllers\Api\V1\Admin\StoreSettingController::class, 'index']);
+            Route::get('/settings/{group}', [\App\Http\Controllers\Api\V1\Admin\StoreSettingController::class, 'showGroup']);
+            Route::post('/settings/{group}', [\App\Http\Controllers\Api\V1\Admin\StoreSettingController::class, 'updateGroup']);
+
+            // Admin Currencies & Rates (Module 37)
+            Route::get('/currencies', [\App\Http\Controllers\Api\V1\Admin\CurrencyController::class, 'index']);
+            Route::post('/currencies', [\App\Http\Controllers\Api\V1\Admin\CurrencyController::class, 'store']);
+            Route::get('/currencies/{currency}', [\App\Http\Controllers\Api\V1\Admin\CurrencyController::class, 'show']);
+            Route::put('/currencies/{currency}', [\App\Http\Controllers\Api\V1\Admin\CurrencyController::class, 'update']);
+            Route::delete('/currencies/{currency}', [\App\Http\Controllers\Api\V1\Admin\CurrencyController::class, 'destroy']);
+            Route::post('/currencies/{currency}/set-default', [\App\Http\Controllers\Api\V1\Admin\CurrencyController::class, 'setDefault']);
+
             // Admin Dashboard Management
             Route::prefix('dashboard')->group(function () {
                 Route::get('/kpis', [\App\Http\Controllers\Api\V1\Admin\AdminDashboardController::class, 'kpis']);
@@ -359,6 +384,20 @@ Route::prefix('v1')->group(function () {
                 Route::get('/top-performers', [\App\Http\Controllers\Api\V1\Admin\AdminDashboardController::class, 'topPerformers']);
                 Route::get('/highlights', [\App\Http\Controllers\Api\V1\Admin\AdminDashboardController::class, 'highlights']);
             });
+
+            // Central System Audit Logs (Module 39)
+            Route::get('/audit-logs/modules', [\App\Http\Controllers\Api\V1\Admin\AdminAuditLogController::class, 'modules'])->middleware('permission:audit-logs.view');
+            Route::get('/audit-logs/export', [\App\Http\Controllers\Api\V1\Admin\AdminAuditLogController::class, 'export'])->middleware('permission:audit-logs.export');
+            Route::get('/audit-logs', [\App\Http\Controllers\Api\V1\Admin\AdminAuditLogController::class, 'index'])->middleware('permission:audit-logs.view');
+            Route::get('/audit-logs/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminAuditLogController::class, 'show'])->middleware('permission:audit-logs.view');
+
+            // Failed Jobs & Queue Monitoring (Module 40)
+            Route::get('/failed-jobs', [\App\Http\Controllers\Api\V1\Admin\AdminFailedJobController::class, 'index'])->middleware('permission:settings.view');
+            Route::get('/failed-jobs/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminFailedJobController::class, 'show'])->middleware('permission:settings.view');
+            Route::post('/failed-jobs/bulk-retry', [\App\Http\Controllers\Api\V1\Admin\AdminFailedJobController::class, 'bulkRetry'])->middleware('permission:settings.update');
+            Route::post('/failed-jobs/{id}/retry', [\App\Http\Controllers\Api\V1\Admin\AdminFailedJobController::class, 'retry'])->middleware('permission:settings.update');
+            Route::delete('/failed-jobs/flush', [\App\Http\Controllers\Api\V1\Admin\AdminFailedJobController::class, 'flush'])->middleware('permission:settings.update');
+            Route::delete('/failed-jobs/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminFailedJobController::class, 'destroy'])->middleware('permission:settings.update');
         });
     });
 });

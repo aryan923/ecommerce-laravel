@@ -51,6 +51,14 @@ class AdminUserService
             $user->roles()->sync($roleIds);
         }
 
+        AuditLogService::log(
+            module: 'staff',
+            action: 'admin.create',
+            entityType: AdminUser::class,
+            entityId: $user->id,
+            newValues: ['name' => $user->name, 'email' => $user->email, 'status' => $user->status, 'role_ids' => $roleIds]
+        );
+
         return $user->load('roles');
     }
 
@@ -59,6 +67,13 @@ class AdminUserService
      */
     public function update(AdminUser $user, array $data): AdminUser
     {
+        $oldValues = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'status' => $user->status,
+            'role_ids' => $user->roles->pluck('id')->toArray(),
+        ];
+
         if (empty($data['password'])) {
             unset($data['password']);
         }
@@ -71,6 +86,19 @@ class AdminUserService
         if ($roleIds !== null) {
             $user->roles()->sync($roleIds);
         }
+
+        if (isset($data['status']) && in_array($data['status'], ['disabled', 'inactive'])) {
+            $user->tokens()->delete();
+        }
+
+        AuditLogService::log(
+            module: 'staff',
+            action: 'admin.update',
+            entityType: AdminUser::class,
+            entityId: $user->id,
+            oldValues: $oldValues,
+            newValues: ['name' => $user->name, 'email' => $user->email, 'status' => $user->status, 'role_ids' => $roleIds ?? $oldValues['role_ids']]
+        );
 
         return $user->load('roles');
     }
@@ -86,7 +114,44 @@ class AdminUserService
             ]);
         }
 
+        $oldStatus = $targetUser->status;
         $targetUser->update(['status' => $status]);
+
+        if (in_array($status, ['disabled', 'inactive'])) {
+            $targetUser->tokens()->delete();
+        }
+
+        AuditLogService::log(
+            module: 'staff',
+            action: 'admin.status_change',
+            entityType: AdminUser::class,
+            entityId: $targetUser->id,
+            oldValues: ['status' => $oldStatus],
+            newValues: ['status' => $status]
+        );
+
+        return $targetUser->load('roles');
+    }
+
+    /**
+     * Reset access / password for a staff member and purge active tokens.
+     */
+    public function resetAccess(AdminUser $targetUser, ?string $newPassword = null): AdminUser
+    {
+        if ($newPassword) {
+            $targetUser->update(['password' => \Illuminate\Support\Facades\Hash::make($newPassword)]);
+        }
+
+        // Purge tokens so staff member is forced to re-authenticate
+        $targetUser->tokens()->delete();
+
+        AuditLogService::log(
+            module: 'staff',
+            action: 'admin.reset_access',
+            entityType: AdminUser::class,
+            entityId: $targetUser->id,
+            newValues: ['tokens_purged' => true, 'password_reset' => !empty($newPassword)]
+        );
 
         return $targetUser->load('roles');
     }
@@ -102,6 +167,15 @@ class AdminUserService
             ]);
         }
 
+        AuditLogService::log(
+            module: 'staff',
+            action: 'admin.delete',
+            entityType: AdminUser::class,
+            entityId: $targetUser->id,
+            oldValues: ['name' => $targetUser->name, 'email' => $targetUser->email]
+        );
+
+        $targetUser->tokens()->delete();
         return $targetUser->delete();
     }
 }

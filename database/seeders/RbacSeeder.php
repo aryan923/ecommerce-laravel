@@ -36,7 +36,9 @@ class RbacSeeder extends Seeder
             'roles' => ['view', 'create', 'update', 'delete'],
             'media' => ['view', 'create', 'update', 'delete'],
             'audit_logs' => ['view'],
-            'settings' => ['view', 'update'],
+            'audit-logs' => ['view', 'export'],
+            'settings' => ['view', 'update', 'configure'],
+            'currency' => ['view', 'create', 'update', 'delete', 'manage'],
         ];
 
         $allPermissions = [];

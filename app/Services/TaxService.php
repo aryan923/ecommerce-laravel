@@ -557,6 +557,15 @@ class TaxService
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ]);
+
+            AuditLogService::log(
+                module: 'taxes',
+                action: 'tax.update',
+                entityType: $modelType,
+                entityId: $modelId,
+                oldValues: $oldValues,
+                newValues: $newValues
+            );
         } catch (\Throwable $e) {
             // Silently absorb audit failures
         }

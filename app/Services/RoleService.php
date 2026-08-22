@@ -38,6 +38,14 @@ class RoleService
             $role->permissions()->sync($permissionIds);
         }
 
+        AuditLogService::log(
+            module: 'roles',
+            action: 'role.create',
+            entityType: Role::class,
+            entityId: $role->id,
+            newValues: ['name' => $role->name, 'slug' => $role->slug, 'permission_ids' => $permissionIds]
+        );
+
         return $role->load('permissions');
     }
 
@@ -46,6 +54,12 @@ class RoleService
      */
     public function update(Role $role, array $data): Role
     {
+        $oldValues = [
+            'name' => $role->name,
+            'description' => $role->description,
+            'permission_ids' => $role->permissions->pluck('id')->toArray(),
+        ];
+
         $permissionIds = $data['permission_ids'] ?? null;
         unset($data['permission_ids']);
 
@@ -54,6 +68,15 @@ class RoleService
         if ($permissionIds !== null) {
             $role->permissions()->sync($permissionIds);
         }
+
+        AuditLogService::log(
+            module: 'roles',
+            action: 'role.update',
+            entityType: Role::class,
+            entityId: $role->id,
+            oldValues: $oldValues,
+            newValues: ['name' => $role->name, 'description' => $role->description, 'permission_ids' => $permissionIds ?? $oldValues['permission_ids']]
+        );
 
         return $role->load('permissions');
     }
@@ -74,6 +97,14 @@ class RoleService
                 'role' => ['Cannot delete a role currently assigned to active staff members.'],
             ]);
         }
+
+        AuditLogService::log(
+            module: 'roles',
+            action: 'role.delete',
+            entityType: Role::class,
+            entityId: $role->id,
+            oldValues: ['name' => $role->name, 'slug' => $role->slug]
+        );
 
         return $role->delete();
     }

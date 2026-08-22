@@ -162,6 +162,35 @@ class AdminUserController extends BaseController
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/v1/admin/users/{id}/reset-access",
+     *     summary="Reset Admin Staff Access / Password",
+     *     description="Reset password and purge active API tokens for an admin staff user.",
+     *     operationId="resetAdminUserAccess",
+     *     tags={"Admin Staff Management"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="password", type="string", format="password", example="NewSecretPassword123!")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Staff access reset successfully")
+     * )
+     */
+    public function resetAccess(Request $request, AdminUser $user): JsonResponse
+    {
+        $request->validate([
+            'password' => ['nullable', 'string', 'min:8', 'max:100'],
+        ]);
+
+        $updatedUser = $this->adminUserService->resetAccess($user, $request->input('password'));
+
+        return $this->successResponse($updatedUser, 'Admin staff user access reset successfully.');
+    }
+
+    /**
      * @OA\Delete(
      *     path="/api/v1/admin/users/{id}",
      *     summary="Delete Admin Staff User",
