@@ -87,7 +87,8 @@ export default function SettingsPage() {
         cart_reservation_ttl_minutes: 15,
         unpaid_order_cancellation_hours: 24,
         free_shipping_threshold: 999,
-        low_stock_threshold_default: 5
+        low_stock_threshold_default: 5,
+        products_per_page: 12
     });
 
     const [seoSettings, setSeoSettings] = useState({
@@ -1401,6 +1402,21 @@ export default function SettingsPage() {
                                             className="form-control"
                                             value={commerceSettings.low_stock_threshold_default}
                                             onChange={e => setCommerceSettings({ ...commerceSettings, low_stock_threshold_default: parseInt(e.target.value) || 5 })}
+                                            style={{ height: '36px', borderRadius: '8px' }}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '6px', fontWeight: 600, fontSize: '0.83rem' }}>
+                                            Storefront Catalog Products Per Page (Default)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            min="1"
+                                            max="100"
+                                            value={commerceSettings.products_per_page || 12}
+                                            onChange={e => setCommerceSettings({ ...commerceSettings, products_per_page: parseInt(e.target.value) || 12 })}
                                             style={{ height: '36px', borderRadius: '8px' }}
                                         />
                                     </div>

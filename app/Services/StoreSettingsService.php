@@ -51,6 +51,7 @@ class StoreSettingsService
             'unpaid_order_cancellation_hours' => 24,
             'free_shipping_threshold' => 999,
             'low_stock_threshold_default' => 5,
+            'products_per_page' => 12,
         ],
         'seo' => [
             'default_meta_title' => 'Laravel E-Commerce Store',

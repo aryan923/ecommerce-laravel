@@ -36,6 +36,24 @@ services:
     depends_on:
       - db
 
+  frontend:
+    container_name: ecom-storefront
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8002/api/v1
+    depends_on:
+      - app
+
 volumes:
   dbdata:
     driver: local
+

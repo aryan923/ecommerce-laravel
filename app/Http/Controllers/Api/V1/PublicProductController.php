@@ -34,7 +34,8 @@ class PublicProductController extends BaseController
     public function index(Request $request): JsonResponse
     {
         $filters = $request->only(['search', 'category', 'brand', 'featured', 'min_price', 'max_price', 'sort_by']);
-        $perPage = (int) $request->input('per_page', 15);
+        $defaultPerPage = app(\App\Services\StoreSettingsService::class)->getSettingsByGroup('commerce')['products_per_page'] ?? 12;
+        $perPage = (int) $request->input('per_page', $defaultPerPage);
 
         $products = $this->productService->getPublicCatalog($filters, $perPage);
 

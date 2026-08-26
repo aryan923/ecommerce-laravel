@@ -52,6 +52,7 @@ class UpdateSettingsGroupRequest extends FormRequest
                 'unpaid_order_cancellation_hours' => 'nullable|integer|min:1|max:720',
                 'free_shipping_threshold' => 'nullable|numeric|min:0',
                 'low_stock_threshold_default' => 'nullable|integer|min:1',
+                'products_per_page' => 'nullable|integer|min:1|max:100',
             ],
             'seo' => [
                 'default_meta_title' => 'nullable|string|max:255',
