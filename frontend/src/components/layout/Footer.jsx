@@ -56,7 +56,7 @@ export default function Footer() {
       </div>
 
       {/* Main Footer Grid (5 Columns) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
         
         {/* Column 1: Brand Info */}
         <div className="space-y-4 lg:col-span-1">
@@ -139,7 +139,7 @@ export default function Footer() {
 
       {/* Bottom Bar: Copyright & Payment Badges */}
       <div className="border-t border-stone-800 py-6 bg-[#0D0D0D]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-stone-500">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-stone-500">
           
           {/* Payment Badges */}
           <div className="flex items-center gap-3 text-stone-400 font-semibold text-[10px]">

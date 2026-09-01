@@ -7,6 +7,7 @@ import { Heart, ShoppingBag, Star } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useToast } from '../../context/ToastContext';
+import { normalizeImageUrl } from '../../lib/image-helper';
 
 export default function ProductCard({ product }) {
   const { addItem, openCart } = useCart();
@@ -16,13 +17,14 @@ export default function ProductCard({ product }) {
 
   if (!product) return null;
 
-  const imageSrc =
+  const rawImage =
     product.primary_image ||
     product.primary_image_url ||
     product.main_image_url ||
     product.image ||
-    product.image_url ||
-    '/placeholder.png';
+    product.image_url;
+
+  const imageSrc = normalizeImageUrl(rawImage);
     
   const price = product.price || 0;
   const originalPrice = product.compare_at_price || product.original_price || product.sale_price && product.price < product.sale_price ? product.sale_price : null;
@@ -32,7 +34,7 @@ export default function ProductCard({ product }) {
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product.id || product.variant_id, 1);
+    addItem(product, 1);
     openCart();
     showToast(`Added "${product.name}" to your cart`, 'success');
   };
@@ -55,11 +57,17 @@ export default function ProductCard({ product }) {
       <div>
         {/* Compact Square Image Container */}
         <div className="relative aspect-square w-full bg-stone-100/80 overflow-hidden">
-          {imageSrc && imageSrc !== '/placeholder.png' ? (
+          {imageSrc ? (
             <img
               src={imageSrc}
               alt={product.name || 'Product'}
               className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => {
+                if (!e.currentTarget.dataset.fallback) {
+                  e.currentTarget.dataset.fallback = 'true';
+                  e.currentTarget.src = '/placeholder.svg';
+                }
+              }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-xs text-stone-400 font-medium">

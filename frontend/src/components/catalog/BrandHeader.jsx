@@ -15,7 +15,7 @@ export default function BrandHeader({ brand = {} }) {
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-amber-200/20 blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 flex flex-col md:flex-row items-start md:items-center gap-6">
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-12 flex flex-col md:flex-row items-start md:items-center gap-6">
         {brand.logo && (
           <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl p-3.5 flex items-center justify-center border border-stone-300/80 shrink-0 shadow-md">
             <img src={brand.logo} alt={name} className="max-w-full max-h-full object-contain" />

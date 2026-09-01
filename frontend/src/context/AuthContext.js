@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setTokenState] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState(null);
 
   const checkAuth = useCallback(async () => {
     const storedToken = getAuthToken();
@@ -50,12 +51,13 @@ export function AuthProvider({ children }) {
   }, [checkAuth]);
 
   const login = async (credentials) => {
+    setAuthError(null);
     setIsLoading(true);
     try {
       const res = await apiClient.post('/auth/login', credentials);
       const responseData = res.data.data || res.data;
       const newToken = responseData.token || responseData.access_token;
-      const userData = responseData.user;
+      const userData = responseData.user || responseData;
 
       if (newToken) {
         setAuthToken(newToken);
@@ -70,16 +72,71 @@ export function AuthProvider({ children }) {
         }
       }
       return responseData;
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Invalid email or password credentials.';
+      setAuthError(msg);
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
   const register = async (userData) => {
+    setAuthError(null);
     setIsLoading(true);
     try {
       const res = await apiClient.post('/auth/register', userData);
+      const responseData = res.data.data || res.data;
+      const newToken = responseData.token || responseData.access_token;
+      const newUser = responseData.user || responseData;
+
+      if (newToken) {
+        setAuthToken(newToken);
+        setTokenState(newToken);
+        setUser(newUser);
+
+        // Merge Guest Cart into User Account Cart
+        try {
+          await apiClient.post('/cart/merge');
+        } catch (mergeErr) {
+          console.warn('Cart merge notice:', mergeErr);
+        }
+      }
+      return responseData;
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Registration failed. Please check your inputs.';
+      setAuthError(msg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const forgotPassword = async (email) => {
+    setAuthError(null);
+    setIsLoading(true);
+    try {
+      const res = await apiClient.post('/auth/forgot-password', { email });
       return res.data;
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Unable to send password reset email.';
+      setAuthError(msg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPassword = async (payload) => {
+    setAuthError(null);
+    setIsLoading(true);
+    try {
+      const res = await apiClient.post('/auth/reset-password', payload);
+      return res.data;
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to reset password. Token may be invalid or expired.';
+      setAuthError(msg);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -106,8 +163,12 @@ export function AuthProvider({ children }) {
         token,
         isAuthenticated: !!user,
         isLoading,
+        authError,
+        setAuthError,
         login,
         register,
+        forgotPassword,
+        resetPassword,
         logout,
         checkAuth,
       }}

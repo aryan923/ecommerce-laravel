@@ -17,7 +17,7 @@ export default function Header() {
     <header className="sticky top-0 z-40 bg-[#F5F2EC] border-b border-stone-200/70 backdrop-blur-md text-stone-900 transition-colors">
       
       {/* Main Header Row */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 h-20 flex items-center justify-between gap-6">
         
         {/* Brand Logo (Left) */}
         <Link href="/" className="flex items-center shrink-0">

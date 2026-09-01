@@ -40,7 +40,7 @@ export default function CategoryBanners() {
 
   return (
     <section className="py-16 bg-[#FAF9F6] border-b border-stone-200/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 text-center">
         {/* Section Header */}
         <span className="text-[11px] font-semibold tracking-widest text-stone-500 uppercase block">
           Shop by Category

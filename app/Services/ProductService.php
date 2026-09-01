@@ -18,7 +18,7 @@ class ProductService
      */
     public function list(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Product::with(['brand', 'categories', 'taxClass', 'shippingClass', 'media', 'productImages.media', 'variants.attributeValues']);
+        $query = Product::with(['brand', 'categories', 'taxClass', 'shippingClass', 'media', 'productImages.media', 'variants.attributeValues', 'relatedProducts']);
 
         if (!empty($filters['search']) && is_string($filters['search'])) {
             $search = trim($filters['search']);
@@ -81,12 +81,17 @@ class ProductService
         $categoryIds = $data['category_ids'] ?? [];
         $primaryCategoryId = $data['primary_category_id'] ?? ($categoryIds[0] ?? null);
         $variantsData = $data['variants'] ?? null;
+        $relatedProductIds = $data['related_product_ids'] ?? null;
 
-        unset($data['category_ids'], $data['primary_category_id'], $data['variants']);
+        unset($data['category_ids'], $data['primary_category_id'], $data['variants'], $data['related_product_ids']);
 
         $product = Product::create($data);
 
         $this->syncCategories($product, $categoryIds, $primaryCategoryId);
+
+        if ($relatedProductIds !== null && is_array($relatedProductIds)) {
+            $product->relatedProducts()->sync($relatedProductIds);
+        }
 
         if ($variantsData !== null && is_array($variantsData) && count($variantsData) > 0) {
             $this->syncVariants($product, $variantsData);
@@ -104,7 +109,7 @@ class ProductService
             }
         }
 
-        return $product->load(['brand', 'categories', 'media', 'productImages.media', 'variants.attributeValues']);
+        return $product->load(['brand', 'categories', 'media', 'productImages.media', 'variants.attributeValues', 'relatedProducts']);
     }
 
     /**
@@ -115,8 +120,9 @@ class ProductService
         $categoryIds = $data['category_ids'] ?? null;
         $primaryCategoryId = $data['primary_category_id'] ?? null;
         $variantsData = $data['variants'] ?? null;
+        $relatedProductIds = $data['related_product_ids'] ?? null;
 
-        unset($data['category_ids'], $data['primary_category_id'], $data['variants']);
+        unset($data['category_ids'], $data['primary_category_id'], $data['variants'], $data['related_product_ids']);
 
         $product->update($data);
 
@@ -124,11 +130,15 @@ class ProductService
             $this->syncCategories($product, $categoryIds, $primaryCategoryId);
         }
 
+        if ($relatedProductIds !== null && is_array($relatedProductIds)) {
+            $product->relatedProducts()->sync($relatedProductIds);
+        }
+
         if ($variantsData !== null && is_array($variantsData)) {
             $this->syncVariants($product, $variantsData);
         }
 
-        return $product->load(['brand', 'categories', 'media', 'productImages.media', 'variants.attributeValues']);
+        return $product->load(['brand', 'categories', 'media', 'productImages.media', 'variants.attributeValues', 'relatedProducts']);
     }
 
     /**
@@ -207,7 +217,12 @@ class ProductService
     public function getPublicBySlug(string $slug): array
     {
         $product = Product::active()
-            ->where('slug', $slug)
+            ->where(function ($q) use ($slug) {
+                $q->where('slug', $slug);
+                if (is_numeric($slug)) {
+                    $q->orWhere('id', (int)$slug);
+                }
+            })
             ->with(['brand', 'categories', 'variants' => fn($q) => $q->active()->with('attributeValues')])
             ->first();
 
@@ -220,20 +235,34 @@ class ProductService
         $primaryCategory = $product->categories->first(fn($c) => $c->pivot->is_primary) ?? $product->categories->first();
         $breadcrumbs = $primaryCategory ? $this->getCategoryBreadcrumbs($primaryCategory) : [];
 
-        // Related products in same category or brand
-        $relatedProducts = Product::active()
-            ->where('id', '!=', $product->id)
-            ->where(function ($q) use ($product, $primaryCategory) {
-                if ($primaryCategory) {
-                    $q->whereHas('categories', fn($cQ) => $cQ->where('categories.id', $primaryCategory->id));
-                }
-                if ($product->brand_id) {
-                    $q->orWhere('brand_id', $product->brand_id);
-                }
-            })
-            ->with('brand')
-            ->take(6)
+        // Related products: Prioritize explicit admin-selected related products, fallback to same category/brand
+        $explicitRelated = $product->relatedProducts()
+            ->where('products.status', 'active')
+            ->with(['brand', 'categories'])
+            ->take(4)
             ->get();
+
+        if ($explicitRelated->count() >= 4) {
+            $relatedProducts = $explicitRelated;
+        } else {
+            $needed = 4 - $explicitRelated->count();
+            $excludeIds = array_merge([$product->id], $explicitRelated->pluck('id')->all());
+
+            $fallbackQuery = Product::where('status', 'active')
+                ->whereNotIn('id', $excludeIds);
+
+            if ($primaryCategory) {
+                $fallbackQuery->whereHas('categories', fn($cQ) => $cQ->where('categories.id', $primaryCategory->id));
+            } elseif ($product->brand_id) {
+                $fallbackQuery->where('brand_id', $product->brand_id);
+            }
+
+            $fallback = $fallbackQuery->with(['brand', 'categories'])
+                ->take($needed)
+                ->get();
+
+            $relatedProducts = $explicitRelated->concat($fallback);
+        }
 
         return [
             'product' => $product,

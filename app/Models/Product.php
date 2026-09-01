@@ -181,6 +181,16 @@ class Product extends Model
     }
 
     /**
+     * Relationship to Related Products.
+     */
+    public function relatedProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'related_products', 'product_id', 'related_product_id')
+            ->withTimestamps();
+    }
+
+
+    /**
      * Get main image URL attribute.
      */
     public function getMainImageUrlAttribute(): ?string

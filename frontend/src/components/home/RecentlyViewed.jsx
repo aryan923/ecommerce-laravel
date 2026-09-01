@@ -21,7 +21,7 @@ export default function RecentlyViewed() {
 
   return (
     <section className="py-16 bg-[#FAF9F6] border-b border-stone-200/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
         <h2 className="font-serif text-2xl sm:text-3xl font-normal text-stone-900 tracking-tight mb-8">
           Recently Viewed
         </h2>

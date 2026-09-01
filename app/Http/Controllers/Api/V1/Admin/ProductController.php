@@ -97,7 +97,7 @@ class ProductController extends BaseController
      */
     public function show(Product $product): JsonResponse
     {
-        return $this->successResponse($product->load(['brand', 'categories', 'taxClass', 'shippingClass', 'media', 'variants.attributeValues']), 'Product details retrieved successfully.');
+        return $this->successResponse($product->load(['brand', 'categories', 'taxClass', 'shippingClass', 'media', 'variants.attributeValues', 'relatedProducts']), 'Product details retrieved successfully.');
     }
 
     /**

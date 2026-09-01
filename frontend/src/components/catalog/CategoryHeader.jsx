@@ -16,7 +16,7 @@ export default function CategoryHeader({ category = {} }) {
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-amber-200/20 blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-12">
         <div className="max-w-2xl space-y-3">
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-900/10 border border-amber-900/20 text-amber-950 text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase">

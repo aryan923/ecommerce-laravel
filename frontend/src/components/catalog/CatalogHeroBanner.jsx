@@ -19,7 +19,7 @@ export default function CatalogHeroBanner({
       </div>
 
       {/* Main Content Container Aligned with Layout Grid */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-16">
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-14 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           {/* Left Column: Typography & Luxury Badges */}

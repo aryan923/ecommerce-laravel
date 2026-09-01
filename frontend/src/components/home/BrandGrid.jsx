@@ -33,7 +33,7 @@ export default function BrandGrid() {
 
   return (
     <section className="py-12 bg-[#FAF9F6] border-b border-stone-200/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 text-center">
         <span className="text-[10px] font-bold tracking-widest text-stone-400 uppercase block mb-6">
           Featured Partner Brands
         </span>

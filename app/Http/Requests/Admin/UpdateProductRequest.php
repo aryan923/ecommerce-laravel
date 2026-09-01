@@ -57,6 +57,8 @@ class UpdateProductRequest extends FormRequest
             'variants.*.download_expiry_days' => ['nullable', 'integer'],
             'variants.*.attribute_value_ids' => ['nullable', 'array'],
             'variants.*.attribute_value_ids.*' => ['exists:attribute_values,id'],
+            'related_product_ids' => ['nullable', 'array'],
+            'related_product_ids.*' => ['exists:products,id'],
         ];
     }
 }

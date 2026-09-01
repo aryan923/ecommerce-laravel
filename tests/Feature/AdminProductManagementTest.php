@@ -198,4 +198,72 @@ class AdminProductManagementTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    /**
+     * Test admin can create and update related products for a product.
+     */
+    public function test_admin_can_manage_related_products(): void
+    {
+        $relProduct1 = Product::create([
+            'name' => 'Related Product 1',
+            'slug' => 'related-product-1',
+            'sku' => 'REL-01',
+            'type' => 'simple',
+            'status' => 'active',
+            'price' => 500.00,
+        ]);
+        $relProduct1->categories()->attach($this->category->id);
+
+        $relProduct2 = Product::create([
+            'name' => 'Related Product 2',
+            'slug' => 'related-product-2',
+            'sku' => 'REL-02',
+            'type' => 'simple',
+            'status' => 'active',
+            'price' => 600.00,
+        ]);
+        $relProduct2->categories()->attach($this->category->id);
+
+        // 1. Update product to set related_product_ids
+        $updateResponse = $this->withHeader('Authorization', 'Bearer ' . $this->adminToken)
+            ->putJson('/api/v1/admin/products/' . $this->product->id, [
+                'name' => 'Updated Product with Related',
+                'related_product_ids' => [$relProduct1->id, $relProduct2->id],
+            ]);
+
+        $updateResponse->assertStatus(200);
+        $this->assertDatabaseHas('related_products', [
+            'product_id' => $this->product->id,
+            'related_product_id' => $relProduct1->id,
+        ]);
+        $this->assertDatabaseHas('related_products', [
+            'product_id' => $this->product->id,
+            'related_product_id' => $relProduct2->id,
+        ]);
+
+        // 2. Fetch product details and check related_products relation
+        $showResponse = $this->withHeader('Authorization', 'Bearer ' . $this->adminToken)
+            ->getJson('/api/v1/admin/products/' . $this->product->id);
+
+        $showResponse->assertStatus(200)
+            ->assertJsonCount(2, 'data.related_products');
+
+        // 3. Create new product with related_product_ids directly
+        $createResponse = $this->withHeader('Authorization', 'Bearer ' . $this->adminToken)
+            ->postJson('/api/v1/admin/products', [
+                'name' => 'New Product with Related',
+                'type' => 'simple',
+                'price' => 999.00,
+                'category_ids' => [$this->category->id],
+                'related_product_ids' => [$relProduct1->id],
+            ]);
+
+        $createResponse->assertStatus(201);
+        $newProductId = $createResponse->json('data.id');
+        $this->assertDatabaseHas('related_products', [
+            'product_id' => $newProductId,
+            'related_product_id' => $relProduct1->id,
+        ]);
+    }
 }
+

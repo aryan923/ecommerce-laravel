@@ -25,7 +25,8 @@ import {
     ChevronLeft,
     UploadCloud,
     Maximize2,
-    Eye
+    Eye,
+    Link2
 } from 'lucide-react';
 import axios from 'axios';
 import MediaLibraryModal from './MediaLibraryModal';
@@ -45,9 +46,16 @@ export default function ProductFormModal({
     const [taxClasses, setTaxClasses] = useState([]);
     const [attributes, setAttributes] = useState([]);
     const [shippingMethods, setShippingMethods] = useState([]);
+    const [availableProducts, setAvailableProducts] = useState([]);
 
     // Category search filter
     const [categoryFilter, setCategoryFilter] = useState('');
+
+    // Related products search & filters state
+    const [relSearch, setRelSearch] = useState('');
+    const [relCategory, setRelCategory] = useState('');
+    const [relBrand, setRelBrand] = useState('');
+    const [relStatus, setRelStatus] = useState('');
 
     // Media Modal State
     const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
@@ -100,6 +108,10 @@ export default function ProductFormModal({
 
         // Variants State
         variants: [],
+
+        // Related Products State
+        related_products: [],
+        related_product_ids: [],
     });
 
     const [submitting, setSubmitting] = useState(false);
@@ -109,6 +121,10 @@ export default function ProductFormModal({
         if (isOpen) {
             setError('');
             setCategoryFilter('');
+            setRelSearch('');
+            setRelCategory('');
+            setRelBrand('');
+            setRelStatus('');
             fetchDropdownData();
 
             if (mode === 'edit' && initialData) {
@@ -123,6 +139,8 @@ export default function ProductFormModal({
                 const galleryMedia = initialData.product_images
                     ? initialData.product_images.filter((pi) => pi.type === 'gallery').map((pi) => pi.media).filter(Boolean)
                     : (initialData.media?.filter((m) => (m.pivot ? m.pivot.type === 'gallery' : m.type === 'gallery')) || []);
+
+                const initialRelated = initialData.related_products || initialData.relatedProducts || [];
 
                 setFormData({
                     name: initialData.name || '',
@@ -172,6 +190,8 @@ export default function ProductFormModal({
                         download_expiry_days: v.download_expiry_days || '',
                         attribute_value_ids: v.attribute_values ? v.attribute_values.map((av) => av.id) : (v.attribute_value_ids || []),
                     })) : [],
+                    related_products: initialRelated,
+                    related_product_ids: initialRelated.map((p) => p.id),
                 });
             } else {
                 setFormData({
@@ -212,6 +232,8 @@ export default function ProductFormModal({
                     variants: [
                         { sku: 'VAR-01', price: '', sale_price: '', stock_qty: 10, image: '', attribute_value_ids: [] }
                     ],
+                    related_products: [],
+                    related_product_ids: [],
                 });
             }
         }
@@ -219,12 +241,13 @@ export default function ProductFormModal({
 
     const fetchDropdownData = async () => {
         try {
-            const [bRes, cRes, tRes, aRes, sRes] = await Promise.all([
+            const [bRes, cRes, tRes, aRes, sRes, pRes] = await Promise.all([
                 axios.get('/api/v1/admin/brands?per_page=100').catch(() => ({ data: { data: [] } })),
                 axios.get('/api/v1/admin/categories?per_page=100').catch(() => ({ data: { data: [] } })),
                 axios.get('/api/v1/admin/tax-classes').catch(() => ({ data: { data: [] } })),
                 axios.get('/api/v1/admin/attributes?per_page=100').catch(() => ({ data: { data: [] } })),
                 axios.get('/api/v1/admin/shipping-methods').catch(() => ({ data: { data: [] } })),
+                axios.get('/api/v1/admin/products?per_page=100').catch(() => ({ data: { data: [] } })),
             ]);
 
             setBrands(bRes.data?.data?.data || bRes.data?.data || []);
@@ -232,6 +255,7 @@ export default function ProductFormModal({
             setTaxClasses(tRes.data?.data?.data || tRes.data?.data || []);
             setAttributes(aRes.data?.data?.data || aRes.data?.data || []);
             setShippingMethods(sRes.data?.data?.data || sRes.data?.data || []);
+            setAvailableProducts(pRes.data?.data?.data || pRes.data?.data || []);
         } catch (e) {
             console.error('Error fetching dropdowns:', e);
         }
@@ -479,6 +503,51 @@ export default function ProductFormModal({
         });
     };
 
+    const handleAddRelatedProduct = (productToAdd) => {
+        if (!formData.related_products.some((p) => p.id === productToAdd.id)) {
+            setFormData((prev) => ({
+                ...prev,
+                related_products: [...prev.related_products, productToAdd],
+                related_product_ids: [...prev.related_product_ids, productToAdd.id],
+            }));
+        }
+    };
+
+    const handleRemoveRelatedProduct = (productId) => {
+        setFormData((prev) => ({
+            ...prev,
+            related_products: prev.related_products.filter((p) => p.id !== productId),
+            related_product_ids: prev.related_product_ids.filter((id) => id !== productId),
+        }));
+    };
+
+    const filteredAvailableProducts = availableProducts.filter((p) => {
+        if (initialData?.id && String(p.id) === String(initialData.id)) return false;
+        if (formData.related_product_ids.includes(p.id)) return false;
+
+        if (relSearch) {
+            const q = relSearch.toLowerCase();
+            const matchesName = p.name?.toLowerCase().includes(q);
+            const matchesSku = p.sku?.toLowerCase().includes(q);
+            if (!matchesName && !matchesSku) return false;
+        }
+
+        if (relCategory) {
+            const hasCat = p.categories?.some((c) => String(c.id) === String(relCategory));
+            if (!hasCat) return false;
+        }
+
+        if (relBrand) {
+            if (String(p.brand_id) !== String(relBrand)) return false;
+        }
+
+        if (relStatus) {
+            if (p.status !== relStatus) return false;
+        }
+
+        return true;
+    });
+
     const selectedShippingMethod = shippingMethods.find(
         (s) => String(s.id) === String(formData.shipping_class_id)
     );
@@ -493,6 +562,7 @@ export default function ProductFormModal({
         { id: 'media', label: 'Media & Gallery', icon: ImageIcon, count: (formData.main_image ? 1 : 0) + formData.gallery.length },
         ...(formData.type === 'variable' || formData.type === 'digital' ? [{ id: 'variants', label: 'Variants & Matrix', icon: Layers, count: formData.variants.length }] : []),
         { id: 'shipping', label: 'Shipping & Specs', icon: Truck },
+        { id: 'related', label: 'Related Products', icon: Link2, count: formData.related_products?.length || 0 },
         { id: 'seo', label: 'SEO & SERP', icon: Search },
         ...(formData.type === 'digital' ? [{ id: 'digital', label: 'Digital Download', icon: Download }] : []),
     ];
@@ -538,6 +608,7 @@ export default function ProductFormModal({
             seo_title: formData.seo_title || null,
             seo_description: formData.seo_description || null,
             meta_keywords: formData.meta_keywords || null,
+            related_product_ids: (formData.related_products || []).map((p) => p.id),
         };
 
         if (formData.sku) payload.sku = formData.sku;
@@ -1738,6 +1809,227 @@ export default function ProductFormModal({
                                                 />
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tab: Related Products */}
+                        {activeTab === 'related' && (
+                            <div>
+                                {/* Selected Related Products Section */}
+                                <div className="form-section-box" style={{ marginBottom: '16px' }}>
+                                    <div className="form-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Link2 size={15} style={{ color: 'var(--admin-primary)' }} />
+                                            <h4 className="form-section-title">
+                                                Selected Related Products ({formData.related_products.length})
+                                            </h4>
+                                        </div>
+                                        {formData.related_products.length > 0 && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => setFormData((prev) => ({ ...prev, related_products: [], related_product_ids: [] }))}
+                                                style={{ fontSize: '0.72rem', padding: '2px 8px' }}
+                                            >
+                                                Clear All
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div className="form-section-body">
+                                        {formData.related_products.length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '24px 16px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+                                                <Link2 size={24} style={{ color: '#94a3b8', marginBottom: '8px' }} />
+                                                <p style={{ fontSize: '0.84rem', color: '#64748b', margin: 0, fontWeight: 500 }}>
+                                                    No related products linked yet.
+                                                </p>
+                                                <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
+                                                    Use the filter controls below to search and link related cross-sell items.
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+                                                {formData.related_products.map((relProd) => {
+                                                    const img = relProd.main_image_url || relProd.image_url || '/placeholder.png';
+                                                    return (
+                                                        <div
+                                                            key={relProd.id}
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '12px',
+                                                                padding: '10px',
+                                                                border: '1px solid #e2e8f0',
+                                                                borderRadius: '8px',
+                                                                background: '#ffffff',
+                                                            }}
+                                                        >
+                                                            <img
+                                                                src={img}
+                                                                alt={relProd.name}
+                                                                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #f1f5f9' }}
+                                                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/40?text=PRD'; }}
+                                                            />
+                                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                                <div style={{ fontSize: '0.82rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                    {relProd.name}
+                                                                </div>
+                                                                <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                                    <span>SKU: {relProd.sku || 'N/A'}</span>
+                                                                    <span>•</span>
+                                                                    <span style={{ fontWeight: 600, color: 'var(--admin-primary)' }}>{formatCurrency(relProd.price || 0, displayCurrency)}</span>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-icon text-danger"
+                                                                onClick={() => handleRemoveRelatedProduct(relProd.id)}
+                                                                title="Remove Related Product"
+                                                                style={{ padding: '4px' }}
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Catalog Product Selection with Filters */}
+                                <div className="form-section-box">
+                                    <div className="form-section-header">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Search size={15} style={{ color: 'var(--admin-primary)' }} />
+                                            <h4 className="form-section-title">Catalog Product Picker & Filters</h4>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-section-body">
+                                        {/* Multi-Filter Controls Bar */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                                            {/* Search Filter */}
+                                            <div style={{ position: 'relative' }}>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Search product name or SKU..."
+                                                    value={relSearch}
+                                                    onChange={(e) => setRelSearch(e.target.value)}
+                                                    style={{ paddingLeft: '32px', fontSize: '0.8rem' }}
+                                                />
+                                                <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                            </div>
+
+                                            {/* Category Filter */}
+                                            <select
+                                                className="form-select"
+                                                value={relCategory}
+                                                onChange={(e) => setRelCategory(e.target.value)}
+                                                style={{ fontSize: '0.8rem' }}
+                                            >
+                                                <option value="">All Categories</option>
+                                                {categories.map((cat) => (
+                                                    <option key={cat.id} value={cat.id}>
+                                                        {cat.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            {/* Brand Filter */}
+                                            <select
+                                                className="form-select"
+                                                value={relBrand}
+                                                onChange={(e) => setRelBrand(e.target.value)}
+                                                style={{ fontSize: '0.8rem' }}
+                                            >
+                                                <option value="">All Brands</option>
+                                                {brands.map((b) => (
+                                                    <option key={b.id} value={b.id}>
+                                                        {b.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            {/* Status Filter */}
+                                            <select
+                                                className="form-select"
+                                                value={relStatus}
+                                                onChange={(e) => setRelStatus(e.target.value)}
+                                                style={{ fontSize: '0.8rem' }}
+                                            >
+                                                <option value="">All Statuses</option>
+                                                <option value="active">Active</option>
+                                                <option value="draft">Draft</option>
+                                                <option value="inactive">Inactive</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Filtered Products Table / List */}
+                                        {filteredAvailableProducts.length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8', fontSize: '0.8rem' }}>
+                                                No matching products found. Try adjusting your search query or filters.
+                                            </div>
+                                        ) : (
+                                            <div className="table-responsive" style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                                                <table className="admin-table" style={{ fontSize: '0.78rem' }}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style={{ width: '48px' }}>Image</th>
+                                                            <th>Product Name</th>
+                                                            <th>SKU</th>
+                                                            <th>Price</th>
+                                                            <th>Status</th>
+                                                            <th style={{ textAlign: 'right' }}>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {filteredAvailableProducts.map((p) => {
+                                                            const img = p.main_image_url || p.image_url || '/placeholder.png';
+                                                            return (
+                                                                <tr key={p.id}>
+                                                                    <td>
+                                                                        <img
+                                                                            src={img}
+                                                                            alt={p.name}
+                                                                            style={{ width: '32px', height: '32px', objectFit: 'cover', borderRadius: '4px' }}
+                                                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/32?text=PRD'; }}
+                                                                        />
+                                                                    </td>
+                                                                    <td>
+                                                                        <div style={{ fontWeight: 600 }}>{p.name}</div>
+                                                                    </td>
+                                                                    <td>{p.sku || 'N/A'}</td>
+                                                                    <td>
+                                                                        <span style={{ fontWeight: 600, color: 'var(--admin-primary)' }}>
+                                                                            {formatCurrency(p.price || 0, displayCurrency)}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span className={`status-badge status-${p.status || 'draft'}`}>
+                                                                            {p.status || 'draft'}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td style={{ textAlign: 'right' }}>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-sm btn-primary"
+                                                                            onClick={() => handleAddRelatedProduct(p)}
+                                                                            style={{ fontSize: '0.72rem', padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                                                        >
+                                                                            <Plus size={12} /> Add Related
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

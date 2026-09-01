@@ -5,7 +5,9 @@ import apiClient from '../../../lib/api-client';
 import CatalogLayout from '../../../components/catalog/CatalogLayout';
 import CategoryHeader from '../../../components/catalog/CategoryHeader';
 
-function CategoryContent({ slug }) {
+function CategoryContent({ params }) {
+  const resolvedParams = params && typeof params.then === 'function' ? use(params) : params;
+  const slug = resolvedParams?.slug || '';
   const [category, setCategory] = useState(null);
 
   useEffect(() => {
@@ -43,16 +45,13 @@ function CategoryContent({ slug }) {
 }
 
 export default function CategoryPage({ params }) {
-  const resolvedParams = params && typeof params.then === 'function' ? use(params) : params;
-  const slug = resolvedParams?.slug || '';
-
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#F5F2EC] flex items-center justify-center p-8">
         <div className="text-stone-500 text-xs font-semibold animate-pulse">Loading category...</div>
       </div>
     }>
-      <CategoryContent slug={slug} />
+      <CategoryContent params={params} />
     </Suspense>
   );
 }
