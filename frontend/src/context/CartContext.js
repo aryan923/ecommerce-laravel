@@ -67,7 +67,7 @@ export function CartProvider({ children }) {
       await fetchCart();
       return res.data;
     } catch (err) {
-      console.warn('Cart addItem notice:', err);
+      console.warn('Cart addItem notice:', err?.response?.data?.message || err.message || 'Cart operation notice');
       // Fallback local addition with real product details
       const fallbackName = productObj?.name || 'Product';
       const fallbackPrice = Number(productObj?.price || productObj?.sale_price || 0);

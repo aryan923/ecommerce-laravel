@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import apiClient from '../lib/api-client';
+import { getAuthToken } from '../lib/session';
 import { useToast } from './ToastContext';
 
 const WishlistContext = createContext(null);
@@ -12,6 +13,19 @@ export function WishlistProvider({ children }) {
   const toast = useToast();
 
   const fetchWishlist = useCallback(async () => {
+    // Only fetch from protected server endpoint if user is authenticated
+    const token = getAuthToken();
+    if (!token) {
+      if (typeof window !== 'undefined') {
+        try {
+          const local = localStorage.getItem('guest_wishlist');
+          if (local) setWishlistItems(JSON.parse(local));
+        } catch (e) {}
+      }
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await apiClient.get('/wishlist');
@@ -19,7 +33,10 @@ export function WishlistProvider({ children }) {
       const items = Array.isArray(data) ? data : (data?.items || []);
       setWishlistItems(items);
     } catch (err) {
-      console.warn('Wishlist fetch notice:', err);
+      // 401 is expected if token expired or invalid; silently handle without console errors
+      if (err?.response?.status !== 401) {
+        console.warn('Wishlist fetch notice:', err);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -47,17 +64,9 @@ export function WishlistProvider({ children }) {
     const prodId = product.id || product.product_id;
     const variantId = product.variant_id || product.product_variant_id || null;
 
-    try {
-      const res = await apiClient.post('/wishlist', {
-        product_id: Number(prodId),
-        variant_id: variantId ? Number(variantId) : null,
-      });
-      await fetchWishlist();
-      toast?.showToast?.(`'${product.name || product.title || 'Product'}' added to your wishlist!`, 'success');
-      return res.data;
-    } catch (err) {
-      console.warn('Wishlist addToWishlist notice:', err);
-      // Local fallback
+    const token = getAuthToken();
+    if (!token) {
+      // Guest local wishlist storage
       const newItem = {
         id: Date.now(),
         product_id: Number(prodId),
@@ -75,12 +84,33 @@ export function WishlistProvider({ children }) {
       };
 
       setWishlistItems((prev) => {
-        if (prev.some((i) => Number(i.product_id || i.id) === Number(prodId))) {
-          return prev;
+        const next = prev.some((i) => Number(i.product_id || i.id) === Number(prodId))
+          ? prev
+          : [...prev, newItem];
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('guest_wishlist', JSON.stringify(next));
+          } catch (e) {}
         }
-        return [...prev, newItem];
+        return next;
       });
       toast?.showToast?.(`'${product.name || product.title || 'Product'}' saved to wishlist!`, 'success');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await apiClient.post('/wishlist', {
+        product_id: Number(prodId),
+        variant_id: variantId ? Number(variantId) : null,
+      });
+      await fetchWishlist();
+      toast?.showToast?.(`'${product.name || product.title || 'Product'}' added to your wishlist!`, 'success');
+      return res.data;
+    } catch (err) {
+      if (err?.response?.status !== 401) {
+        console.warn('Wishlist addToWishlist notice:', err);
+      }
     } finally {
       setIsLoading(false);
     }

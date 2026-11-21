@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Sparkles, ShoppingBag, ArrowRight, Check, Eye, Layers } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useCurrency } from '@/context/CurrencyContext';
+import apiClient from '@/lib/api-client';
 
-const lookItems = [
+const initialLookItems = [
   {
-    id: 11,
     pinNumber: 1,
     name: 'Retro Tinted Aviator Sunglasses',
     category: 'Accessories',
@@ -18,12 +18,13 @@ const lookItems = [
     price: 185,
     originalPrice: 220,
     slug: 'retro-tinted-aviator-sunglasses',
+    fallbackSlug: 'designer-sunglasses-gold',
+    fallbackId: 4,
     image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
     pinPosition: { top: '28%', left: '55%' },
     description: 'Vintage Japanese titanium frames with gradient tinted UV400 lenses.',
   },
   {
-    id: 12,
     pinNumber: 2,
     name: 'Satin-Lapel Tailored Dinner Jacket',
     category: 'Men\'s Collection',
@@ -32,12 +33,13 @@ const lookItems = [
     price: 640,
     originalPrice: 750,
     slug: 'satin-lapel-tailored-dinner-jacket',
+    fallbackSlug: 'cashmere-knit-sweater',
+    fallbackId: 6,
     image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
     pinPosition: { top: '48%', left: '38%' },
     description: 'Super 130s Italian virgin wool blazer with silk-satin peak lapels.',
   },
   {
-    id: 13,
     pinNumber: 3,
     name: 'Monogram Silk-Cotton Fitted Shirt',
     category: 'Men\'s Collection',
@@ -46,12 +48,13 @@ const lookItems = [
     price: 160,
     originalPrice: 195,
     slug: 'monogram-silk-cotton-fitted-shirt',
+    fallbackSlug: 'minimalist-leather-cardholder',
+    fallbackId: 8,
     image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80',
     pinPosition: { top: '56%', left: '53%' },
     description: 'Breathable Egyptian cotton and Mulberry silk weave with hidden placket.',
   },
   {
-    id: 2,
     pinNumber: 4,
     name: 'Classic Chronometer Watch',
     category: 'Watches & Timepieces',
@@ -60,12 +63,13 @@ const lookItems = [
     price: 799,
     originalPrice: 890,
     slug: 'classic-chronometer-watch',
+    fallbackSlug: 'classic-chronometer-watch',
+    fallbackId: 2,
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
     pinPosition: { top: '70%', left: '72%' },
     description: 'Swiss-made automatic chronometer with sapphire crystal glass.',
   },
   {
-    id: 14,
     pinNumber: 5,
     name: 'High-Rise Pleated Tuxedo Trousers',
     category: 'Men\'s Collection',
@@ -74,6 +78,8 @@ const lookItems = [
     price: 240,
     originalPrice: 280,
     slug: 'high-rise-pleated-tuxedo-trousers',
+    fallbackSlug: 'italian-leather-loafers',
+    fallbackId: 5,
     image: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80',
     pinPosition: { top: '88%', left: '52%' },
     description: 'Italian fluid wool double-pleated trousers with side tab adjusters.',
@@ -87,6 +93,62 @@ export default function ShopTheLook() {
   const [addedItemIds, setAddedItemIds] = useState({});
   const [isAddingAll, setIsAddingAll] = useState(false);
   const [addAllSuccess, setAddAllSuccess] = useState(false);
+
+  // Initialize with real, verified database product IDs
+  const [lookItems, setLookItems] = useState(() =>
+    initialLookItems.map(item => ({
+      ...item,
+      id: item.fallbackId,
+      product_id: item.fallbackId,
+    }))
+  );
+
+  // Dynamically synchronize with live backend catalog to resolve live database IDs
+  useEffect(() => {
+    let isMounted = true;
+    async function syncCatalog() {
+      try {
+        const res = await apiClient.get('/products?per_page=50');
+        const catalog = res.data?.data || [];
+        if (!Array.isArray(catalog) || catalog.length === 0 || !isMounted) return;
+
+        setLookItems(prev =>
+          prev.map(item => {
+            // 1. Exact slug match
+            let matched = catalog.find(p => p.slug === item.slug);
+            // 2. Fallback slug match (for already seeded products)
+            if (!matched && item.fallbackSlug) {
+              matched = catalog.find(p => p.slug === item.fallbackSlug);
+            }
+            // 3. Fallback ID match
+            if (!matched && item.fallbackId) {
+              matched = catalog.find(p => p.id === item.fallbackId);
+            }
+
+            if (matched) {
+              return {
+                ...item,
+                id: matched.id,
+                product_id: matched.id,
+                name: item.name || matched.name,
+                price: Number(matched.sale_price || matched.price || item.price),
+                originalPrice: Number(matched.price || item.originalPrice),
+                slug: matched.slug,
+                image: matched.main_image_url || matched.primary_image_url || matched.image_url || item.image,
+              };
+            }
+            return item;
+          })
+        );
+      } catch (e) {
+        // Keep verified initial state
+      }
+    }
+    syncCatalog();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const displayPrice = (val) => {
     if (formatPrice) {
@@ -207,7 +269,7 @@ export default function ShopTheLook() {
                 const isActive = activePin === item.pinNumber;
                 return (
                   <button
-                    key={item.id}
+                    key={item.pinNumber}
                     onClick={() => setActivePin(item.pinNumber)}
                     style={{ top: item.pinPosition.top, left: item.pinPosition.left }}
                     className={`absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 shadow-2xl z-20 ${
@@ -264,7 +326,7 @@ export default function ShopTheLook() {
 
                 return (
                   <div
-                    key={item.id}
+                    key={item.pinNumber}
                     onClick={() => setActivePin(item.pinNumber)}
                     className={`flex items-center gap-3.5 p-3.5 rounded-2xl border transition-all duration-300 cursor-pointer ${
                       isActive
