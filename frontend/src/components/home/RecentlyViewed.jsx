@@ -20,7 +20,7 @@ export default function RecentlyViewed() {
   if (!recentProducts || recentProducts.length === 0) return null;
 
   return (
-    <section className="py-12 my-14 sm:my-20 lg:my-24 bg-[#FAF9F6] border-b border-stone-200/60">
+    <section className="py-12 sm:py-16 lg:py-20 bg-[#FAF9F6] border-b border-stone-200/60">
       <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-1.5 h-6 rounded-full bg-amber-700" />

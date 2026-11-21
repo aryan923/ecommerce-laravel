@@ -90,7 +90,7 @@ export default function ProductSection({ title = "Curated For You", subtitle = "
   }, [activeTab]);
 
   return (
-    <section className="py-14 my-14 sm:my-20 lg:my-24 bg-[#FAF9F6] border-b border-stone-200/60">
+    <section className="py-12 sm:py-16 lg:py-20 bg-[#FAF9F6] border-b border-stone-200/60">
       <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header & Filter Tabs */}

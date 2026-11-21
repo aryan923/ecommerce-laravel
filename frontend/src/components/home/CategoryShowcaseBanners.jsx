@@ -28,7 +28,7 @@ const categoryShowcases = [
 
 export default function CategoryShowcaseBanners() {
   return (
-    <section className="my-14 sm:my-20 lg:my-24">
+    <section className="py-12 sm:py-16 lg:py-20">
       <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
         {/* Section Header */}

@@ -7,7 +7,7 @@ import { ArrowRight, Tag } from 'lucide-react';
 
 export default function PromoBanner() {
   return (
-    <section className="my-14 sm:my-20 lg:my-24">
+    <section className="py-12 sm:py-16 lg:py-20">
       <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative bg-gradient-to-br from-[#F5F1E8] via-[#EFEAE0] to-[#E9E3D6] text-stone-950 border border-stone-300/80 rounded-3xl overflow-hidden p-10 sm:p-14 lg:p-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-lg shadow-stone-900/5">
           

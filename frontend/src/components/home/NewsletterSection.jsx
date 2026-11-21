@@ -21,7 +21,7 @@ export default function NewsletterSection() {
   };
 
   return (
-    <section className="my-14 sm:my-20 lg:my-24">
+    <section className="py-12 sm:py-16 lg:py-20">
       <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative bg-gradient-to-br from-[#F5F0E6] via-[#EBE4D6] to-[#E2D8C6] text-stone-950 border border-stone-300/80 rounded-3xl overflow-hidden p-10 sm:p-14 lg:p-18 shadow-xl shadow-stone-900/5">
           

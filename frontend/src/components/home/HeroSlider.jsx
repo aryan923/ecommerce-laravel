@@ -71,7 +71,7 @@ export default function HeroSlider() {
   const slide = slides[currentSlide] || defaultSlides[0];
 
   return (
-    <section className="relative w-full bg-[#F5F2EC] text-stone-900 overflow-hidden border-b border-stone-200/80 pt-6 pb-12 lg:pt-10 lg:pb-16 mb-8 sm:mb-12">
+    <section className="relative w-full bg-[#F5F2EC] text-stone-900 overflow-hidden border-b border-stone-200/80 py-10 sm:py-14 lg:py-16">
       
       {/* Full-width Edge-to-Edge Image on Right with Seamless Fade */}
       <div className="absolute inset-y-0 right-0 w-full lg:w-2/3 z-0 pointer-events-none overflow-hidden">

@@ -39,7 +39,7 @@ export default function CategoryBanners() {
   const displayList = categories.slice(0, 6);
 
   return (
-    <section className="py-12 my-14 sm:my-20 lg:my-24 bg-[#FAF9F6] border-b border-stone-200/60">
+    <section className="py-12 sm:py-16 lg:py-20 bg-[#FAF9F6] border-b border-stone-200/60">
       <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Section Header */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-900/5 border border-amber-900/10 mb-2">

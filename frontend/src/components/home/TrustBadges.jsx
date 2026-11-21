@@ -28,7 +28,7 @@ export default function TrustBadges() {
   ];
 
   return (
-    <section className="my-14 sm:my-20 lg:my-24">
+    <section className="py-10 sm:py-14 bg-white/70 border-b border-stone-200/60">
       <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {badges.map((badge, idx) => {

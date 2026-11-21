@@ -9,6 +9,7 @@ import CurrencySwitcher from './CurrencySwitcher';
 import AccountDropdown from './AccountDropdown';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import AnnouncementBar from './AnnouncementBar';
 
 export default function Header() {
   const { cartCount, openCart } = useCart();
@@ -17,6 +18,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 bg-[#F5F2EC] border-b border-stone-200/70 backdrop-blur-md text-stone-900 transition-colors">
+      {/* Top Announcement Bar */}
+      <AnnouncementBar />
       
       {/* Main Header Row */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 h-20 flex items-center justify-between gap-6">
