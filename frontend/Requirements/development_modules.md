@@ -39,6 +39,7 @@
 | **11** | **Order Tracking & Info Pages** | Public Shipment Tracker, About Us, Contact Us, Shipping & Return Policy, Terms, Privacy | Medium | 01 | `GET /api/v1/shipments/track/{tracking_number}` |
 | **12** | **Product Comparison Engine** | Side-by-side spec & price comparison (`/compare`), floating comparison bar | Low | 04, 05 | `GET /api/v1/products` |
 | **13** | **OTP & Security Verification** | Email/Phone OTP verification modal & page (`/auth/verify-otp`) | High | 07 | `POST /api/v1/auth/register`, `Model: Otp` |
+| **14** | **Frontend CMS & Dynamic Content** | Dynamic Hero Slider, Promo Banners, Dynamic Page Renderer (`/pages/[slug]`), Policy Routes, Footer Links | High | 01, 02 | `GET /api/v1/banners`, `GET /api/v1/pages/{slug}` |
 
 ---
 
@@ -248,6 +249,19 @@
 - **Components**:
   - `OtpInputModal.jsx`: 6-digit PIN input with resend timer.
 
+### Module 14: Frontend CMS & Dynamic Content
+- **Purpose**: Connect storefront hero slider, promo banners, and dynamic policy pages to backend CMS API endpoints (`GET /api/v1/banners` & `GET /api/v1/pages/{slug}`), controlled 100% from React Admin Panel.
+- **Route Files**:
+  - `frontend/src/app/pages/[slug]/page.js` (Dynamic Page Renderer with `generateMetadata`)
+  - `frontend/src/app/about/page.js`, `/privacy/page.js`, `/terms/page.js`, `/shipping-policy/page.js` (Dynamic policy shortcuts)
+- **Attached Endpoints**:
+  - `GET /api/v1/banners` (Query: `placement`)
+  - `GET /api/v1/pages/{slug}`
+- **Components**:
+  - `HeroSlider.jsx`: Dynamic homepage banner slider pulling placement `home_hero`.
+  - `PromoBanner.jsx`: Placement `category_banner` / `sidebar` / `footer` / `popup` promo banners.
+  - `DynamicPageClient.jsx`: Renders sanitized HTML content, SEO metadata, breadcrumbs, and 404 handler.
+
 ---
 
 ---
@@ -271,6 +285,7 @@ Every module implementation MUST be backed by Playwright End-to-End (E2E) automa
 | **09** | Customer Account | `frontend/tests/e2e/account.spec.js` | Profile edit, Saved address add/edit/delete, Order history list, Order cancellation request |
 | **10** | Wishlist | `frontend/tests/e2e/wishlist.spec.js` | Toggle wishlist heart icon, View wishlist page, Move item from wishlist to cart |
 | **11** | Order Tracking | `frontend/tests/e2e/tracking.spec.js` | Submit tracking number, Verify shipment status timeline step rendering |
+| **14** | Frontend CMS | `frontend/tests/e2e/cms.spec.js` | Dynamic storefront hero banner rendering, `/pages/[slug]` HTML fetch, SEO metadata generation, 404 fallback |
 
 ---
 

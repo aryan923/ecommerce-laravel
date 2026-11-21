@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { User, LogOut, ShoppingBag, Settings, UserCheck } from 'lucide-react';
+import { User, LogOut, ShoppingBag, Settings, UserCheck, Heart } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function AccountDropdown() {
@@ -88,6 +88,14 @@ export default function AccountDropdown() {
             >
               <UserCheck className="w-4 h-4 text-stone-500" />
               <span>Dashboard</span>
+            </Link>
+            <Link
+              href="/wishlist"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-100 transition-colors"
+            >
+              <Heart className="w-4 h-4 text-rose-500" />
+              <span>My Wishlist</span>
             </Link>
             <Link
               href="/account/orders"

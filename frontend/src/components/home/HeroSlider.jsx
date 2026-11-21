@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Truck, RotateCcw, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Truck, RotateCcw, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { fetchBanners } from '@/lib/cms-api';
 
-const slides = [
+const defaultSlides = [
   {
     id: 1,
     tag: 'NEW COLLECTION 2024',
@@ -33,26 +34,51 @@ const slides = [
 ];
 
 export default function HeroSlider() {
+  const [slides, setSlides] = useState(defaultSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
+    async function loadBanners() {
+      const activeBanners = await fetchBanners('home_hero');
+      if (activeBanners && activeBanners.length > 0) {
+        const mapped = activeBanners.map((b, index) => ({
+          id: b.id || index + 1,
+          tag: b.placement ? b.placement.replace('_', ' ').toUpperCase() : 'PROMOTIONAL BANNER',
+          title: b.title || 'Special Promotion',
+          titleHighlight: '',
+          subtitle: 'Discover exclusive deals, curated collections, and top quality items.',
+          primaryCtaText: b.button_text || 'Shop Now',
+          primaryCtaLink: b.link_url || '/products',
+          secondaryCtaText: 'View Products',
+          secondaryCtaLink: '/products',
+          image: b.image_desktop || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1400&q=80',
+        }));
+        setSlides(mapped);
+      }
+    }
+
+    loadBanners();
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 8000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slides]);
 
-  const slide = slides[currentSlide];
+  const slide = slides[currentSlide] || defaultSlides[0];
 
   return (
-    <section className="relative w-full bg-[#F5F2EC] text-stone-900 overflow-hidden border-b border-stone-200/80 pt-6 pb-12 lg:pt-10 lg:pb-16">
+    <section className="relative w-full bg-[#F5F2EC] text-stone-900 overflow-hidden border-b border-stone-200/80 pt-6 pb-12 lg:pt-10 lg:pb-16 mb-8 sm:mb-12">
       
       {/* Full-width Edge-to-Edge Image on Right with Seamless Fade */}
       <div className="absolute inset-y-0 right-0 w-full lg:w-2/3 z-0 pointer-events-none overflow-hidden">
         <div className="relative w-full h-full">
           <Image
             src={slide.image}
-            alt="Luxury Lifestyle Hero"
+            alt={slide.title || "Luxury Lifestyle Hero"}
             fill
             priority
             className="object-cover object-center lg:object-right transition-opacity duration-1000"
@@ -65,7 +91,7 @@ export default function HeroSlider() {
         </div>
       </div>
 
-      {/* Main Content Container (Starts higher up to eliminate top empty space) */}
+      {/* Main Content Container */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
         <div className="w-full max-w-2xl lg:max-w-3xl space-y-6 lg:space-y-8">
           
@@ -74,12 +100,14 @@ export default function HeroSlider() {
             {slide.tag}
           </span>
 
-          {/* Larger Luxury Editorial Serif Title */}
+          {/* Title */}
           <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-normal text-stone-950 leading-[1.06] tracking-tight">
             {slide.title}{' '}
-            <span className="italic font-serif text-amber-800/85 font-normal block sm:inline">
-              {slide.titleHighlight}
-            </span>
+            {slide.titleHighlight && (
+              <span className="italic font-serif text-amber-800/85 font-normal block sm:inline">
+                {slide.titleHighlight}
+              </span>
+            )}
           </h1>
 
           {/* Subtitle */}
@@ -97,13 +125,45 @@ export default function HeroSlider() {
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
 
-            <Link
-              href={slide.secondaryCtaLink}
-              className="bg-white/80 backdrop-blur-sm border border-stone-300 hover:bg-white text-stone-900 font-semibold text-sm sm:text-base px-8 py-4 rounded-xl transition-all duration-200 shadow-sm"
-            >
-              {slide.secondaryCtaText}
-            </Link>
+            {slide.secondaryCtaLink && (
+              <Link
+                href={slide.secondaryCtaLink}
+                className="bg-white/80 backdrop-blur-sm border border-stone-300 hover:bg-white text-stone-900 font-semibold text-sm sm:text-base px-8 py-4 rounded-xl transition-all duration-200 shadow-sm"
+              >
+                {slide.secondaryCtaText}
+              </Link>
+            )}
           </div>
+
+          {/* Carousel Controls if multiple slides */}
+          {slides.length > 1 && (
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)}
+                className="p-2 rounded-full border border-stone-300 bg-white/70 hover:bg-white text-stone-800 transition-all"
+                aria-label="Previous Slide"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <div className="flex gap-1.5">
+                {slides.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentSlide(i)}
+                    className={`h-2 rounded-full transition-all ${i === currentSlide ? 'w-6 bg-stone-900' : 'w-2 bg-stone-300'}`}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
+                className="p-2 rounded-full border border-stone-300 bg-white/70 hover:bg-white text-stone-800 transition-all"
+                aria-label="Next Slide"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
 
           {/* Integrated Mini Trust Badges */}
           <div className="pt-8 border-t border-stone-300/60 grid grid-cols-3 gap-4 text-left max-w-2xl">

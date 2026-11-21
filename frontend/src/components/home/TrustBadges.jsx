@@ -28,19 +28,26 @@ export default function TrustBadges() {
   ];
 
   return (
-    <section className="py-12 bg-[#FAF9F6] border-t border-stone-200/80">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <section className="my-14 sm:my-20 lg:my-24">
+      <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {badges.map((badge, idx) => {
             const Icon = badge.icon;
             return (
-              <div key={idx} className="flex items-start gap-4 p-4 rounded-xl bg-white/60 border border-stone-200/60 shadow-sm">
-                <div className="w-10 h-10 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-800 shrink-0">
+              <div
+                key={idx}
+                className="group flex items-start gap-4 p-5 rounded-2xl bg-white border border-stone-200/80 shadow-xs hover:shadow-lg hover:-translate-y-1 hover:border-amber-700/30 transition-all duration-300"
+              >
+                <div className="w-11 h-11 rounded-xl bg-amber-100/80 border border-amber-200 flex items-center justify-center text-amber-900 shrink-0 shadow-xs group-hover:scale-110 group-hover:bg-amber-200 transition-all duration-300">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h5 className="text-xs sm:text-sm font-bold text-stone-900">{badge.title}</h5>
-                  <p className="text-[11px] text-stone-500 mt-0.5 leading-snug">{badge.subtitle}</p>
+                  <h5 className="text-xs sm:text-sm font-extrabold text-stone-900 tracking-tight group-hover:text-amber-900 transition-colors">
+                    {badge.title}
+                  </h5>
+                  <p className="text-[11px] text-stone-500 mt-1 leading-relaxed font-medium">
+                    {badge.subtitle}
+                  </p>
                 </div>
               </div>
             );

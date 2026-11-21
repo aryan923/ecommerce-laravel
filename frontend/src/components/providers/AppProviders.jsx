@@ -6,6 +6,9 @@ import { ToastProvider } from '../../context/ToastContext';
 import { CurrencyProvider } from '../../context/CurrencyContext';
 import { AuthProvider } from '../../context/AuthContext';
 import { CartProvider } from '../../context/CartContext';
+import { WishlistProvider } from '../../context/WishlistContext';
+import { CompareProvider } from '../../context/CompareContext';
+import CompareBar from '../compare/CompareBar';
 import { getOrCreateGuestSessionId } from '../../lib/session';
 
 export default function AppProviders({ children }) {
@@ -18,7 +21,14 @@ export default function AppProviders({ children }) {
       <ToastProvider>
         <CurrencyProvider>
           <AuthProvider>
-            <CartProvider>{children}</CartProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <CompareProvider>
+                  {children}
+                  <CompareBar />
+                </CompareProvider>
+              </WishlistProvider>
+            </CartProvider>
           </AuthProvider>
         </CurrencyProvider>
       </ToastProvider>

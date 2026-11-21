@@ -49,12 +49,19 @@ export default function ForgotPasswordForm() {
 
       {/* Success Banner */}
       {successMessage && (
-        <div data-testid="forgot-password-success" className="p-4 bg-emerald-50 border border-emerald-200/80 rounded-2xl text-emerald-900 text-xs font-medium space-y-1">
+        <div data-testid="forgot-password-success" className="p-4 bg-emerald-50 border border-emerald-200/80 rounded-2xl text-emerald-900 text-xs font-medium space-y-2">
           <div className="flex items-center gap-2 font-extrabold text-emerald-800">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Reset Instructions Sent!</span>
+            <span>Reset Security Code Sent!</span>
           </div>
           <p className="text-[11px] text-emerald-700 leading-relaxed">{successMessage}</p>
+          <Link
+            href={`/auth/verify-otp?email=${encodeURIComponent(email.trim())}&type=password_reset`}
+            className="inline-flex items-center gap-1 text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <span>Enter 6-Digit OTP Code</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       )}
 

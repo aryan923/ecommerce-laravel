@@ -148,7 +148,7 @@ export default function ProductDetailClient({ slug }) {
   // Loading Skeleton State
   if (isLoading) {
     return (
-      <div data-testid="pdp-loading" className="min-h-screen bg-stone-50/50 py-8 px-4 sm:px-6 lg:px-10 max-w-[1600px] mx-auto animate-pulse">
+      <div data-testid="pdp-loading" className="min-h-screen bg-stone-50/50 py-8 px-6 sm:px-8 lg:px-12 max-w-6xl mx-auto my-6 animate-pulse">
         <div className="h-5 w-48 bg-stone-200 rounded mb-8" />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           <div className="lg:col-span-6 aspect-square bg-stone-200 rounded-3xl" />
@@ -168,7 +168,7 @@ export default function ProductDetailClient({ slug }) {
   // Error State
   if (error || !product) {
     return (
-      <div data-testid="pdp-error" className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8 max-w-md mx-auto">
+      <div data-testid="pdp-error" className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8 max-w-md mx-auto my-8">
         <h2 className="text-2xl font-black text-stone-900">Product Not Found</h2>
         <p className="text-sm text-stone-500 mt-2 mb-6">
           The requested product may have been moved or is currently unavailable.
@@ -188,8 +188,8 @@ export default function ProductDetailClient({ slug }) {
   ];
 
   return (
-    <div data-testid="pdp-page" className="min-h-screen bg-stone-50/40 text-stone-900 py-6 sm:py-10">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
+    <div data-testid="pdp-page" className="min-h-screen bg-stone-50/40 text-stone-900 py-6 sm:py-10 my-4">
+      <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* Breadcrumb Trail */}
         <div className="mb-6">
           <Breadcrumbs items={breadcrumbItems} />

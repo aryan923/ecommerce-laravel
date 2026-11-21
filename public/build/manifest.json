@@ -1,0 +1,38 @@
+{
+  "_index-CzApALvg.js": {
+    "file": "assets/index-CzApALvg.js",
+    "name": "index"
+  },
+  "resources/css/admin.css": {
+    "file": "assets/admin-COQK6-hM.css",
+    "src": "resources/css/admin.css",
+    "isEntry": true
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-l0sNRNKZ.js",
+    "name": "app",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/admin/main.jsx": {
+    "file": "assets/main-1GtH4FHl.js",
+    "name": "main",
+    "src": "resources/js/admin/main.jsx",
+    "isEntry": true,
+    "imports": [
+      "_index-CzApALvg.js"
+    ],
+    "css": [
+      "assets/admin-COQK6-hM.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-eQ0rs7bf.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_index-CzApALvg.js"
+    ]
+  }
+}

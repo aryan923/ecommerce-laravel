@@ -207,8 +207,8 @@ export default function FilterSidebar({
   return (
     <>
       {/* Desktop Sidebar View */}
-      <aside className="hidden lg:block w-64 shrink-0 pr-6">
-        <div className="sticky top-24 bg-white/60 backdrop-blur-sm border border-stone-200/80 p-5 rounded-2xl shadow-sm">
+      <aside className="hidden lg:block w-72 lg:w-80 shrink-0 pr-4">
+        <div className="sticky top-24 bg-white/90 backdrop-blur-md border border-stone-300/70 p-6 rounded-3xl shadow-md space-y-6 text-stone-900">
           {content}
         </div>
       </aside>

@@ -5,16 +5,19 @@ import { useRouter } from 'next/navigation';
 import { ShoppingBag, Zap, Heart, Minus, Plus } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
+import { useWishlist } from '../../context/WishlistContext';
 import apiClient from '../../lib/api-client';
 
 export default function AddToCartSection({ product = {}, selectedVariant = null }) {
   const router = useRouter();
   const { addItem, openCart } = useCart();
   const { showToast } = useToast();
+  const { isWishlisted: checkIsWishlisted, toggleWishlist } = useWishlist();
 
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isWishlisted = checkIsWishlisted(product);
 
   const variantId = selectedVariant?.id || product.default_variant_id || product.id;
   const maxStock = selectedVariant ? selectedVariant.stock_quantity : (product.stock_quantity ?? product.stock ?? 10);
@@ -66,20 +69,10 @@ export default function AddToCartSection({ product = {}, selectedVariant = null 
   };
 
   const handleToggleWishlist = async () => {
-    const nextState = !isWishlisted;
-    setIsWishlisted(nextState);
-
-    try {
-      if (nextState) {
-        await apiClient.post('/wishlist', { product_id: product.id });
-        showToast(`Added "${product.name || 'Product'}" to Wishlist`, 'success');
-      } else {
-        await apiClient.delete(`/wishlist/${product.id}`);
-        showToast('Removed from Wishlist', 'info');
-      }
-    } catch (err) {
-      showToast(nextState ? 'Saved to Wishlist' : 'Removed from Wishlist', 'info');
-    }
+    await toggleWishlist({
+      ...product,
+      variant_id: selectedVariant?.id || product.default_variant_id || null,
+    });
   };
 
   return (

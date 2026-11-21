@@ -39,19 +39,24 @@ export default function CategoryBanners() {
   const displayList = categories.slice(0, 6);
 
   return (
-    <section className="py-16 bg-[#FAF9F6] border-b border-stone-200/60">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 text-center">
+    <section className="py-12 my-14 sm:my-20 lg:my-24 bg-[#FAF9F6] border-b border-stone-200/60">
+      <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Section Header */}
-        <span className="text-[11px] font-semibold tracking-widest text-stone-500 uppercase block">
-          Shop by Category
-        </span>
-        <h2 className="font-serif text-3xl sm:text-4xl font-normal text-stone-900 mt-1 tracking-tight">
-          Explore Our Collections
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-900/5 border border-amber-900/10 mb-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-700 animate-pulse" />
+          <span className="text-[10px] font-extrabold tracking-widest text-amber-900 uppercase">
+            Handpicked Collections
+          </span>
+        </div>
+        <h2 className="font-serif text-3xl sm:text-4xl font-normal text-stone-900 tracking-tight">
+          Explore Our Categories
         </h2>
-        <div className="w-12 h-0.5 bg-amber-700/60 mx-auto mt-3 mb-10" />
+        <p className="text-xs text-stone-500 max-w-sm mx-auto mt-1 mb-8 font-medium">
+          Curated essentials thoughtfully designed for every facet of life.
+        </p>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
           {displayList.map((cat, idx) => {
             const imageSrc = cat.image || fallbackCategories[idx % fallbackCategories.length].image;
             const targetSlug = cat.slug || 'fashion';
@@ -60,26 +65,27 @@ export default function CategoryBanners() {
               <Link
                 key={cat.id || cat.slug || idx}
                 href={`/category/${targetSlug}`}
-                className="group flex flex-col bg-[#F7F6F2] border border-stone-200/80 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300"
+                className="group flex flex-col bg-white border border-stone-200/80 rounded-2xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-400"
               >
                 {/* Image Container */}
-                <div className="relative aspect-4/5 w-full bg-stone-200 overflow-hidden">
+                <div className="relative aspect-4/5 w-full bg-stone-100 overflow-hidden">
                   <Image
                     src={imageSrc}
                     alt={cat.name || 'Category'}
                     fill
-                    className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    className="object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 via-stone-950/10 to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-300" />
                 </div>
 
                 {/* Card Label */}
-                <div className="p-3 text-center bg-[#F7F6F2]">
-                  <h4 className="text-xs sm:text-sm font-semibold text-stone-900 group-hover:text-amber-800 transition-colors truncate">
+                <div className="p-3 text-center bg-white/95 border-t border-stone-100">
+                  <h4 className="text-xs font-bold text-stone-900 group-hover:text-amber-800 transition-colors truncate">
                     {cat.name}
                   </h4>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-medium text-stone-500 group-hover:text-stone-900 mt-0.5 transition-colors">
-                    <span>Explore Now</span>
-                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-stone-400 group-hover:text-amber-700 mt-1 transition-colors">
+                    <span>Discover</span>
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </div>
               </Link>

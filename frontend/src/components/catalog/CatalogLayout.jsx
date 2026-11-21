@@ -134,7 +134,7 @@ export default function CatalogLayout({
   const [loading, setLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(8);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'compact' | 'list'
 
@@ -263,7 +263,7 @@ export default function CatalogLayout({
       } catch (err) {
         console.warn('Catalog product fetch notice:', err);
         if (isMounted) {
-          const effectivePerPage = perPageFilter || itemsPerPage || 8;
+          const effectivePerPage = perPageFilter || itemsPerPage || 12;
           setProducts(FALLBACK_PRODUCTS.slice(0, effectivePerPage));
           setTotalItems(FALLBACK_PRODUCTS.length);
           setTotalPages(Math.ceil(FALLBACK_PRODUCTS.length / effectivePerPage) || 1);
@@ -291,7 +291,7 @@ export default function CatalogLayout({
       )}
 
       {/* Main Container */}
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 pt-6">
+      <div className="max-w-7xl lg:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 my-4">
         
         {/* Breadcrumb Navigation */}
         <div className="mb-6">
@@ -331,15 +331,15 @@ export default function CatalogLayout({
 
             {/* Product Cards Grid */}
             {loading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="bg-stone-200/60 animate-pulse rounded-2xl h-72" />
+                  <div key={i} className="bg-stone-200/60 animate-pulse rounded-2xl h-80" />
                 ))}
               </div>
             ) : products.length > 0 ? (
               <div
                 data-testid="catalog-product-grid"
-                className={`grid gap-5 ${
+                className={`grid gap-6 ${
                   viewMode === 'compact'
                     ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'
                     : viewMode === 'list'

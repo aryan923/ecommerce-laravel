@@ -195,24 +195,16 @@ class Product extends Model
      */
     public function getMainImageUrlAttribute(): ?string
     {
-        // 1. Try productImages relationship with eager loaded media
         if ($this->relationLoaded('productImages') && $this->productImages->isNotEmpty()) {
             $mainImg = $this->productImages->firstWhere('type', 'main') ?? $this->productImages->first();
-            if ($mainImg && $mainImg->media && !empty($mainImg->media->url)) {
+            if ($mainImg && $mainImg->relationLoaded('media') && $mainImg->media && !empty($mainImg->media->url)) {
                 return $mainImg->media->url;
             }
         }
 
-        // 2. Try media pivot relationship
         if ($this->relationLoaded('media') && $this->media->isNotEmpty()) {
             $main = $this->media->first(fn($m) => $m->pivot && $m->pivot->type === 'main') ?? $this->media->first();
             if ($main && !empty($main->url)) return $main->url;
-        }
-
-        // 3. Query directly
-        $mainProductImg = $this->productImages()->where('type', 'main')->with('media')->first() ?? $this->productImages()->with('media')->first();
-        if ($mainProductImg && $mainProductImg->media && !empty($mainProductImg->media->url)) {
-            return $mainProductImg->media->url;
         }
 
         return null;
@@ -226,20 +218,13 @@ class Product extends Model
         if ($this->relationLoaded('productImages') && $this->productImages->isNotEmpty()) {
             return $this->productImages
                 ->where('type', 'gallery')
-                ->map(fn($pi) => $pi->media ? $pi->media->url : null)
+                ->map(fn($pi) => ($pi->relationLoaded('media') && $pi->media) ? $pi->media->url : null)
                 ->filter()
                 ->values()
                 ->toArray();
         }
 
-        return $this->productImages()
-            ->where('type', 'gallery')
-            ->with('media')
-            ->get()
-            ->map(fn($pi) => $pi->media ? $pi->media->url : null)
-            ->filter()
-            ->values()
-            ->toArray();
+        return [];
     }
 
     /**

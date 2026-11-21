@@ -28,6 +28,7 @@ import {
     MessageSquare,
     BarChart3,
     Image,
+    FileText,
     Activity
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -49,6 +50,8 @@ import ReviewsPage from './pages/ReviewsPage';
 import NotificationPage from './pages/NotificationPage';
 import ReportsPage from './pages/ReportsPage';
 import MediaLibraryPage from './pages/MediaLibraryPage';
+import BannersPage from './pages/BannersPage';
+import PagesPage from './pages/PagesPage';
 import SettingsPage from './pages/SettingsPage';
 import StaffPage from './pages/StaffPage';
 import AuditLogsPage from './pages/AuditLogsPage';
@@ -334,6 +337,26 @@ function AdminLayout() {
                         </div>
                     </NavLink>
 
+                    <NavLink
+                        to="/banners"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <Image size={17} />
+                            <span>Banners & Promos</span>
+                        </div>
+                    </NavLink>
+
+                    <NavLink
+                        to="/pages"
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <div className="nav-item-content">
+                            <FileText size={17} />
+                            <span>CMS Pages</span>
+                        </div>
+                    </NavLink>
+
                     {/* SECTION 5: SETTINGS */}
                     <div className="nav-section-label" style={{ marginTop: '10px' }}>
                         <span>System Config</span>
@@ -577,6 +600,8 @@ function AdminLayout() {
                         <Route path="/notifications" element={<NotificationPage />} />
                         <Route path="/reports" element={<ReportsPage />} />
                         <Route path="/media" element={<MediaLibraryPage />} />
+                        <Route path="/banners" element={<BannersPage />} />
+                        <Route path="/pages" element={<PagesPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/staff" element={<StaffPage />} />
                         <Route path="/audit-logs" element={<AuditLogsPage />} />

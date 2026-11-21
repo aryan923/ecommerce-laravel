@@ -44,6 +44,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/products', [PublicProductController::class, 'index']);
     Route::get('/products/{slug}', [PublicProductController::class, 'show']);
     Route::get('/products/{product_id}/reviews', [\App\Http\Controllers\Api\V1\PublicProductReviewController::class, 'index']);
+    Route::get('/banners', [\App\Http\Controllers\Api\V1\PublicBannerController::class, 'index']);
+    Route::get('/pages/{slug}', [\App\Http\Controllers\Api\V1\PublicPageController::class, 'show']);
 
     // Customer Authentication Endpoints
     Route::prefix('auth')->group(function () {
@@ -205,6 +207,23 @@ Route::prefix('v1')->group(function () {
             Route::post('/media/sort', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'sort'])->middleware('permission:media.update');
             Route::delete('/media/unused', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'purgeUnused'])->middleware('permission:media.delete');
             Route::delete('/media/{id}', [\App\Http\Controllers\Api\V1\Admin\MediaController::class, 'destroy'])->middleware('permission:media.delete');
+
+            // Banners Management
+            Route::get('/banners', [\App\Http\Controllers\Api\V1\Admin\AdminBannerController::class, 'index'])->middleware('permission:banners.view');
+            Route::post('/banners', [\App\Http\Controllers\Api\V1\Admin\AdminBannerController::class, 'store'])->middleware('permission:banners.create');
+            Route::post('/banners/reorder', [\App\Http\Controllers\Api\V1\Admin\AdminBannerController::class, 'reorder'])->middleware('permission:banners.update');
+            Route::get('/banners/{banner}', [\App\Http\Controllers\Api\V1\Admin\AdminBannerController::class, 'show'])->middleware('permission:banners.view');
+            Route::put('/banners/{banner}', [\App\Http\Controllers\Api\V1\Admin\AdminBannerController::class, 'update'])->middleware('permission:banners.update');
+            Route::patch('/banners/{banner}/status', [\App\Http\Controllers\Api\V1\Admin\AdminBannerController::class, 'updateStatus'])->middleware('permission:banners.update');
+            Route::delete('/banners/{banner}', [\App\Http\Controllers\Api\V1\Admin\AdminBannerController::class, 'destroy'])->middleware('permission:banners.delete');
+
+            // CMS Pages Management
+            Route::get('/pages', [\App\Http\Controllers\Api\V1\Admin\AdminPageController::class, 'index'])->middleware('permission:pages.view');
+            Route::post('/pages', [\App\Http\Controllers\Api\V1\Admin\AdminPageController::class, 'store'])->middleware('permission:pages.create');
+            Route::get('/pages/{page}', [\App\Http\Controllers\Api\V1\Admin\AdminPageController::class, 'show'])->middleware('permission:pages.view');
+            Route::put('/pages/{page}', [\App\Http\Controllers\Api\V1\Admin\AdminPageController::class, 'update'])->middleware('permission:pages.update');
+            Route::patch('/pages/{page}/status', [\App\Http\Controllers\Api\V1\Admin\AdminPageController::class, 'updateStatus'])->middleware('permission:pages.update');
+            Route::delete('/pages/{page}', [\App\Http\Controllers\Api\V1\Admin\AdminPageController::class, 'destroy'])->middleware('permission:pages.delete');
 
             // Coupon Management
             Route::get('/coupons', [\App\Http\Controllers\Api\V1\Admin\CouponController::class, 'index'])->middleware('permission:coupons.view');

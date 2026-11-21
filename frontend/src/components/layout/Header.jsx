@@ -8,9 +8,11 @@ import LiveSearch from './LiveSearch';
 import CurrencySwitcher from './CurrencySwitcher';
 import AccountDropdown from './AccountDropdown';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 
 export default function Header() {
   const { cartCount, openCart } = useCart();
+  const { wishlistCount } = useWishlist();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
@@ -63,6 +65,21 @@ export default function Header() {
 
           {/* Account Icon / Dropdown */}
           <AccountDropdown />
+
+          {/* Wishlist Link with Heart Icon & Badge */}
+          <Link
+            href="/wishlist"
+            data-testid="header-wishlist-btn"
+            className="relative p-1.5 text-stone-700 hover:text-stone-950 transition-colors"
+            title="Saved Wishlist"
+          >
+            <Heart className="w-5 h-5" />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white font-extrabold text-[10px] flex items-center justify-center shadow">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
 
           {/* Cart Icon with Yellow Badge */}
           <button

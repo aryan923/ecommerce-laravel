@@ -20,41 +20,6 @@ export default function Footer() {
   return (
     <footer className="bg-[#111111] text-stone-300 text-xs">
       
-      {/* Top Newsletter Card Section */}
-      <div className="bg-[#FAF9F5] text-stone-900 py-12 px-4 border-t border-b border-stone-200/80 text-center relative">
-        <div className="max-w-2xl mx-auto space-y-4">
-          
-          {/* Centered Circle Icon Badge */}
-          <div className="w-12 h-12 mx-auto rounded-full bg-[#E5DFD3] flex items-center justify-center text-stone-800 shadow-sm">
-            <Mail className="w-5 h-5" />
-          </div>
-
-          <h3 className="font-serif text-2xl sm:text-3xl font-normal text-stone-900 tracking-tight">
-            Stay in the Know
-          </h3>
-          <p className="text-stone-600 text-xs sm:text-sm">
-            Get updates on new arrivals, exclusive offers, and more.
-          </p>
-
-          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto pt-2">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email address"
-              required
-              className="w-full bg-white border border-stone-300 px-4 py-3 text-stone-900 text-xs rounded-lg placeholder-stone-400 focus:outline-none focus:border-stone-800"
-            />
-            <button
-              type="submit"
-              className="w-full sm:w-auto bg-[#18181B] hover:bg-stone-900 text-white font-medium text-xs px-6 py-3 rounded-lg transition-colors shrink-0"
-            >
-              Subscribe
-            </button>
-          </form>
-        </div>
-      </div>
-
       {/* Main Footer Grid (5 Columns) */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
         
@@ -97,9 +62,9 @@ export default function Footer() {
           <h5 className="font-semibold text-white uppercase tracking-wider text-[11px] mb-4">Customer Care</h5>
           <ul className="space-y-2 text-stone-400 text-[11px]">
             <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
-            <li><Link href="/faqs" className="hover:text-white transition-colors">FAQs</Link></li>
-            <li><Link href="/shipping" className="hover:text-white transition-colors">Shipping & Delivery</Link></li>
-            <li><Link href="/returns" className="hover:text-white transition-colors">Returns & Refunds</Link></li>
+            <li><Link href="/pages/faqs" className="hover:text-white transition-colors">FAQs</Link></li>
+            <li><Link href="/pages/shipping-policy" className="hover:text-white transition-colors">Shipping Policy</Link></li>
+            <li><Link href="/pages/return-policy" className="hover:text-white transition-colors">Return Policy</Link></li>
             <li><Link href="/track-order" className="hover:text-white transition-colors">Track Your Order</Link></li>
           </ul>
         </div>
@@ -108,11 +73,9 @@ export default function Footer() {
         <div>
           <h5 className="font-semibold text-white uppercase tracking-wider text-[11px] mb-4">About Us</h5>
           <ul className="space-y-2 text-stone-400 text-[11px]">
-            <li><Link href="/about" className="hover:text-white transition-colors">Our Story</Link></li>
-            <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-            <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-            <li><Link href="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
-            <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
+            <li><Link href="/pages/about-us" className="hover:text-white transition-colors">Our Story</Link></li>
+            <li><Link href="/pages/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+            <li><Link href="/pages/terms-and-conditions" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
           </ul>
         </div>
 

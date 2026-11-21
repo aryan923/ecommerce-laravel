@@ -160,8 +160,8 @@ export default function CheckoutClient() {
   };
 
   return (
-    <div data-testid="checkout-page" className="min-h-screen bg-stone-50/60 text-stone-900 py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-4">
+    <div data-testid="checkout-page" className="min-h-screen bg-stone-50/60 text-stone-900 py-6 sm:py-8 my-4">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 space-y-5">
         {/* Header Bar */}
         <div className="flex items-center justify-between border-b border-stone-200/80 pb-3">
           <Link href="/cart" className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 transition-colors">

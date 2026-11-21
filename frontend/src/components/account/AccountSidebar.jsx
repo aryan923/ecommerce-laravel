@@ -11,6 +11,7 @@ import {
   MapPin,
   Building2,
   Bell,
+  Heart,
   LogOut,
   ChevronRight,
 } from 'lucide-react';
@@ -18,6 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const NAV_ITEMS = [
   { href: '/account', label: 'Overview', icon: LayoutDashboard },
+  { href: '/wishlist', label: 'My Wishlist', icon: Heart },
   { href: '/account/profile', label: 'Profile & Security', icon: User },
   { href: '/account/orders', label: 'Order History', icon: Package },
   { href: '/account/returns', label: 'Returns & Exchanges', icon: RefreshCw },

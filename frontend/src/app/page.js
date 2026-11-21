@@ -2,10 +2,12 @@ import React from 'react';
 import HeroSlider from '@/components/home/HeroSlider';
 import CategoryBanners from '@/components/home/CategoryBanners';
 import ProductSection from '@/components/home/ProductSection';
+import CategoryShowcaseBanners from '@/components/home/CategoryShowcaseBanners';
 import PromoBanner from '@/components/home/PromoBanner';
 import TrustBadges from '@/components/home/TrustBadges';
 import BrandGrid from '@/components/home/BrandGrid';
 import RecentlyViewed from '@/components/home/RecentlyViewed';
+import NewsletterSection from '@/components/home/NewsletterSection';
 
 export const metadata = {
   title: "ECOMSTORE | Discover Things You'll Love",
@@ -15,26 +17,32 @@ export const metadata = {
 export default function HomePage() {
   return (
     <div className="bg-[#FAF9F6] min-h-screen text-stone-900">
-      {/* Hero Banner Section */}
+      {/* 1. Hero Banner Section */}
       <HeroSlider />
 
-      {/* Category Grid Section */}
+      {/* 2. Category Grid Section */}
       <CategoryBanners />
 
-      {/* Curated Products Section */}
+      {/* 3. Curated Products Section */}
       <ProductSection title="Curated For You" subtitle="Handpicked favorites, just for you." />
 
-      {/* Mid-Page Promo Banner */}
+      {/* 4. Mid-Page Promo Banner */}
       <PromoBanner />
 
-      {/* Trust Badges */}
-      <TrustBadges />
+      {/* 5. Category Feature Showcase Banners */}
+      <CategoryShowcaseBanners />
 
-      {/* Partner Brand Logos */}
+      {/* 6. Partner Brand Logos */}
       <BrandGrid />
 
-      {/* Recently Viewed Products */}
+      {/* 7. Value & Trust Badges */}
+      <TrustBadges />
+
+      {/* 8. Recently Viewed Products */}
       <RecentlyViewed />
+
+      {/* 9. Insider Newsletter Section */}
+      <NewsletterSection />
     </div>
   );
 }

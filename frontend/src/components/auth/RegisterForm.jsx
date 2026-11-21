@@ -61,7 +61,7 @@ export default function RegisterForm() {
         password_confirmation: passwordConfirmation,
         terms_accepted: termsAccepted,
       });
-      router.push('/');
+      router.push(`/auth/verify-otp?email=${encodeURIComponent(email.trim())}&type=registration`);
     } catch (err) {
       // Error handled by AuthContext
     }

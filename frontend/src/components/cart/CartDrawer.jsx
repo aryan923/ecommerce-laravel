@@ -2,14 +2,16 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight, Tag, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, X, Plus, Minus, Trash2, Heart, ArrowRight, Tag, ShieldCheck } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useCurrency } from '../../context/CurrencyContext';
+import { useWishlist } from '../../context/WishlistContext';
 import { normalizeImageUrl } from '../../lib/image-helper';
 
 export default function CartDrawer() {
   const { cart, isCartOpen, closeCart, updateQuantity, removeItem, cartCount, subtotal, discountAmount, cartTotal, appliedCoupon, isLoading } = useCart();
   const { formatPrice } = useCurrency();
+  const { addToWishlist } = useWishlist();
 
   if (!isCartOpen) return null;
 
@@ -114,13 +116,22 @@ export default function CartDrawer() {
                           <h4 className="text-sm font-bold text-stone-900 truncate">
                             {item.name || product.name || 'Product Item'}
                           </h4>
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="p-1 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
-                            title="Remove item"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              onClick={() => addToWishlist(product.id ? product : { ...item, id: item.product_id || item.id })}
+                              className="p-1 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                              title="Save to Wishlist"
+                            >
+                              <Heart className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => removeItem(item.id)}
+                              className="p-1 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                              title="Remove item"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                         {(item.attributes || variant.name) && (
                           <p className="text-xs text-stone-500 font-medium mt-0.5 line-clamp-1">

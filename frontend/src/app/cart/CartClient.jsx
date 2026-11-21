@@ -19,8 +19,8 @@ export default function CartClient() {
   const isEmpty = !items || items.length === 0;
 
   return (
-    <div data-testid="cart-page" className="min-h-screen bg-stone-50/40 text-stone-900 py-4 sm:py-6">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div data-testid="cart-page" className="min-h-screen bg-stone-50/40 text-stone-900 py-6 sm:py-8 my-4">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* Breadcrumb Trail */}
         <div className="mb-2.5">
           <Breadcrumbs items={breadcrumbItems} />

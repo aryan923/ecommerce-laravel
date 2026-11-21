@@ -26,17 +26,30 @@ export function AuthProvider({ children }) {
                     if (res.data?.success) {
                         setUser(res.data.data);
                         localStorage.setItem('admin_user', JSON.stringify(res.data.data));
+                    } else {
+                        clearAuth();
                     }
                 } catch (err) {
                     console.warn('Session expired or invalid token');
-                    logout();
+                    clearAuth();
+                } finally {
+                    setLoading(false);
                 }
+            } else {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         verifySession();
     }, []);
+
+    const clearAuth = () => {
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_user');
+        delete axios.defaults.headers.common['Authorization'];
+    };
 
     const login = async (email, password) => {
         const response = await axios.post('/api/v1/admin/auth/login', { login: email, email, password });
@@ -57,18 +70,14 @@ export function AuthProvider({ children }) {
     };
 
     const logout = async () => {
-        try {
-            if (token) {
+        const activeToken = token;
+        clearAuth();
+        if (activeToken) {
+            try {
                 await axios.post('/api/v1/admin/auth/logout');
+            } catch (e) {
+                // Ignore API logout errors
             }
-        } catch (e) {
-            // Ignore logout API error
-        } finally {
-            setToken(null);
-            setUser(null);
-            localStorage.removeItem('admin_token');
-            localStorage.removeItem('admin_user');
-            delete axios.defaults.headers.common['Authorization'];
         }
     };
 

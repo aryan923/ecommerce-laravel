@@ -164,7 +164,7 @@ class ProductService
      */
     public function getPublicCatalog(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Product::active()->with(['brand', 'categories']);
+        $query = Product::active()->with(['brand', 'categories', 'productImages.media', 'media']);
 
         if (!empty($filters['search']) && is_string($filters['search'])) {
             $search = trim($filters['search']);
@@ -223,7 +223,7 @@ class ProductService
                     $q->orWhere('id', (int)$slug);
                 }
             })
-            ->with(['brand', 'categories', 'variants' => fn($q) => $q->active()->with('attributeValues')])
+            ->with(['brand', 'categories', 'productImages.media', 'media', 'variants' => fn($q) => $q->active()->with('attributeValues')])
             ->first();
 
         if (!$product) {

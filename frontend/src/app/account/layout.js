@@ -32,8 +32,8 @@ export default function AccountLayout({ children }) {
   if (!isAuthenticated) return null;
 
   return (
-    <div data-testid="account-portal-layout" className="min-h-screen bg-stone-50/40 text-stone-900 py-4 sm:py-6">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div data-testid="account-portal-layout" className="min-h-screen bg-stone-50/40 text-stone-900 py-6 sm:py-8 my-4">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
         <div className="mb-3">
           <Breadcrumbs items={breadcrumbItems} />
         </div>
