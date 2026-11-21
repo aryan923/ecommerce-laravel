@@ -102,17 +102,28 @@ class RbacSeeder extends Seeder
         $orderPermissions = Permission::whereIn('module', ['orders', 'customers', 'shipping'])->pluck('id');
         $orderManagerRole->permissions()->sync($orderPermissions);
 
-        // 3. Create Initial Super Admin User
-        $superAdminUser = AdminUser::firstOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Super Admin',
-                'mobile' => '+19999999999',
-                'password' => Hash::make('SecretAdmin123!'),
-                'status' => 'active',
-            ]
-        );
+        // 3. Create Initial Super Admin User (Configurable via .env or php artisan admin:create)
+        $adminEmail = env('ADMIN_EMAIL');
+        $adminPassword = env('ADMIN_PASSWORD');
 
-        $superAdminUser->roles()->sync([$superAdminRole->id]);
+        // Fallback default only in local/testing environments to maintain automated test suite compatibility
+        if (app()->environment('testing', 'local') && !$adminEmail) {
+            $adminEmail = 'admin@example.com';
+            $adminPassword = 'SecretAdmin123!';
+        }
+
+        if ($adminEmail && $adminPassword) {
+            $superAdminUser = AdminUser::firstOrCreate(
+                ['email' => $adminEmail],
+                [
+                    'name' => env('ADMIN_NAME', 'Super Admin'),
+                    'mobile' => env('ADMIN_MOBILE', '+19999999999'),
+                    'password' => Hash::make($adminPassword),
+                    'status' => 'active',
+                ]
+            );
+
+            $superAdminUser->roles()->sync([$superAdminRole->id]);
+        }
     }
 }
