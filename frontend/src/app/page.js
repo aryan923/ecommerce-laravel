@@ -1,6 +1,5 @@
 import React from 'react';
 import HeroSlider from '@/components/home/HeroSlider';
-import AtelierSplitSection from '@/components/home/AtelierSplitSection';
 import CategoryBanners from '@/components/home/CategoryBanners';
 import ProductSection from '@/components/home/ProductSection';
 import ShopTheLook from '@/components/home/ShopTheLook';
@@ -24,40 +23,37 @@ export default function HomePage() {
       {/* 1. Hero Banner Section */}
       <HeroSlider />
 
-      {/* 2. Curated Atelier 60/40 Split Feature */}
-      <AtelierSplitSection />
-
-      {/* 3. Category Grid Section */}
+      {/* 2. Category Grid Section */}
       <CategoryBanners />
 
-      {/* 4. Curated Products Grid */}
+      {/* 3. Curated Products Grid */}
       <ProductSection title="Curated For You" subtitle="Handpicked favorites, just for you." />
 
-      {/* 5. Shop The Look / Editorial Lookbook */}
+      {/* 4. Shop The Look / Editorial Lookbook */}
       <ShopTheLook />
 
-      {/* 6. Mid-Page Promo Banner */}
+      {/* 5. Mid-Page Promo Banner */}
       <PromoBanner />
 
-      {/* 7. Category Feature Showcase Banners */}
+      {/* 6. Category Feature Showcase Banners */}
       <CategoryShowcaseBanners />
 
-      {/* 8. Customer Testimonials & Verified Reviews */}
+      {/* 7. Customer Testimonials & Verified Reviews */}
       <CustomerTestimonials />
 
-      {/* 9. Value & Trust Badges */}
+      {/* 8. Value & Trust Badges */}
       <TrustBadges />
 
-      {/* 10. Partner Brand Logos */}
+      {/* 9. Partner Brand Logos */}
       <BrandGrid />
 
-      {/* 11. Frequently Asked Questions (FAQ) */}
+      {/* 10. Frequently Asked Questions (FAQ) */}
       <HomeFaqSection />
 
-      {/* 12. Recently Viewed Products */}
+      {/* 11. Recently Viewed Products */}
       <RecentlyViewed />
 
-      {/* 13. Insider Newsletter Section */}
+      {/* 12. Insider Newsletter Section */}
       <NewsletterSection />
     </div>
   );
