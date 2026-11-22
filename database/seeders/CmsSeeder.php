@@ -16,24 +16,35 @@ class CmsSeeder extends Seeder
         // Seed default Hero Banners
         if (Banner::count() === 0) {
             Banner::create([
-                'title' => 'Spring Elegance Collection 2026',
-                'image_desktop' => 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&auto=format&fit=crop&q=80',
-                'image_mobile' => 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&auto=format&fit=crop&q=80',
-                'link_url' => '/products',
-                'button_text' => 'Shop Collection',
+                'title' => 'The Streetwear Avant-Garde Edit',
+                'image_desktop' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1600&q=85',
+                'image_mobile' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=85',
+                'link_url' => '/products?category=men',
+                'button_text' => 'Explore Streetwear',
                 'placement' => 'home_hero',
                 'sort_order' => 1,
                 'is_active' => true,
             ]);
 
             Banner::create([
-                'title' => 'Exclusive Autumn Savings',
-                'image_desktop' => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&auto=format&fit=crop&q=80',
-                'image_mobile' => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&auto=format&fit=crop&q=80',
-                'link_url' => '/products?featured=1',
-                'button_text' => 'Explore Sale',
+                'title' => 'Youthful Elegance & Bold Vibrancy',
+                'image_desktop' => 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1600&q=85',
+                'image_mobile' => 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=85',
+                'link_url' => '/products?category=women',
+                'button_text' => 'Discover Couture',
                 'placement' => 'home_hero',
                 'sort_order' => 2,
+                'is_active' => true,
+            ]);
+
+            Banner::create([
+                'title' => 'Boxy Cuts & Relaxed Silhouettes',
+                'image_desktop' => 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1600&q=85',
+                'image_mobile' => 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=800&q=85',
+                'link_url' => '/products?sort=popular',
+                'button_text' => 'Shop Tailored Street',
+                'placement' => 'home_hero',
+                'sort_order' => 3,
                 'is_active' => true,
             ]);
         }

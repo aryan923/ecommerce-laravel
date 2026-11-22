@@ -9,27 +9,39 @@ import { fetchBanners } from '@/lib/cms-api';
 const defaultSlides = [
   {
     id: 1,
-    tag: 'NEW COLLECTION 2024',
-    title: 'Discover Things You’ll',
-    titleHighlight: 'Love',
-    subtitle: 'Thoughtfully selected products, beautiful designs, and everyday essentials—all in one place.',
-    primaryCtaText: 'Shop New Arrivals',
-    primaryCtaLink: '/products',
-    secondaryCtaText: 'Explore Collection',
-    secondaryCtaLink: '/products?featured=1',
-    image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1400&q=80',
+    tag: 'GEN-Z ATELIER // EDITION 2026',
+    title: 'The Streetwear Avant-Garde',
+    titleHighlight: 'Edit',
+    subtitle: 'Relaxed silhouettes, structured shoulders, and retro tinted eyewear engineered for contemporary urban poise.',
+    primaryCtaText: 'Explore Streetwear',
+    primaryCtaLink: '/products?category=men',
+    secondaryCtaText: 'Shop Lookbook',
+    secondaryCtaLink: '/products',
+    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1600&q=85',
   },
   {
     id: 2,
-    tag: 'LIMITED EDITION 2024',
-    title: 'Elevate Your Everyday',
-    titleHighlight: 'Style',
-    subtitle: 'Crafted with premium materials for timeless comfort and understated elegance.',
-    primaryCtaText: 'Explore Collection',
-    primaryCtaLink: '/products',
+    tag: 'EDITORIAL RUNWAY // YOUTH COUTURE',
+    title: 'Youthful Elegance & Bold',
+    titleHighlight: 'Vibrancy',
+    subtitle: 'Vibrant luxury mock-necks, high-waisted fluid tailoring, and unapologetic runway aesthetics defining the new generation.',
+    primaryCtaText: 'Discover New Drops',
+    primaryCtaLink: '/products?sort=latest',
+    secondaryCtaText: 'Explore Couture',
+    secondaryCtaLink: '/products?category=women',
+    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1600&q=85',
+  },
+  {
+    id: 3,
+    tag: 'DECONSTRUCTED SUITING // LIMITED',
+    title: 'Boxy Cuts & Relaxed',
+    titleHighlight: 'Silhouettes',
+    subtitle: 'Deconstructed blazers, wide-leg pleated trousers, and Swiss chronometers blending timeless atelier craft with Gen-Z flair.',
+    primaryCtaText: 'Shop Tailored Street',
+    primaryCtaLink: '/products?category=men',
     secondaryCtaText: 'View Bestsellers',
     secondaryCtaLink: '/products?sort=popular',
-    image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1400&q=80',
+    image: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1600&q=85',
   },
 ];
 
@@ -41,18 +53,23 @@ export default function HeroSlider() {
     async function loadBanners() {
       const activeBanners = await fetchBanners('home_hero');
       if (activeBanners && activeBanners.length > 0) {
-        const mapped = activeBanners.map((b, index) => ({
-          id: b.id || index + 1,
-          tag: b.placement ? b.placement.replace('_', ' ').toUpperCase() : 'PROMOTIONAL BANNER',
-          title: b.title || 'Special Promotion',
-          titleHighlight: '',
-          subtitle: 'Discover exclusive deals, curated collections, and top quality items.',
-          primaryCtaText: b.button_text || 'Shop Now',
-          primaryCtaLink: b.link_url || '/products',
-          secondaryCtaText: 'View Products',
-          secondaryCtaLink: '/products',
-          image: b.image_desktop || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1400&q=80',
-        }));
+        const mapped = activeBanners.map((b, index) => {
+          const fallback = defaultSlides[index % defaultSlides.length];
+          return {
+            id: b.id || index + 1,
+            tag: b.placement && !b.placement.includes('home_hero') ? b.placement.replace('_', ' ').toUpperCase() : fallback.tag,
+            title: b.title && !b.title.includes('Special Promotion') && !b.title.includes('Autumn Savings') ? b.title : fallback.title,
+            titleHighlight: fallback.titleHighlight,
+            subtitle: b.description || fallback.subtitle,
+            primaryCtaText: b.button_text || fallback.primaryCtaText,
+            primaryCtaLink: b.link_url || fallback.primaryCtaLink,
+            secondaryCtaText: fallback.secondaryCtaText,
+            secondaryCtaLink: fallback.secondaryCtaLink,
+            image: (b.image_desktop && !b.image_desktop.includes('441986300917') && !b.image_desktop.includes('1584917865442'))
+              ? b.image_desktop
+              : fallback.image,
+          };
+        });
         setSlides(mapped);
       }
     }
@@ -64,7 +81,7 @@ export default function HeroSlider() {
     if (slides.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 8000);
+    }, 6000);
     return () => clearInterval(interval);
   }, [slides]);
 
@@ -76,13 +93,19 @@ export default function HeroSlider() {
       {/* Full-width Edge-to-Edge Image on Right with Seamless Fade */}
       <div className="absolute inset-y-0 right-0 w-full lg:w-2/3 z-0 pointer-events-none overflow-hidden">
         <div className="relative w-full h-full">
-          <Image
-            src={slide.image}
-            alt={slide.title || "Luxury Lifestyle Hero"}
-            fill
-            priority
-            className="object-cover object-center lg:object-right transition-opacity duration-1000"
-          />
+          {slides.map((s, idx) => (
+            <Image
+              key={s.id || idx}
+              src={s.image}
+              alt={s.title || "Gen-Z Luxury Fashion Hero"}
+              fill
+              priority={idx === 0}
+              sizes="(max-width: 1024px) 100vw, 66vw"
+              className={`object-cover object-center lg:object-right transition-opacity duration-1000 ease-in-out ${
+                idx === currentSlide ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          ))}
           {/* Smooth Linear Gradient Fade from solid background to transparent image */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#F5F2EC] via-[#F5F2EC]/90 to-transparent w-full lg:w-4/5" />
           {/* Vertical Soft Edge Blending */}
