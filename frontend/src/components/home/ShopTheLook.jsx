@@ -279,15 +279,15 @@ export default function ShopTheLook() {
                     key={item.pinNumber}
                     onClick={() => setActivePin(item.pinNumber)}
                     style={{ top: item.pinPosition.top, left: item.pinPosition.left }}
-                    className={`group absolute -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-[11px] transition-all duration-300 z-20 ${
+                    className={`group absolute -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center font-black text-[9px] transition-all duration-300 z-20 before:absolute before:-inset-2 before:content-[''] ${
                       isActive
-                        ? 'bg-amber-400 text-stone-950 scale-110 ring-2 ring-amber-300 shadow-lg shadow-amber-400/50'
-                        : 'bg-stone-900/85 text-white hover:scale-110 hover:bg-stone-950 ring-1.5 ring-white/80 shadow-md'
+                        ? 'bg-amber-400 text-stone-950 scale-110 ring-1.5 ring-amber-300 shadow-md shadow-amber-400/40'
+                        : 'bg-stone-900/85 text-white hover:scale-110 hover:bg-stone-950 ring-1 ring-white/80 shadow-sm'
                     }`}
                     title={`Pin ${item.pinNumber}: ${item.name}`}
                   >
                     <span
-                      className={`absolute inset-0 rounded-full animate-ping pointer-events-none opacity-30 ${
+                      className={`absolute inset-0 rounded-full animate-ping pointer-events-none opacity-25 ${
                         isActive ? 'bg-amber-400' : 'bg-white/40 group-hover:bg-amber-300'
                       }`}
                     />
