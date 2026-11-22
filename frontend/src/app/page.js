@@ -1,6 +1,6 @@
 import React from 'react';
 import HeroSlider from '@/components/home/HeroSlider';
-import GiftVouchersSection from '@/components/home/GiftVouchersSection';
+import EditorialCapsules from '@/components/home/EditorialCapsules';
 import CategoryBanners from '@/components/home/CategoryBanners';
 import ProductSection from '@/components/home/ProductSection';
 import ShopTheLook from '@/components/home/ShopTheLook';
@@ -24,8 +24,8 @@ export default function HomePage() {
       {/* 1. Hero Banner Section */}
       <HeroSlider />
 
-      {/* 2. Member Gift Vouchers & Privilege Passes */}
-      <GiftVouchersSection />
+      {/* 2. Editorial Capsule Edits */}
+      <EditorialCapsules />
 
       {/* 3. Category Grid Section */}
       <CategoryBanners />
