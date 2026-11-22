@@ -279,18 +279,19 @@ export default function ShopTheLook() {
                     key={item.pinNumber}
                     onClick={() => setActivePin(item.pinNumber)}
                     style={{ top: item.pinPosition.top, left: item.pinPosition.left }}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 shadow-2xl z-20 ${
+                    className={`group absolute -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-[11px] transition-all duration-300 z-20 ${
                       isActive
-                        ? 'bg-amber-400 text-stone-950 scale-125 ring-4 ring-amber-300/80 shadow-amber-400/50'
-                        : 'bg-stone-900/90 text-white hover:scale-110 hover:bg-stone-900 ring-2 ring-white/70'
+                        ? 'bg-amber-400 text-stone-950 scale-110 ring-2 ring-amber-300 shadow-lg shadow-amber-400/50'
+                        : 'bg-stone-900/85 text-white hover:scale-110 hover:bg-stone-950 ring-1.5 ring-white/80 shadow-md'
                     }`}
                     title={`Pin ${item.pinNumber}: ${item.name}`}
                   >
-                    <span className="relative flex h-2 w-2 mr-0.5">
-                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isActive ? 'bg-stone-900' : 'bg-amber-400'}`} />
-                      <span className={`relative inline-flex rounded-full h-2 w-2 ${isActive ? 'bg-stone-950' : 'bg-amber-400'}`} />
-                    </span>
-                    <span>{item.pinNumber}</span>
+                    <span
+                      className={`absolute inset-0 rounded-full animate-ping pointer-events-none opacity-30 ${
+                        isActive ? 'bg-amber-400' : 'bg-white/40 group-hover:bg-amber-300'
+                      }`}
+                    />
+                    <span className="relative z-10 leading-none">{item.pinNumber}</span>
                   </button>
                 );
               })}
