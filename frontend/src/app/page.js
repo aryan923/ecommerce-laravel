@@ -1,8 +1,12 @@
 import React from 'react';
 import HeroSlider from '@/components/home/HeroSlider';
+import VipPromoRibbon from '@/components/home/VipPromoRibbon';
+import CategoryChipsRail from '@/components/home/CategoryChipsRail';
 import CategoryBanners from '@/components/home/CategoryBanners';
+import NewDropsCarousel from '@/components/home/NewDropsCarousel';
 import ProductSection from '@/components/home/ProductSection';
 import ShopTheLook from '@/components/home/ShopTheLook';
+import PriceTierCurations from '@/components/home/PriceTierCurations';
 import PromoBanner from '@/components/home/PromoBanner';
 import CategoryShowcaseBanners from '@/components/home/CategoryShowcaseBanners';
 import CustomerTestimonials from '@/components/home/CustomerTestimonials';
@@ -23,37 +27,49 @@ export default function HomePage() {
       {/* 1. Hero Banner Section */}
       <HeroSlider />
 
-      {/* 2. Category Grid Section */}
+      {/* 2. Slim VIP Privilege & Promo Ribbon (1-Click Copy Code) */}
+      <VipPromoRibbon />
+
+      {/* 3. Category Quick-Chips Rail (1-Click Department Navigation) */}
+      <CategoryChipsRail />
+
+      {/* 4. Visual Category Grid Section */}
       <CategoryBanners />
 
-      {/* 3. Curated Products Grid */}
+      {/* 5. Newest Drops of the Season (Horizontal Scrollable Carousel) */}
+      <NewDropsCarousel />
+
+      {/* 6. Curated Products Grid */}
       <ProductSection title="Curated For You" subtitle="Handpicked favorites, just for you." />
 
-      {/* 4. Shop The Look / Editorial Lookbook */}
+      {/* 7. Shop The Look / Editorial Lookbook */}
       <ShopTheLook />
 
-      {/* 5. Mid-Page Promo Banner */}
+      {/* 8. Curated by Price Tiers (Spending Thresholds / Gift Vault) */}
+      <PriceTierCurations />
+
+      {/* 9. Mid-Page Promo Banner */}
       <PromoBanner />
 
-      {/* 6. Category Feature Showcase Banners */}
+      {/* 10. Category Feature Showcase Banners */}
       <CategoryShowcaseBanners />
 
-      {/* 7. Customer Testimonials & Verified Reviews */}
+      {/* 11. Customer Testimonials & Verified Reviews */}
       <CustomerTestimonials />
 
-      {/* 8. Value & Trust Badges */}
+      {/* 12. Value & Trust Badges */}
       <TrustBadges />
 
-      {/* 9. Partner Brand Logos */}
+      {/* 13. Partner Brand Logos */}
       <BrandGrid />
 
-      {/* 10. Frequently Asked Questions (FAQ) */}
+      {/* 14. Frequently Asked Questions (FAQ) */}
       <HomeFaqSection />
 
-      {/* 11. Recently Viewed Products */}
+      {/* 15. Recently Viewed Products */}
       <RecentlyViewed />
 
-      {/* 12. Insider Newsletter Section */}
+      {/* 16. Insider Newsletter Section */}
       <NewsletterSection />
     </div>
   );
