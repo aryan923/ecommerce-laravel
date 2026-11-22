@@ -16,13 +16,24 @@ class CmsSeeder extends Seeder
         // Seed default Hero Banners
         if (Banner::count() === 0) {
             Banner::create([
-                'title' => 'The Streetwear Avant-Garde Edit',
-                'image_desktop' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1600&q=85',
-                'image_mobile' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=85',
-                'link_url' => '/products?category=men',
-                'button_text' => 'Explore Streetwear',
+                'title' => 'The Modern Vanguard Duo',
+                'image_desktop' => 'https://images.unsplash.com/photo-1683664794354-31b59f51e10c?auto=format&fit=crop&w=1600&q=85',
+                'image_mobile' => 'https://images.unsplash.com/photo-1683664794354-31b59f51e10c?auto=format&fit=crop&w=800&q=85',
+                'link_url' => '/products',
+                'button_text' => 'Explore All Streetwear',
                 'placement' => 'home_hero',
                 'sort_order' => 1,
+                'is_active' => true,
+            ]);
+
+            Banner::create([
+                'title' => 'Deconstructed Suiting & Boxy Cuts',
+                'image_desktop' => 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1600&q=85',
+                'image_mobile' => 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=800&q=85',
+                'link_url' => '/products?category=men',
+                'button_text' => "Shop Men's Edition",
+                'placement' => 'home_hero',
+                'sort_order' => 2,
                 'is_active' => true,
             ]);
 
@@ -31,20 +42,31 @@ class CmsSeeder extends Seeder
                 'image_desktop' => 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1600&q=85',
                 'image_mobile' => 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=85',
                 'link_url' => '/products?category=women',
-                'button_text' => 'Discover Couture',
+                'button_text' => "Shop Women's Drops",
                 'placement' => 'home_hero',
-                'sort_order' => 2,
+                'sort_order' => 3,
                 'is_active' => true,
             ]);
 
             Banner::create([
-                'title' => 'Boxy Cuts & Relaxed Silhouettes',
-                'image_desktop' => 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1600&q=85',
-                'image_mobile' => 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=800&q=85',
-                'link_url' => '/products?sort=popular',
-                'button_text' => 'Shop Tailored Street',
+                'title' => 'Structured Overcoats & Modern Layers',
+                'image_desktop' => 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=1600&q=85',
+                'image_mobile' => 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=85',
+                'link_url' => '/products?category=men',
+                'button_text' => 'Shop Outerwear',
                 'placement' => 'home_hero',
-                'sort_order' => 3,
+                'sort_order' => 4,
+                'is_active' => true,
+            ]);
+
+            Banner::create([
+                'title' => 'The Streetwear Avant-Garde Edit',
+                'image_desktop' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1600&q=85',
+                'image_mobile' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=85',
+                'link_url' => '/products?category=women',
+                'button_text' => "Shop Women's Streetwear",
+                'placement' => 'home_hero',
+                'sort_order' => 5,
                 'is_active' => true,
             ]);
         }

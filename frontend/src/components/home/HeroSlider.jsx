@@ -9,39 +9,75 @@ import { fetchBanners } from '@/lib/cms-api';
 const defaultSlides = [
   {
     id: 1,
-    tag: 'GEN-Z ATELIER // EDITION 2026',
-    title: 'The Streetwear Avant-Garde',
-    titleHighlight: 'Edit',
-    subtitle: 'Relaxed silhouettes, structured shoulders, and retro tinted eyewear engineered for contemporary urban poise.',
-    primaryCtaText: 'Explore Streetwear',
-    primaryCtaLink: '/products?category=men',
-    secondaryCtaText: 'Shop Lookbook',
-    secondaryCtaLink: '/products',
-    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1600&q=85',
+    tag: 'EDITORIAL LOOKBOOK // CO-ED ATELIER',
+    title: 'The Modern Vanguard',
+    titleHighlight: 'Duo',
+    subtitle: 'Synchronized tailoring, deconstructed streetwear, and avant-garde street poise redefining luxury fashion for the next generation.',
+    primaryCtaText: 'Explore All Streetwear',
+    primaryCtaLink: '/products',
+    secondaryCtaText: 'Shop Duo Lookbook',
+    secondaryCtaLink: '/products?sort=latest',
+    image: 'https://images.unsplash.com/photo-1683664794354-31b59f51e10c?auto=format&fit=crop&w=1600&q=85',
   },
   {
     id: 2,
-    tag: 'EDITORIAL RUNWAY // YOUTH COUTURE',
-    title: 'Youthful Elegance & Bold',
-    titleHighlight: 'Vibrancy',
-    subtitle: 'Vibrant luxury mock-necks, high-waisted fluid tailoring, and unapologetic runway aesthetics defining the new generation.',
-    primaryCtaText: 'Discover New Drops',
-    primaryCtaLink: '/products?sort=latest',
-    secondaryCtaText: 'Explore Couture',
-    secondaryCtaLink: '/products?category=women',
-    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1600&q=85',
-  },
-  {
-    id: 3,
-    tag: 'DECONSTRUCTED SUITING // LIMITED',
-    title: 'Boxy Cuts & Relaxed',
-    titleHighlight: 'Silhouettes',
-    subtitle: 'Deconstructed blazers, wide-leg pleated trousers, and Swiss chronometers blending timeless atelier craft with Gen-Z flair.',
-    primaryCtaText: 'Shop Tailored Street',
+    tag: "MEN'S ATELIER // BOX SILHOUETTE",
+    title: 'Deconstructed Suiting & Boxy',
+    titleHighlight: 'Cuts',
+    subtitle: 'Oversized blazers, wide-leg fluid trousers, and effortless poise blending atelier precision with Gen-Z urban edge.',
+    primaryCtaText: "Shop Men's Edition",
     primaryCtaLink: '/products?category=men',
     secondaryCtaText: 'View Bestsellers',
     secondaryCtaLink: '/products?sort=popular',
     image: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1600&q=85',
+  },
+  {
+    id: 3,
+    tag: "WOMEN'S RUNWAY // YOUTH COUTURE",
+    title: 'Youthful Elegance & Bold',
+    titleHighlight: 'Vibrancy',
+    subtitle: 'High-fashion mock-necks, architectural high-waisted tailoring, and confident runway presence crafted for modern tastemakers.',
+    primaryCtaText: "Shop Women's Drops",
+    primaryCtaLink: '/products?category=women',
+    secondaryCtaText: 'Discover Couture',
+    secondaryCtaLink: '/products?sort=latest',
+    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1600&q=85',
+  },
+  {
+    id: 4,
+    tag: 'URBAN COUTURE // STREET STATEMENT',
+    title: 'Structured Overcoats & Modern',
+    titleHighlight: 'Layers',
+    subtitle: 'Full-length tailored coats, textured monochrome layering, and raw urban confidence engineered for city streets.',
+    primaryCtaText: 'Shop Outerwear',
+    primaryCtaLink: '/products?category=men',
+    secondaryCtaText: 'New Arrivals',
+    secondaryCtaLink: '/products?sort=latest',
+    image: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=1600&q=85',
+  },
+  {
+    id: 5,
+    tag: 'AVANT-GARDE // EDITION 2026',
+    title: 'The Streetwear Avant-Garde',
+    titleHighlight: 'Edit',
+    subtitle: 'Oversized silhouettes, tactical accents, and dark retro eyewear engineered for unapologetic city style.',
+    primaryCtaText: "Shop Women's Streetwear",
+    primaryCtaLink: '/products?category=women',
+    secondaryCtaText: 'Discover Drops',
+    secondaryCtaLink: '/products?sort=latest',
+    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1600&q=85',
+  },
+  {
+    id: 6,
+    tag: 'MINIMALIST ATELIER // FLUID TAILORING',
+    title: 'Relaxed Tailoring & Fluid',
+    titleHighlight: 'Forms',
+    subtitle: 'Sculptural oversized neutral suiting, clean lines, and relaxed luxury designed for understated everyday confidence.',
+    primaryCtaText: 'Shop Neutral Tailoring',
+    primaryCtaLink: '/products?category=women',
+    secondaryCtaText: 'View Editorial',
+    secondaryCtaLink: '/products',
+    image: 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?auto=format&fit=crop&w=1600&q=85',
   },
 ];
 
@@ -52,25 +88,37 @@ export default function HeroSlider() {
   useEffect(() => {
     async function loadBanners() {
       const activeBanners = await fetchBanners('home_hero');
-      if (activeBanners && activeBanners.length > 0) {
-        const mapped = activeBanners.map((b, index) => {
-          const fallback = defaultSlides[index % defaultSlides.length];
-          return {
-            id: b.id || index + 1,
-            tag: b.placement && !b.placement.includes('home_hero') ? b.placement.replace('_', ' ').toUpperCase() : fallback.tag,
-            title: b.title && !b.title.includes('Special Promotion') && !b.title.includes('Autumn Savings') ? b.title : fallback.title,
-            titleHighlight: fallback.titleHighlight,
-            subtitle: b.description || fallback.subtitle,
-            primaryCtaText: b.button_text || fallback.primaryCtaText,
-            primaryCtaLink: b.link_url || fallback.primaryCtaLink,
-            secondaryCtaText: fallback.secondaryCtaText,
-            secondaryCtaLink: fallback.secondaryCtaLink,
-            image: (b.image_desktop && !b.image_desktop.includes('441986300917') && !b.image_desktop.includes('1584917865442'))
-              ? b.image_desktop
-              : fallback.image,
-          };
-        });
-        setSlides(mapped);
+      // Filter out stale seed/placeholder banners from the database
+      const customBanners = (activeBanners || []).filter((b) => {
+        const isStaleImage = b.image_desktop && (
+          b.image_desktop.includes('1490481651871') ||
+          b.image_desktop.includes('441986300917') ||
+          b.image_desktop.includes('1584917865442') ||
+          b.image_desktop.includes('1616486338812')
+        );
+        const isStaleTitle = b.title && (
+          b.title.includes('Spring Elegance Collection') ||
+          b.title.includes('Exclusive Autumn Savings') ||
+          b.title.includes('Special Promotion')
+        );
+        return !isStaleImage && !isStaleTitle && b.image_desktop;
+      });
+
+      // If genuine custom CMS banners exist, prepend them ahead of default editorial slides
+      if (customBanners.length > 0) {
+        const mappedCustom = customBanners.map((b, idx) => ({
+          id: b.id || `cms-${idx}`,
+          tag: b.placement ? b.placement.replace('_', ' ').toUpperCase() : 'EDITORIAL DROP',
+          title: b.title || 'Curated Contemporary Collection',
+          titleHighlight: '',
+          subtitle: b.description || 'Exclusive designer pieces curated for contemporary aesthetics.',
+          primaryCtaText: b.button_text || 'Shop Now',
+          primaryCtaLink: b.link_url || '/products',
+          secondaryCtaText: 'View Lookbook',
+          secondaryCtaLink: '/products?sort=latest',
+          image: b.image_desktop,
+        }));
+        setSlides([...mappedCustom, ...defaultSlides]);
       }
     }
 
