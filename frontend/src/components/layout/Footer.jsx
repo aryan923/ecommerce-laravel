@@ -63,8 +63,8 @@ export default function Footer() {
           <ul className="space-y-2 text-stone-400 text-[11px]">
             <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
             <li><Link href="/pages/faqs" className="hover:text-white transition-colors">FAQs</Link></li>
-            <li><Link href="/pages/shipping-policy" className="hover:text-white transition-colors">Shipping Policy</Link></li>
-            <li><Link href="/pages/return-policy" className="hover:text-white transition-colors">Return Policy</Link></li>
+            <li><Link href="/shipping-policy" className="hover:text-white transition-colors">Shipping Policy</Link></li>
+            <li><Link href="/shipping-policy" className="hover:text-white transition-colors">Return Policy</Link></li>
             <li><Link href="/track-order" className="hover:text-white transition-colors">Track Your Order</Link></li>
           </ul>
         </div>
@@ -73,9 +73,9 @@ export default function Footer() {
         <div>
           <h5 className="font-semibold text-white uppercase tracking-wider text-[11px] mb-4">About Us</h5>
           <ul className="space-y-2 text-stone-400 text-[11px]">
-            <li><Link href="/pages/about-us" className="hover:text-white transition-colors">Our Story</Link></li>
-            <li><Link href="/pages/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-            <li><Link href="/pages/terms-and-conditions" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
+            <li><Link href="/about" className="hover:text-white transition-colors">Our Story</Link></li>
+            <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+            <li><Link href="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
           </ul>
         </div>
 
