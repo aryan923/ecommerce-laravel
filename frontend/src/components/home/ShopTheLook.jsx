@@ -21,7 +21,7 @@ const initialLookItems = [
     fallbackSlug: 'designer-sunglasses-gold',
     fallbackId: 4,
     image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
-    pinPosition: { top: '28%', left: '55%' },
+    pinPosition: { top: '28.5%', left: '53%' },
     description: 'Vintage Japanese titanium frames with gradient tinted UV400 lenses.',
   },
   {
@@ -29,29 +29,29 @@ const initialLookItems = [
     name: 'Satin-Lapel Tailored Dinner Jacket',
     category: 'Men\'s Collection',
     brand: 'Luxora Atelier',
-    tag: 'Outerwear',
+    tag: 'Coat & Jacket',
     price: 640,
     originalPrice: 750,
     slug: 'satin-lapel-tailored-dinner-jacket',
     fallbackSlug: 'cashmere-knit-sweater',
     fallbackId: 6,
     image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
-    pinPosition: { top: '48%', left: '38%' },
+    pinPosition: { top: '46%', left: '33%' },
     description: 'Super 130s Italian virgin wool blazer with silk-satin peak lapels.',
   },
   {
     pinNumber: 3,
-    name: 'Monogram Silk-Cotton Fitted Shirt',
+    name: 'Monogram Silk-Cotton Fitted Black Shirt',
     category: 'Men\'s Collection',
     brand: 'Luxora Atelier',
-    tag: 'Shirting',
+    tag: 'Black Shirt',
     price: 160,
     originalPrice: 195,
-    slug: 'monogram-silk-cotton-fitted-shirt',
+    slug: 'monogram-silk-cotton-fitted-black-shirt',
     fallbackSlug: 'minimalist-leather-cardholder',
     fallbackId: 8,
     image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80',
-    pinPosition: { top: '56%', left: '53%' },
+    pinPosition: { top: '52%', left: '53%' },
     description: 'Breathable Egyptian cotton and Mulberry silk weave with hidden placket.',
   },
   {
@@ -66,22 +66,22 @@ const initialLookItems = [
     fallbackSlug: 'classic-chronometer-watch',
     fallbackId: 2,
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
-    pinPosition: { top: '70%', left: '72%' },
+    pinPosition: { top: '71.5%', left: '72.5%' },
     description: 'Swiss-made automatic chronometer with sapphire crystal glass.',
   },
   {
     pinNumber: 5,
-    name: 'High-Rise Pleated Tuxedo Trousers',
+    name: 'High-Rise Pleated Tailored Black Pants',
     category: 'Men\'s Collection',
     brand: 'Vera Leather',
-    tag: 'Tailoring',
+    tag: 'Black Pants',
     price: 240,
     originalPrice: 280,
-    slug: 'high-rise-pleated-tuxedo-trousers',
+    slug: 'high-rise-pleated-tailored-black-pants',
     fallbackSlug: 'italian-leather-loafers',
     fallbackId: 5,
     image: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80',
-    pinPosition: { top: '88%', left: '52%' },
+    pinPosition: { top: '88%', left: '53%' },
     description: 'Italian fluid wool double-pleated trousers with side tab adjusters.',
   },
 ];
@@ -116,11 +116,18 @@ export default function ShopTheLook() {
           prev.map(item => {
             // 1. Exact slug match
             let matched = catalog.find(p => p.slug === item.slug);
-            // 2. Fallback slug match (for already seeded products)
+            // 2. Slug variations (e.g. if database has older or alternate slug)
+            if (!matched && item.slug === 'monogram-silk-cotton-fitted-black-shirt') {
+              matched = catalog.find(p => p.slug === 'monogram-silk-cotton-fitted-shirt');
+            }
+            if (!matched && item.slug === 'high-rise-pleated-tailored-black-pants') {
+              matched = catalog.find(p => p.slug === 'high-rise-pleated-tuxedo-trousers');
+            }
+            // 3. Fallback slug match (for already seeded products)
             if (!matched && item.fallbackSlug) {
               matched = catalog.find(p => p.slug === item.fallbackSlug);
             }
-            // 3. Fallback ID match
+            // 4. Fallback ID match
             if (!matched && item.fallbackId) {
               matched = catalog.find(p => p.id === item.fallbackId);
             }
@@ -251,14 +258,14 @@ export default function ShopTheLook() {
           
           {/* Left Column: Funky High-Fashion Male Model Editorial Image */}
           <div className="lg:col-span-7 sticky top-24">
-            <div className="relative aspect-[3/4] sm:aspect-[4/5] rounded-3xl overflow-hidden bg-stone-950 border border-stone-300/80 shadow-2xl group">
+            <div className="relative aspect-[2/3] max-w-[540px] mx-auto rounded-3xl overflow-hidden bg-stone-950 border border-stone-300/80 shadow-2xl group">
               
               <Image
                 src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=80"
                 alt="Editorial Funky Fashion Model in Avant-Garde Tailored Attire"
                 fill
                 priority
-                className="object-cover object-top filter brightness-[0.98] contrast-[1.02] group-hover:scale-[1.02] transition-transform duration-700"
+                className="object-cover object-center filter brightness-[0.98] contrast-[1.02] group-hover:scale-[1.02] transition-transform duration-700"
               />
 
               {/* Editorial Gradient Overlays */}

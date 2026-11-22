@@ -220,7 +220,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Cut from Super 130s Italian virgin wool with full canvas construction. Features structured shoulders, lustrous silk-satin peak lapels, interior piped pockets, and surgeon cuffs with custom metallic engraved buttons.',
             ],
             [
-                'name' => 'Monogram Silk-Cotton Fitted Shirt',
+                'name' => 'Monogram Silk-Cotton Fitted Black Shirt',
                 'type' => 'simple',
                 'status' => 'active',
                 'featured' => true,
@@ -234,7 +234,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Masterfully woven from a 70% Egyptian cotton and 30% Mulberry silk blend. Designed with a clean hidden button placket, stiffened spread collar, and mother-of-pearl buttons for a sharp, modern silhouette under formal tailoring.',
             ],
             [
-                'name' => 'High-Rise Pleated Tuxedo Trousers',
+                'name' => 'High-Rise Pleated Tailored Black Pants',
                 'type' => 'simple',
                 'status' => 'active',
                 'featured' => true,
@@ -244,7 +244,7 @@ class ProductSeeder extends Seeder
                 'sale_price' => 240.00,
                 'cost_price' => 95.00,
                 'image_url' => 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80',
-                'short_description' => 'Italian wool double-pleated formal trousers featuring a signature extended tab waistband.',
+                'short_description' => 'Italian wool double-pleated formal black trousers featuring a signature extended tab waistband.',
                 'description' => 'Tailored in Florence from fluid tropical-weight wool with gentle natural stretch. Features a high-rise waist with double front pleats, buttoned coin pocket, side adjusters, and satin side tuxedo stripes.',
             ],
         ];
@@ -289,21 +289,37 @@ class ProductSeeder extends Seeder
 
             // Create or Link Media & ProductImage
             if (!empty($pData['image_url'])) {
-                $media = Media::firstOrCreate(
-                    ['url' => $pData['image_url']],
-                    [
-                        'model_type' => Product::class,
-                        'model_id' => $product->id,
-                        'file_name' => Str::slug($product->name) . '.jpg',
-                        'file_path' => 'products/' . Str::slug($product->name) . '.jpg',
-                        'disk' => 'public',
-                        'type' => 'main',
-                        'mime_type' => 'image/jpeg',
-                        'size' => 1024,
-                        'alt' => $product->name,
-                        'sort_order' => 0,
-                    ]
-                );
+                $slug = Str::slug($product->name);
+                $filePath = 'products/' . $slug . '.jpg';
+                $localFull = storage_path('app/public/' . $filePath);
+                $hasLocal = file_exists($localFull);
+                $fileSize = $hasLocal ? (int) filesize($localFull) : 1024;
+                $dimensions = $hasLocal ? @getimagesize($localFull) : null;
+                $width = $dimensions ? (int) $dimensions[0] : 800;
+                $height = $dimensions ? (int) $dimensions[1] : 800;
+
+                $media = Media::where('model_type', Product::class)
+                    ->where('model_id', $product->id)
+                    ->first()
+                    ?? Media::where('url', $pData['image_url'])->first()
+                    ?? new Media();
+
+                $media->fill([
+                    'model_type' => Product::class,
+                    'model_id' => $product->id,
+                    'file_name' => $slug . '.jpg',
+                    'file_path' => $filePath,
+                    'disk' => 'public',
+                    'url' => $pData['image_url'],
+                    'type' => 'main',
+                    'mime_type' => 'image/jpeg',
+                    'size' => $fileSize,
+                    'width' => $width,
+                    'height' => $height,
+                    'alt' => $product->name,
+                    'sort_order' => 0,
+                ]);
+                $media->save();
 
                 ProductImage::firstOrCreate(
                     [
