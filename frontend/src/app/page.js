@@ -1,6 +1,6 @@
 import React from 'react';
 import HeroSlider from '@/components/home/HeroSlider';
-import RunwayStories from '@/components/home/RunwayStories';
+import AtelierSplitSection from '@/components/home/AtelierSplitSection';
 import CategoryBanners from '@/components/home/CategoryBanners';
 import ProductSection from '@/components/home/ProductSection';
 import ShopTheLook from '@/components/home/ShopTheLook';
@@ -24,8 +24,8 @@ export default function HomePage() {
       {/* 1. Hero Banner Section */}
       <HeroSlider />
 
-      {/* 2. Slim Runway Stories & Highlights Ribbon */}
-      <RunwayStories />
+      {/* 2. Curated Atelier 60/40 Split Feature */}
+      <AtelierSplitSection />
 
       {/* 3. Category Grid Section */}
       <CategoryBanners />
